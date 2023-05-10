@@ -1,0 +1,75 @@
+{
+  "name": "@ngrx/reactive-forms",
+  "version": "1.2.1",
+  "description": "Form bindings for NGRX",
+  "main": "dist/index.js",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://amcdnl@github.com/amcdnl/ngrx-form.git"
+  },
+  "keywords": [
+    "ngrx",
+    "redux",
+    "state",
+    "store",
+    "state-mangement",
+    "reactive-forms",
+    "angular"
+  ],
+  "author": "Austin McDaniel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amcdnl/ngrx-form/issues"
+  },
+  "homepage": "https://github.com/amcdnl/ngrx-form#readme",
+  "peerDependencies": {
+    "@angular/core": "^16.0.0",
+    "@angular/forms": "^16.0.0",
+    "@ngrx/effects": "^16.0.0",
+    "@ngrx/store": "^16.0.0",
+    "rxjs": "~7.8.0",
+    "zone.js": "~0.13.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^16.0.0",
+    "@angular/cli": "^16.0.0",
+    "@angular/compiler-cli": "^16.0.0",
+    "@types/jasmine": "~4.3.0",
+    "@types/node": "^16.11.35",
+    "copyfiles": "^2.4.1",
+    "jasmine-core": "~4.6.0",
+    "jasmine-marbles": "~0.9.2",
+    "jasmine-spec-reporter": "~7.0.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.0.0",
+    "protractor": "~7.0.0",
+    "ts-node": "~10.9.0",
+    "typescript": "~4.9.3"
+  },
+  "ngPackage": {
+    "lib": {
+      "entryFile": "src/index.ts"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "npm run prettier",
+      "git add"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 120,
+    "tabWidth": 2
+  }
+}
