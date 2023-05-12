@@ -1,3 +1,4 @@
+import { AbstractControlOptions } from "@angular/forms";
 import { ModelOptions } from "@ngrx/forms";
 
 export interface Profile {
@@ -24,7 +25,7 @@ export const initialProfile: Profile = {
   aliases: ['']
 }
 
-export const validators: ModelOptions<Profile> = {
+export const options: ModelOptions<Profile> = {
   firstName: {},
   lastName: {},
   address: {
@@ -33,5 +34,5 @@ export const validators: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: [{}]
+  aliases: {'0':{}}
 }
