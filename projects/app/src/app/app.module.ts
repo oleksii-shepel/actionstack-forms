@@ -1,24 +1,28 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './components/app/app.component';
-import { ProfileEditorComponent } from './components/profile-editor/profile-editor.component';
+import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
 import { StoreModule } from '@ngrx/store';
-import { form, NgrxFormModule } from '@ngrx/reactive-forms';
 import { reducer } from './reducers';
+import { ReactiveFormsModule as rf, form, TemplateDrivenFormsModule } from '@ngrx/forms';
+import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ProfileEditorComponent
+    ReactiveProfileEditorComponent,
+    TemplateProfileEditorComponent
   ],
   imports: [
     BrowserModule,
     ReactiveFormsModule,
+    FormsModule,
     StoreModule.forRoot(reducer, {
       metaReducers: [form]
     }),
-    NgrxFormModule
+    rf,
+    TemplateDrivenFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

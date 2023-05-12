@@ -1,0 +1,44 @@
+<form #form="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngrx2Form="hero">
+  <label for="first-name">First Name: </label>
+  <input id="first-name" type="text" ngrx2Model="firstName" name="firstName">
+
+  <label for="last-name">Last Name: </label>
+  <input id="last-name" type="text" ngrx2Model="lastName" name="lastName">
+
+  <div ngrx2ModelGroup="address">
+    <h2>Address</h2>
+
+    <label for="street">Street: </label>
+    <input id="street" type="text" ngrx2Model="street" name="street">
+
+    <label for="city">City: </label>
+    <input id="city" type="text" ngrx2Model="city" name="city">
+
+    <label for="state">State: </label>
+    <input id="state" type="text" ngrx2Model="state" name="state">
+
+    <label for="zip">Zip Code: </label>
+    <input id="zip" type="text" ngrx2Model="zip" name="zip">
+  </div>
+
+  <div ngrx2ModelArray="aliases">
+    <h2>Aliases</h2>
+    <button type="button" (click)="addAlias()">+ Add another alias</button>
+
+    <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
+      <!-- The repeated alias template -->
+      <label for="aliases.{{i}}">Alias:</label>
+      <input id="aliases.{{i}}" type="text" ngrx2Model="i" name="{{i}}">
+    </div>
+  </div>
+
+
+  <p>Complete the form to enable button.</p>
+  <button type="submit" [disabled]="!form.form.valid">Submit</button>
+</form>
+
+<hr>
+
+<p>Form State: {{ profile$ | async | json }}</p>
+
+<button type="button" (click)="updateProfile()">Update Profile</button>

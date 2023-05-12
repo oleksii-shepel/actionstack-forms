@@ -1,3 +1,5 @@
+import { ModelOptions } from "@ngrx/forms";
+
 export interface Profile {
   firstName: string;
   lastName: string;
@@ -8,4 +10,28 @@ export interface Profile {
     zip: string;
   };
   aliases: string[];
+}
+
+export const initialProfile: Profile = {
+  firstName: '',
+  lastName: '',
+  address: {
+    street: '',
+    city: '',
+    state: '',
+    zip: ''
+  },
+  aliases: ['']
+}
+
+export const validators: ModelOptions<Profile> = {
+  firstName: {},
+  lastName: {},
+  address: {
+    street: {},
+    city: {},
+    state: {},
+    zip: {},
+  },
+  aliases: [{}]
 }

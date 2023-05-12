@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-export type EditorType = 'name' | 'profile';
+export type EditorType = 'reactive' | 'template-driven';
 
 @Component({
   selector: 'app-root',
@@ -8,14 +8,14 @@ export type EditorType = 'name' | 'profile';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  editor: EditorType = 'name';
+  editor: EditorType = 'reactive';
 
-  get showNameEditor() {
-    return this.editor === 'name';
+  get showReactiveProfileEditor() {
+    return this.editor === 'reactive';
   }
 
-  get showProfileEditor() {
-    return this.editor === 'profile';
+  get showTemplateProfileEditor() {
+    return this.editor === 'template-driven';
   }
 
   toggleEditor(type: EditorType) {

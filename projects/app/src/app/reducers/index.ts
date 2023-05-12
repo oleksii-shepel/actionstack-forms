@@ -36,6 +36,7 @@ import { combineReducers } from '@ngrx/store';
  * notation packages up all of the exports into a single object.
  */
 import * as fromProfile from './profile.reducer';
+import * as fromHero from './hero.reducer';
 
 /**
  * As mentioned, we treat each reducer like a table in a database. This means
@@ -43,6 +44,7 @@ import * as fromProfile from './profile.reducer';
  */
 export interface State {
   profile: fromProfile.ProfileState;
+  hero: fromHero.ProfileState
 }
 
 /**
@@ -54,6 +56,7 @@ export interface State {
  */
 const reducers = {
   profile: fromProfile.profileReducer,
+  hero: fromHero.profileReducer
 };
 
 const developmentReducer: ActionReducer<State> = compose(storeFreeze, combineReducers)(reducers);
@@ -84,7 +87,7 @@ export function reducer(state: any, action: any) {
  * ```
  */
 export const getProfileSlice = (state: State) => state.profile;
-
+export const getHeroSlice = (state: State) => state.hero;
 /**
  * Every reducer module exports selector functions, however child reducers
  * have no knowledge of the overall state tree. To make them useable, we
@@ -96,3 +99,4 @@ export const getProfileSlice = (state: State) => state.profile;
  * pieces of state.
  */
  export const getProfile = createSelector(fromProfile.getProfileState, fromProfile.getProfileState);
+ export const getHero = createSelector(fromHero.getProfileState, fromHero.getProfileState);

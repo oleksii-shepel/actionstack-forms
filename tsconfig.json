@@ -3,10 +3,10 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "@ngrx/reactive-forms": [
-        "dist/ngrx/reactive-forms",
-        "projects/ngrx/reactive-forms/src"
-      ]
+      "@ngrx/forms": [
+        "dist/ngrx/forms",
+        "projects/ngrx/src/lib"
+      ],
     },
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",

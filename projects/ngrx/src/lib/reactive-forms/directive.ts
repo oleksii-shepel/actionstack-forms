@@ -2,7 +2,7 @@ import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef } from '@angular
 import { FormGroupDirective } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, debounceTime } from 'rxjs';
-import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, UpdateForm } from './actions';
+import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, UpdateForm } from '../shared/actions';
 
 const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
 

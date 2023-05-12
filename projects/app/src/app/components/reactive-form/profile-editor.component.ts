@@ -1,35 +1,25 @@
 import { Component, Output, EventEmitter } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { FormArray } from '@angular/forms';
-import { Profile } from '../../models/profile';
+import { Profile, initialProfile } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { ProfileState } from '../../reducers/profile.reducer';
 import { getProfile } from '../../reducers';
 import { Observable } from 'rxjs';
-import { UpdateForm, UpdateFormValue } from '@ngrx/reactive-forms';
+import { UpdateFormValue, buildFormGroup } from '@ngrx/forms';
 
 @Component({
-  selector: 'app-profile-editor',
+  selector: 'reactive-profile-editor',
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css']
 })
-export class ProfileEditorComponent {
+export class ReactiveProfileEditorComponent {
   @Output() formSubmitted = new EventEmitter<Profile>();
 
   profile$: Observable<ProfileState>;
 
-  profileForm = this.fb.group({
-    firstName: [''],
-    lastName: [''],
-    address: this.fb.group({
-      street: [''],
-      city: [''],
-      state: [''],
-      zip: ['']
-    }),
-    aliases: this.fb.array([''])
-  });
+  profileForm = buildFormGroup(initialProfile) as FormGroup;
 
   get aliases() {
     return this.profileForm.get('aliases') as FormArray;

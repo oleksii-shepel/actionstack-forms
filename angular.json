@@ -3,23 +3,23 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "@ngrx/reactive-forms": {
+    "@ngrx/forms": {
       "projectType": "library",
-      "root": "projects/ngrx/reactive-forms",
-      "sourceRoot": "projects/ngrx/reactive-forms/src",
+      "root": "projects/ngrx/src",
+      "sourceRoot": "projects/ngrx/src/lib",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/ngrx/reactive-forms/ng-package.json"
+            "project": "projects/ngrx/src/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngrx/reactive-forms/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ngrx/src/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngrx/reactive-forms/tsconfig.lib.json"
+              "tsConfig": "projects/ngrx/src/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -27,7 +27,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "projects/ngrx/reactive-forms/tsconfig.spec.json",
+            "tsConfig": "projects/ngrx/src/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
