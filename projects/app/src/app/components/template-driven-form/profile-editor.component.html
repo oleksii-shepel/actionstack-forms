@@ -1,34 +1,34 @@
 <form #form="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngrx2Form="hero">
   <label for="first-name">First Name: </label>
-  <input id="first-name" type="text" ngModel name="firstName">
+  <input id="first-name" type="text" ngField name="firstName">
 
   <label for="last-name">Last Name: </label>
-  <input id="last-name" type="text" ngModel name="lastName">
+  <input id="last-name" type="text" ngField name="lastName">
 
-  <div ngModelGroup="address">
+  <div>
     <h2>Address</h2>
 
     <label for="street">Street: </label>
-    <input id="street" type="text" ngModel name="street">
+    <input id="street" type="text" ngField name="street">
 
     <label for="city">City: </label>
-    <input id="city" type="text" ngModel name="city">
+    <input id="city" type="text" ngField name="city">
 
     <label for="state">State: </label>
-    <input id="state" type="text" ngModel name="state">
+    <input id="state" type="text" ngField name="state">
 
     <label for="zip">Zip Code: </label>
-    <input id="zip" type="text" ngModel name="zip">
+    <input id="zip" type="text" ngField name="zip">
   </div>
 
-  <div ngModelGroup="aliases">
+  <div>
     <h2>Aliases</h2>
     <button type="button" (click)="addAlias()">+ Add another alias</button>
 
     <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
       <!-- The repeated alias template -->
       <label for="aliases.{{i}}">Alias:</label>
-      <input id="aliases.{{i}}" type="text" ngModel name="{{i}}">
+      <input id="aliases.{{i}}" type="text" ngField name="{{i}}">
     </div>
   </div>
 
