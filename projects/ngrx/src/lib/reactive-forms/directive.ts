@@ -6,11 +6,11 @@ import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, U
 
 const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
 
-@Directive({ selector: '[ngrxForm]' })
-export class FormDirective implements OnInit, OnDestroy {
-  @Input('ngrxForm') path!: string;
-  @Input('ngrxFormDebounce') debounce = 100;
-  @Input('ngrxFormClearOnDestroy') clearOnDestroy: boolean = false;
+@Directive({ selector: '[formGroup][ngStore]' })
+export class ReactiveStoreDirective implements OnInit, OnDestroy {
+  @Input('ngStore') path!: string;
+  @Input('ngStoreDebounce') debounce = 100;
+  @Input('ngStoreClearOnDestroy') clearOnDestroy: boolean = false;
 
   private _destroyed$ = new Subject<boolean>();
   private _updating = false;

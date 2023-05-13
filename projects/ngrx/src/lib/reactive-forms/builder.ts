@@ -19,10 +19,12 @@ export function buildFormArray(model: any, options: any = {}, groupOptions: Abst
   if(Array.isArray(model)) {
     let formControls: AbstractControl[] = [];
     model.forEach((item, index) => {
-      if(typeof item === 'object' && !Array.isArray(item)) {
-        formControls.push(buildFormGroup(item, options[index] || {}, options[index]["__group"] || {}))
+      if(typeof item !== 'object') {
+        formControls.push(formBuilder.control(item, (options[index] || {}) as AbstractControlOptions))
+      } else if (typeof item === 'object' && !Array.isArray(item)) {
+        formControls.push(buildFormGroup(item, options[index] || {}, options[index] ? options[index]["__group"] : {}))
       } else if(Array.isArray(item)) {
-        formControls.push(buildFormArray(item, options[index] || {}, options[index]["__group"]))
+        formControls.push(buildFormArray(item, options[index] || {}, options[index] ? options[index]["__group"] : {}))
       }
     });
 
@@ -42,12 +44,12 @@ export function buildFormGroup(model: any, options: any = {}, groupOptions: Abst
     let formGroup = formBuilder.group({}, (options["__group"] || groupOptions) as AbstractControlOptions);
 
     for (let [key, value] of Object.entries(model as any)) {
-      if(typeof value !== 'object' && !Array.isArray(value)) {
+      if(typeof value !== 'object') {
         formGroup.addControl(key, formBuilder.control(value, (options[key] || {}) as AbstractControlOptions));
-      } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-        formGroup.addControl(key, buildFormGroup(value, options[key] || {}, options[key]["__group"] || {}));
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        formGroup.addControl(key, buildFormGroup(value, options[key] || {}, options[key]? options[key]["__group"] : {}));
       } else if(Array.isArray(value)) {
-        let formArray = buildFormArray(value, options[key] || {}, options[key]["__group"] || {}) as FormArray
+        let formArray = buildFormArray(value, options[key] || {}, options[key]? options[key]["__group"] : {}) as FormArray
         formGroup.addControl(key, formArray)
       }
     }
