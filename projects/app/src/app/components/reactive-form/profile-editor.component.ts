@@ -22,7 +22,6 @@ export class ReactiveProfileEditorComponent {
   profileForm = buildFormGroup(initialProfile) as FormGroup;
 
   get aliases() {
-    console.log(this.profileForm.get('aliases'));
     return this.profileForm.get('aliases') as FormArray;
   }
 
