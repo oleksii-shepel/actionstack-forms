@@ -1,18 +1,18 @@
 import {Directive, forwardRef, Host, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, Provider, Self, SimpleChanges} from '@angular/core';
-import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, FormControl, FormControlDirective, FormGroup, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgForm, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
-import { selectValueAccessor } from './accessors';
+import { AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, FormArrayName, FormControlDirective, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgControl, NgForm, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
 import { composeAsyncValidators, composeValidators } from '../shared/validators';
 import { CALL_SET_DISABLED_STATE } from '../shared/controls';
 
 const formControlBinding: Provider = {
   provide: NgControl,
-  useExisting: forwardRef(() => FieldDirective)
+  useExisting: forwardRef(() => ArrayDirective)
 };
 
-@Directive({selector: '[ngField]:not([formControlName]):not([formControl])', providers: [formControlBinding], exportAs: 'ngField'})
-export class FieldDirective extends FormControlDirective implements OnInit, OnChanges, OnDestroy {
-  @Input("name") override name!: string;
+@Directive({selector: '[ngFieldArray]', providers: [formControlBinding], exportAs: 'ngFieldArray'})
+export class ArrayDirective extends FormArrayName implements OnInit, OnChanges, OnDestroy {
+  @Input("ngFieldArray") override name!: string;
 
+  private _formArray!: FormArray;
   private _rawValidators!: (ValidatorFn | Validator)[];
   private _composedValidator!: ValidatorFn | null;
   private _composedAsyncValidator!: AsyncValidatorFn | null;
@@ -23,25 +23,26 @@ export class FieldDirective extends FormControlDirective implements OnInit, OnCh
       @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator|ValidatorFn)[],
       @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators:
           (AsyncValidator|AsyncValidatorFn)[],
-      @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[],
       @Optional() @Inject(CALL_SET_DISABLED_STATE) callSetDisabledState?:
           SetDisabledStateOption) {
-    super(validators, asyncValidators, valueAccessors, null, callSetDisabledState);
+    super(_parent, validators, asyncValidators);
     this._setValidators(validators);
     this._setAsyncValidators(asyncValidators);
-    this.valueAccessor = selectValueAccessor(this, valueAccessors);
 
-    this.form = new FormControl(this.name);
-    this.form.setValidators(this._composedValidator);
-    this.form.setAsyncValidators(this._composedAsyncValidator);
+    this._formArray = new FormArray<any>([]);
+    this._formArray.setValidators(this._composedValidator);
+    this._formArray.setAsyncValidators(this._composedAsyncValidator);
   }
-  ngOnInit(): void {
-    (this._parent as NgForm).form.addControl(this.name!.toString(), this.form);
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+
+    (this._parent as NgForm).form.addControl(this.name!.toString(), this._formArray);
     console.log(this._parent);
   }
 
   /** @nodoc */
-  override ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges): void {
     FormControlDirective.prototype.ngOnChanges.call(this, changes);
   }
 
@@ -58,25 +59,6 @@ export class FieldDirective extends FormControlDirective implements OnInit, OnCh
    */
   override get path(): string[] {
     return [];
-  }
-
-  /**
-   * @description
-   * The `FormControl` bound to this directive.
-   */
-  override get control(): FormControl {
-    return this.form;
-  }
-
-  /**
-   * @description
-   * Sets the new value for the view model and emits an `ngModelChange` event.
-   *
-   * @param newValue The new value for the view model.
-   */
-  override viewToModelUpdate(newValue: any): void {
-    this.viewModel = newValue;
-    this.update.emit(newValue);
   }
 
   /**

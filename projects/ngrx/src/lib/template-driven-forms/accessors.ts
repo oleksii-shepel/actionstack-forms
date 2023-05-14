@@ -80,9 +80,9 @@ export function selectValueAccessor(
   if (!valueAccessors) return null;
 
   if (!Array.isArray(valueAccessors)) {
-    const loc = _describeControlLocation(dir);
-    throw new Error(
-      `Value accessor was not provided as an array for form control with ${loc}. ` +
+    _throwError(
+      dir,
+      `Value accessor was not provided as an array for form control with.` +
         `Check that the \`NG_VALUE_ACCESSOR\` token is configured as a \`multi: true\` provider.`
     );
   }

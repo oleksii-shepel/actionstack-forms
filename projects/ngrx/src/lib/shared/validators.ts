@@ -31,7 +31,7 @@ export function normalizeValidators<V>(
   });
 }
 
-function isValidatorFn<V>(
+export function isValidatorFn<V>(
   validator: V | Validator | AsyncValidator
 ): validator is V {
   return !(validator as Validator).validate;
@@ -41,7 +41,7 @@ function isValidatorFn<V>(
  * Merges synchronous validators into a single validator function.
  * See `Validators.compose` for additional information.
  */
-function compose(
+export function compose(
   validators: (ValidatorFn | null | undefined)[] | null
 ): ValidatorFn | null {
   if (!validators) return null;
@@ -55,20 +55,20 @@ function compose(
   };
 }
 
-function isPresent(o: any): boolean {
+export function isPresent(o: any): boolean {
   return o != null;
 }
 
-type GenericValidatorFn = (control: AbstractControl) => any;
+export type GenericValidatorFn = (control: AbstractControl) => any;
 
-function executeValidators<V extends GenericValidatorFn>(
+export function executeValidators<V extends GenericValidatorFn>(
   control: AbstractControl,
   validators: V[]
 ): ReturnType<V>[] {
   return validators.map((validator) => validator(control));
 }
 
-function mergeErrors(
+export function mergeErrors(
   arrayOfErrors: (ValidationErrors | null)[]
 ): ValidationErrors | null {
   let res: { [key: string]: any } = {};
@@ -96,7 +96,7 @@ export function composeAsyncValidators(
  * Merges asynchronous validators into a single validator function.
  * See `Validators.composeAsync` for additional information.
  */
-function composeAsync(
+export function composeAsync(
   validators: (AsyncValidatorFn | null)[]
 ): AsyncValidatorFn | null {
   if (!validators) return null;
@@ -128,7 +128,6 @@ export function toObservable(value: any): Observable<any> {
   return obs;
 }
 
-
 /**
  * Determine if the argument is shaped like a Promise
  */
@@ -138,3 +137,12 @@ export function isPromise<T = any>(obj: any): obj is Promise<T> {
   return !!obj && typeof obj.then === 'function';
 }
 
+/**
+ * Merges raw control validators with a given directive validator and returns the combined list of
+ * validators as an array.
+ */
+export function mergeValidators<V>(controlValidators: V|V[]|null, dirValidator: V): V[] {
+  if (controlValidators === null) return [dirValidator];
+  return Array.isArray(controlValidators) ? [...controlValidators, dirValidator] :
+                                            [controlValidators, dirValidator];
+}

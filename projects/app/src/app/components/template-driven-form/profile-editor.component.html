@@ -1,11 +1,11 @@
-<form #form="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngrx2Form="hero">
+<form #form="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngSlug="hero">
   <label for="first-name">First Name: </label>
   <input id="first-name" type="text" ngField name="firstName">
 
   <label for="last-name">Last Name: </label>
   <input id="last-name" type="text" ngField name="lastName">
 
-  <div>
+  <div ngFieldGroup="address">
     <h2>Address</h2>
 
     <label for="street">Street: </label>
@@ -21,7 +21,7 @@
     <input id="zip" type="text" ngField name="zip">
   </div>
 
-  <div>
+  <div ngFieldArray="aliases">
     <h2>Aliases</h2>
     <button type="button" (click)="addAlias()">+ Add another alias</button>
 
