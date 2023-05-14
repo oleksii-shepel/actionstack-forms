@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { StoreDirective } from './store.directive';
 import { FieldDirective } from './field.directive';
-import { ArrayDirective } from './array.directive';
-import { GroupDirective } from './group.directive';
+import { FieldArrayDirective } from './array.directive';
+import { FieldGroupDirective } from './group.directive';
+import { BaseControlValueAccessor, BuiltInControlValueAccessor } from './accessors';
 
 @NgModule({
   imports: [FormsModule, StoreModule],
-  declarations: [StoreDirective, FieldDirective, ArrayDirective, GroupDirective],
-  exports: [StoreDirective, FieldDirective, ArrayDirective, GroupDirective]
+  declarations: [StoreDirective, FieldDirective, FieldArrayDirective, FieldGroupDirective, BaseControlValueAccessor, BuiltInControlValueAccessor],
+  exports: [StoreDirective, FieldDirective, FieldArrayDirective, FieldGroupDirective]
 })
 export class TemplateDrivenFormsModule {}

@@ -1,78 +1,124 @@
-import {Directive, forwardRef, Host, Inject, Input, OnChanges, OnDestroy, Optional, Provider, Self, SimpleChanges} from '@angular/core';
-import { AsyncValidator, AsyncValidatorFn, ControlContainer, Form, FormControlDirective, FormGroup, FormGroupDirective, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgForm, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
-import { composeAsyncValidators, composeValidators } from '../shared/validators';
-import { CALL_SET_DISABLED_STATE } from '../shared/controls';
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 
-const formControlBinding: Provider = {
-  provide: NgControl,
-  useExisting: forwardRef(() => GroupDirective)
+import {
+  Directive,
+  forwardRef,
+  Host,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Optional,
+  Provider,
+  Self,
+  SkipSelf,
+} from '@angular/core';
+
+import { AbstractFormGroupDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validator, ValidatorFn } from '@angular/forms';
+import { selectValueAccessor } from './accessors';
+
+const formGroupNameProvider: Provider = {
+  provide: ControlContainer,
+  useExisting: forwardRef(() => FieldGroupDirective),
 };
 
-@Directive({selector: '[ngFieldGroup]', providers: [formControlBinding], exportAs: 'ngFieldGroup'})
-export class GroupDirective extends FormGroupDirective implements Form, OnChanges, OnDestroy {
-  @Input("ngFieldGroup") override name!: string;
+/**
+ * @description
+ *
+ * Syncs a nested `FormGroup` or `FormRecord` to a DOM element.
+ *
+ * This directive can only be used with a parent `FormGroupDirective`.
+ *
+ * It accepts the string name of the nested `FormGroup` or `FormRecord` to link, and
+ * looks for a `FormGroup` or `FormRecord` registered with that name in the parent
+ * `FormGroup` instance you passed into `FormGroupDirective`.
+ *
+ * Use nested form groups to validate a sub-group of a
+ * form separately from the rest or to group the values of certain
+ * controls into their own nested object.
+ *
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ *
+ * @usageNotes
+ *
+ * ### Access the group by name
+ *
+ * The following example uses the `AbstractControl.get` method to access the
+ * associated `FormGroup`
+ *
+ * ```ts
+ *   this.form.get('name');
+ * ```
+ *
+ * ### Access individual controls in the group
+ *
+ * The following example uses the `AbstractControl.get` method to access
+ * individual controls within the group using dot syntax.
+ *
+ * ```ts
+ *   this.form.get('name.first');
+ * ```
+ *
+ * ### Register a nested `FormGroup`.
+ *
+ * The following example registers a nested *name* `FormGroup` within an existing `FormGroup`,
+ * and provides methods to retrieve the nested `FormGroup` and individual controls.
+ *
+ * {@example forms/ts/nestedFormGroup/nested_form_group_example.ts region='Component'}
+ *
+ * @ngModule ReactiveFormsModule
+ * @publicApi
+ */
 
-  private _rawValidators!: (ValidatorFn | Validator)[];
-  private _composedValidator!: ValidatorFn | null;
-  private _composedAsyncValidator!: AsyncValidatorFn | null;
-  private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
-
-  constructor(
-      @Optional() @Host() private _parent: ControlContainer,
-      @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator|ValidatorFn)[],
-      @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators:
-          (AsyncValidator|AsyncValidatorFn)[],
-      @Optional() @Inject(CALL_SET_DISABLED_STATE) callSetDisabledState?:
-          SetDisabledStateOption) {
-    super(validators, asyncValidators, callSetDisabledState);
-    this._setValidators(validators);
-    this._setAsyncValidators(asyncValidators);
-
-    this.form = new FormGroup({});
-    this.form.setValidators(this._composedValidator);
-    this.form.setAsyncValidators(this._composedAsyncValidator);
-  }
-
-  ngOnInit(): void {
-    (this._parent as NgForm).form.addControl(this.name!.toString(), this.form);
-    console.log(this._parent);
-  }
-
-  /** @nodoc */
-  override ngOnChanges(changes: SimpleChanges): void {
-    FormControlDirective.prototype.ngOnChanges.call(this, changes);
-  }
-
-  /** @nodoc */
-  override ngOnDestroy() {
-    (this._parent as NgForm).form.removeControl(this.name!.toString());
-    FormControlDirective.prototype.ngOnDestroy.call(this);
-  }
-
+@Directive({selector: '[ngFieldGroup]', providers: [
+    formGroupNameProvider,
+  ],
+   exportAs: 'ngFieldGroup'})
+export class FieldGroupDirective extends AbstractFormGroupDirective implements OnInit, OnDestroy {
   /**
    * @description
-   * Returns an array that represents the path from the top-level form to this control.
-   * Each index is the string name of the control on that level.
+   * Tracks the name of the `NgModelGroup` bound to the directive. The name corresponds
+   * to a key in the parent `NgForm`.
    */
-  override get path(): string[] {
-    return [];
+  @Input('ngFieldGroup') override name: string = '';
+  private _parent: ControlContainer;
+  private _rawValidators!: (Validator | ValidatorFn)[];
+  private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
+  valueAccessor: ControlValueAccessor | null;
+
+  constructor(
+      @Host() @SkipSelf() parent: ControlContainer,
+      @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator|ValidatorFn)[],
+      @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: (AsyncValidator|AsyncValidatorFn)[],
+      @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
+    super();
+    this._parent = parent;
+    this._setValidators(validators);
+    this._setAsyncValidators(asyncValidators);
+    this.valueAccessor = selectValueAccessor(this, valueAccessors);
   }
 
   /**
    * Sets synchronous validators for this directive.
    * @internal
    */
-  private _setValidators(validators: Array<Validator|ValidatorFn>|undefined): void {
+  _setValidators(validators: Array<Validator|ValidatorFn>|undefined): void {
     this._rawValidators = validators || [];
-    this._composedValidator = composeValidators(this._rawValidators);
+    // this._composedValidatorFn = composeValidators(this._rawValidators);
   }
 
   /**
    * Sets asynchronous validators for this directive.
    * @internal
    */
-  private _setAsyncValidators(validators: Array<AsyncValidator|AsyncValidatorFn>|undefined): void {
+  _setAsyncValidators(validators: Array<AsyncValidator|AsyncValidatorFn>|undefined): void {
     this._rawAsyncValidators = validators || [];
-    this._composedAsyncValidator = composeAsyncValidators(this._rawAsyncValidators);
+    // this._composedAsyncValidatorFn = composeAsyncValidators(this._rawAsyncValidators);
   }
 }

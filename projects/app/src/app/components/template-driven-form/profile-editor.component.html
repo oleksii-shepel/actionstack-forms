@@ -1,6 +1,6 @@
 <form #form="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngSlug="hero">
   <label for="first-name">First Name: </label>
-  <input id="first-name" type="text" ngField name="firstName">
+  <input id="first-name" type="text" ngField (change)="formChanged($event)" name="firstName">
 
   <label for="last-name">Last Name: </label>
   <input id="last-name" type="text" ngField name="lastName">

@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Profile, initialProfile } from '../../models/profile';
 import { Store } from '@ngrx/store';
-import { ProfileState } from '../../reducers/hero.reducer';
+import { HeroState } from '../../reducers/hero.reducer';
 import { getHero } from '../../reducers';
 import { Observable } from 'rxjs';
 import { UpdateFormValue } from '@ngrx/forms';
@@ -16,10 +16,10 @@ export class TemplateProfileEditorComponent {
   @Output() formSubmitted = new EventEmitter<Profile>();
   @ViewChild('form') form: NgForm | null = null;
 
-  profile$: Observable<ProfileState>;
+  profile$: Observable<HeroState>;
   model = initialProfile;
 
-  constructor(private store: Store<ProfileState>) {
+  constructor(private store: Store<HeroState>) {
     this.profile$ = this.store.select(getHero);
   }
 
@@ -43,5 +43,9 @@ export class TemplateProfileEditorComponent {
   onSubmit() {
     this.formSubmitted.emit(this.form!.value as Profile);
     alert("Form submitted successfully");
+  }
+
+  formChanged(event: any) {
+    console.log(event);
   }
 }

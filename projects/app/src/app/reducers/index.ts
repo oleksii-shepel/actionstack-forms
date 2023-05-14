@@ -44,7 +44,7 @@ import * as fromHero from './hero.reducer';
  */
 export interface State {
   profile: fromProfile.ProfileState;
-  hero: fromHero.ProfileState
+  hero: fromHero.HeroState
 }
 
 /**
@@ -99,4 +99,4 @@ export const getHeroSlice = (state: State) => state.hero;
  * pieces of state.
  */
  export const getProfile = createSelector(fromProfile.getProfileState, fromProfile.getProfileState);
- export const getHero = createSelector(fromHero.getProfileState, fromHero.getProfileState);
+ export const getHero = createSelector(fromHero.getHeroState, fromHero.getHeroState);

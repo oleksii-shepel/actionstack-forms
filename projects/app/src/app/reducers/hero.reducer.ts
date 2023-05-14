@@ -2,13 +2,13 @@ import { Action } from '@ngrx/store';
 import { FormState } from '@ngrx/forms';
 import { Profile, initialProfile } from '../models/profile';
 
-export interface ProfileState extends FormState<Profile> {}
+export interface HeroState extends FormState<Profile> {}
 
-export const initialState: ProfileState = {
+export const initialState: HeroState = {
   model: initialProfile,
 };
 
-export function profileReducer(state = initialState, action: Action): ProfileState {
+export function profileReducer(state = initialState, action: Action): HeroState {
   switch (action.type) {
     default: {
       return state;
@@ -25,4 +25,4 @@ export function profileReducer(state = initialState, action: Action): ProfileSta
  * use-case.
  */
 
-export const getProfileState = (state: ProfileState) => state;
+export const getHeroState = (state: HeroState) => state;

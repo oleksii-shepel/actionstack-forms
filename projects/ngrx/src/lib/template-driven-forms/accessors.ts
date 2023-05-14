@@ -8,7 +8,9 @@ import { AbstractControlDirective, ControlValueAccessor, DefaultValueAccessor } 
  * Note: this is an *internal-only* class and should not be extended or used directly in
  * applications code.
  */
-@Directive()
+@Directive({
+  selector: 'base-control-value-accessor'
+})
 export class BaseControlValueAccessor {
   /**
    * The registered callback function called when a change or input event occurs on the input
@@ -68,7 +70,9 @@ export class BaseControlValueAccessor {
  * Note: this is an *internal-only* class and should not be extended or used directly in
  * applications code.
  */
-@Directive()
+@Directive({
+  selector: 'built-in-control-value-accessor',
+})
 export class BuiltInControlValueAccessor extends BaseControlValueAccessor {
 }
 
