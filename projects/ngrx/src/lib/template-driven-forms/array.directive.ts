@@ -1,8 +1,6 @@
-import {Directive, forwardRef, Host, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, Provider, Self, SimpleChanges, SkipSelf} from '@angular/core';
-import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, Form, FormArray, FormArrayName, FormControlDirective, FormGroup, FormGroupDirective, FormGroupName, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgForm, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
+import {Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Provider, Self, SkipSelf} from '@angular/core';
+import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgControl, NgForm, Validator, ValidatorFn } from '@angular/forms';
 import { composeAsyncValidators, composeValidators } from '../shared/validators';
-import { CALL_SET_DISABLED_STATE } from '../shared/controls';
-import { selectValueAccessor } from './accessors';
 import { FieldGroupDirective } from './group.directive';
 
 const formControlBinding: Provider = {
