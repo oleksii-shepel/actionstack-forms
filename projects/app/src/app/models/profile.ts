@@ -13,15 +13,15 @@ export interface Profile {
 }
 
 export const initialProfile: Profile = {
-  firstName: 'asdasd',
-  lastName: 'sadfsafas',
+  firstName: '',
+  lastName: '',
   address: {
-    street: 'sadfsadf',
-    city: 'dasfasdf',
-    state: 'asdfsadf',
-    zip: 'asdfsdaf'
+    street: '',
+    city: '',
+    state: '',
+    zip: ''
   },
-  aliases: ['asdfasdf']
+  aliases: ['']
 }
 
 export const options: ModelOptions<Profile> = {

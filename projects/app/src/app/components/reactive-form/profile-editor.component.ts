@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, NgForm } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { FormArray } from '@angular/forms';
 import { Profile, initialProfile } from '../../models/profile';
@@ -7,12 +7,13 @@ import { Store } from '@ngrx/store';
 import { ProfileState } from '../../reducers/profile.reducer';
 import { getProfile } from '../../reducers';
 import { Observable } from 'rxjs';
-import { UpdateFormValue, buildFormGroup } from '@ngrx/forms';
+import { ReactiveStoreDirective, UpdateFormValue, buildFormGroup } from '@ngrx/forms';
 
 @Component({
   selector: 'reactive-profile-editor',
   templateUrl: './profile-editor.component.html',
-  styleUrls: ['./profile-editor.component.css']
+  styleUrls: ['./profile-editor.component.css'],
+  providers: [{provide: 'form', useExisting: NgForm}]
 })
 export class ReactiveProfileEditorComponent {
   @Output() formSubmitted = new EventEmitter<Profile>();

@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Profile, initialProfile } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { HeroState } from '../../reducers/hero.reducer';
@@ -10,7 +10,8 @@ import { UpdateFormValue } from '@ngrx/forms';
 @Component({
   selector: 'template-profile-editor',
   templateUrl: './profile-editor.component.html',
-  styleUrls: ['./profile-editor.component.css']
+  styleUrls: ['./profile-editor.component.css'],
+  providers: [{provide: 'form', useExisting: FormGroupDirective}]
 })
 export class TemplateProfileEditorComponent {
   @Output() formSubmitted = new EventEmitter<Profile>();

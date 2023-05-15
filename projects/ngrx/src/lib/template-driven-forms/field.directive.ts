@@ -5,7 +5,7 @@ import { composeAsyncValidators, composeValidators } from '../shared/validators'
 import { CALL_SET_DISABLED_STATE } from '../shared/controls';
 import { FieldGroupDirective } from './group.directive';
 import { FieldArrayDirective } from './array.directive';
-import { StoreDirective } from './store.directive';
+import { DynamicStoreDirective } from './store.directive';
 import { getValue } from '../shared';
 
 const formControlBinding: Provider = {
@@ -35,7 +35,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   private _composedAsyncValidator!: AsyncValidatorFn | null;
   private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   private _parent: ControlContainer;
-  private _ngStore: StoreDirective | null | undefined;
+  private _ngStore: DynamicStoreDirective | null | undefined;
 
   constructor(
       @Optional() @Host() parent: ControlContainer,
@@ -47,7 +47,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
           SetDisabledStateOption,
           ) {
     super();
-    this._ngStore = inject(StoreDirective);
+    //this._ngStore = inject(StoreDirective);
 
     this._parent = parent;
     this._setValidators(validators);
@@ -75,7 +75,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   }
 
   ngOnInit(): void {
-    this._ngStore?.store.select(state => getValue(state, `${this._ngStore?.path}.model`)).subscribe(
+    this._ngStore?.store.select((state: any) => getValue(state, `${this._ngStore?.path}.model`)).subscribe(
     (state: any) => {
       this.form.patchValue(getValue(state, this.path.join('.')), {emitEvent: false});
     });
