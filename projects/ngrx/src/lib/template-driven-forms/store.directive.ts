@@ -2,9 +2,9 @@ import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef } from '@angular
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, debounceTime } from 'rxjs';
-import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, UpdateForm } from '../shared/actions';
-
-const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
+import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, UpdateForm, InitForm } from '../shared/actions';
+import { getValue } from '../shared';
+import { initialProfile } from 'projects/app/src/app/models/profile';
 
 @Directive({ selector: 'form:not([ngNoForm]):not([formGroup])[ngStore],ng-form[ngStore],[ngForm][ngStore]' })
 export class StoreDirective implements OnInit, OnDestroy {
@@ -16,9 +16,9 @@ export class StoreDirective implements OnInit, OnDestroy {
   private _updating = false;
 
   constructor(
-    private _store: Store<any>,
-    private _form: NgForm,
-    private _cd: ChangeDetectorRef
+    public store: Store<any>,
+    private form: NgForm,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -26,91 +26,94 @@ export class StoreDirective implements OnInit, OnDestroy {
       throw new Error("Misuse of ngrxForm directive");
     }
 
-    if(!this._form) {
+    if(!this.form) {
       throw new Error("ngForm directive not found");
     }
 
-    this._store
+    this.store
       .select(state => getValue(state, `${this.path}.model`))
       .pipe(takeUntil(this._destroyed$))
       .subscribe(model => {
         if (!this._updating) {
           this._updating = false;
           if (model) {
-            this._form.form.patchValue(model);
-            this._cd.markForCheck();
+            this.form.form.patchValue(model);
+            this.cdr.markForCheck();
           }
         }
       });
 
-    this._store
+    this.store
       .select(state => getValue(state, `${this.path}.dirty`))
       .pipe(takeUntil(this._destroyed$))
       .subscribe(dirty => {
-        if (this._form.form.dirty !== dirty) {
+        if (this.form.form.dirty !== dirty) {
           if (dirty === true) {
-            this._form.form.markAsDirty();
-            this._cd.markForCheck();
+            this.form.form.markAsDirty();
+            this.cdr.markForCheck();
           } else if (dirty === false) {
-            this._form.form.markAsPristine();
-            this._cd.markForCheck();
+            this.form.form.markAsPristine();
+            this.cdr.markForCheck();
           }
         }
       });
 
-    this._store
+    this.store
       .select(state => getValue(state, `${this.path}.disabled`))
       .pipe(takeUntil(this._destroyed$))
       .subscribe(disabled => {
-        if (this._form.form.disabled !== disabled) {
+        if (this.form.form.disabled !== disabled) {
           if (disabled === true) {
-            this._form.form.disable();
-            this._cd.markForCheck();
+            this.form.form.disable();
+            this.cdr.markForCheck();
           } else if (disabled === false) {
-            this._form.form.enable();
-            this._cd.markForCheck();
+            this.form.form.enable();
+            this.cdr.markForCheck();
           }
         }
       });
 
 
 
-    this._form.valueChanges!
+    this.form.valueChanges!
       .pipe(debounceTime(this.debounce), takeUntil(this._destroyed$))
       .subscribe(value => {
         this._updating = true;
-        this._store.dispatch(
+        this.store.dispatch(
           new UpdateFormValue({
             path: this.path,
-            value
+            value: this.form.value
           })
         );
 
-        this._store.dispatch(
+        this.store.dispatch(
           new UpdateFormDirty({
             path: this.path,
-            dirty: this._form.dirty
+            dirty: this.form.dirty
           })
         );
 
-        this._store.dispatch(
+        this.store.dispatch(
           new UpdateFormErrors({
             path: this.path,
-            errors: this._form.errors
+            errors: this.form.errors
           })
         );
       });
 
-    this._form.statusChanges!
+    this.form.statusChanges!
       .pipe(debounceTime(this.debounce), takeUntil(this._destroyed$))
       .subscribe(status => {
-        this._store.dispatch(
+        this.store.dispatch(
           new UpdateFormStatus({
             path: this.path,
             status
           })
         );
       });
+
+    this.form.form.patchValue(initialProfile);
+    this.store.dispatch(new InitForm({ value: initialProfile, path: this.path }));
   }
 
   ngOnDestroy() {
@@ -118,7 +121,7 @@ export class StoreDirective implements OnInit, OnDestroy {
     this._destroyed$.complete();
 
     if (this.clearOnDestroy) {
-      this._store.dispatch(
+      this.store.dispatch(
         new UpdateForm({
           path: this.path,
           value: null,

@@ -29,7 +29,7 @@ export class FieldArrayDirective extends ControlContainer implements OnInit, OnD
   private _composedValidator!: ValidatorFn | null;
   private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   private _composedAsyncValidator!: AsyncValidatorFn | null;
-  private _onCollectionChange!: () => void;
+  private _onCollectionChange = () => { this._form?.updateValueAndValidity()};
   private _form!: FormArray<any>;
   constructor(
       @Optional() @Host() @SkipSelf() parent: ControlContainer,
@@ -41,14 +41,6 @@ export class FieldArrayDirective extends ControlContainer implements OnInit, OnD
     this._setValidators(validators);
     this._setAsyncValidators(asyncValidators);
     this._form = new FormArray<any>([], this._composedValidator, this._composedAsyncValidator);
-
-    Object.assign(FormArray.prototype, this._form, { registerControl: (name: string, control: any) => {
-        if (this._form.controls[name as any]) return;
-        this._form.controls[name as any] = control;
-        control.setParent(this._form);
-        control._registerOnCollectionChange(this._onCollectionChange);
-        return control;
-    } });
   }
 
   valueAccessor!: ControlValueAccessor | null;
@@ -101,12 +93,19 @@ export class FieldArrayDirective extends ControlContainer implements OnInit, OnD
     return null;
   }
 
+  addControl(control: any): void {
+    this._form.controls.push(control);
+  }
+
+  removeControl(control: any): void {
+    this._form.controls = this._form.controls.filter((item) => item !== control);
+  }
   /**
    * @description
    * The top-level directive for this group if present, otherwise null.
    */
   override get formDirective(): any {
-    return this._parent ? <any>this._parent.formDirective : null;
+    return this;
   }
 
   /**
@@ -118,8 +117,6 @@ export class FieldArrayDirective extends ControlContainer implements OnInit, OnD
     return [...this._parent.path!, this.name.toString()];
   }
 
-  private _checkParentType(): void {
-  }
 
   /**
    * Sets synchronous validators for this directive.
@@ -141,7 +138,3 @@ export class FieldArrayDirective extends ControlContainer implements OnInit, OnD
 
 }
 
-function _hasInvalidParent(parent: ControlContainer): boolean {
-  return !(parent instanceof FormGroupName) && !(parent instanceof FormGroupDirective) &&
-      !(parent instanceof FormArrayName);
-}

@@ -1,10 +1,12 @@
-import { EventEmitter, Directive, forwardRef, Host, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, Provider, Self, SimpleChanges, Output } from '@angular/core';
+import { EventEmitter, Directive, forwardRef, Host, Inject, Input, inject, OnDestroy, OnInit, Optional, Provider, Self, SimpleChanges, Output } from '@angular/core';
 import { AbstractControl, AbstractControlDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgForm, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
 import { selectValueAccessor } from './accessors';
 import { composeAsyncValidators, composeValidators } from '../shared/validators';
 import { CALL_SET_DISABLED_STATE } from '../shared/controls';
 import { FieldGroupDirective } from './group.directive';
 import { FieldArrayDirective } from './array.directive';
+import { StoreDirective } from './store.directive';
+import { getValue } from '../shared';
 
 const formControlBinding: Provider = {
   provide: NgControl,
@@ -33,6 +35,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   private _composedAsyncValidator!: AsyncValidatorFn | null;
   private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   private _parent: ControlContainer;
+  private _ngStore: StoreDirective | null | undefined;
 
   constructor(
       @Optional() @Host() parent: ControlContainer,
@@ -42,9 +45,9 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
       @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[],
       @Optional() @Inject(CALL_SET_DISABLED_STATE) callSetDisabledState?:
           SetDisabledStateOption,
-
           ) {
     super();
+    this._ngStore = inject(StoreDirective);
 
     this._parent = parent;
     this._setValidators(validators);
@@ -72,6 +75,11 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   }
 
   ngOnInit(): void {
+    this._ngStore?.store.select(state => getValue(state, `${this._ngStore?.path}.model`)).subscribe(
+    (state: any) => {
+      this.form.patchValue(getValue(state, this.path.join('.')), {emitEvent: false});
+    });
+
     if(this._parent instanceof NgForm) {
       this._parent.formDirective.addControl(this);
     } else if(this._parent instanceof FieldGroupDirective) {
@@ -83,7 +91,13 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
 
   /** @nodoc */
   ngOnDestroy() {
-    (this._parent as NgForm).form.removeControl(this.name!.toString());
+    if(this._parent instanceof NgForm) {
+      this._parent.formDirective.removeControl(this);
+    } else if(this._parent instanceof FieldGroupDirective) {
+      this._parent.formDirective!.removeControl(this);
+    } else if(this._parent instanceof FieldArrayDirective) {
+      this._parent.formDirective!.removeControl(this);
+    }
   }
 
   override get control(): AbstractControl<any, any> | null {
@@ -100,7 +114,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
    * Each index is the string name of the control on that level.
    */
   override get path(): string[] {
-    return this._parent ? [...this._parent.path!, this.name!.toString()] : [this.name!.toString()];
+    return [...this._parent.path!, this.name!.toString()];
   }
 
   /**

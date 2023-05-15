@@ -8,7 +8,9 @@ export interface FormState<T> {
   status?: string;
 }
 
-const setValue = (obj: any, prop: string, val: any) => {
+export const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
+
+export const setValue = (obj: any, prop: string, val: any) => {
   obj = { ...obj };
   const split = prop.split('.');
   const last = split[split.length - 1];
@@ -26,6 +28,10 @@ const setValue = (obj: any, prop: string, val: any) => {
 export function form(reducer: Function) {
   return function(state: any, action: any) {
     let nextState = reducer(state, action);
+
+    if (action.type === FormActions.Init) {
+      nextState = setValue(nextState, `${action.payload.path}.model`, { ...action.payload.value });
+    }
 
     if (action.type === FormActions.UpdateValue || action.type === FormActions.UpdateForm) {
       nextState = setValue(nextState, `${action.payload.path}.model`, { ...action.payload.value });

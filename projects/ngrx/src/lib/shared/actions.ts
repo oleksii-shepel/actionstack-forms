@@ -1,6 +1,7 @@
 import { Action } from '@ngrx/store';
 
 export enum FormActions {
+  Init = '[Form] Init',
   UpdateStatus = '[Form] Update Status',
   UpdateValue = '[Form] Update Value',
   UpdateDirty = '[Form] Update Dirty',
@@ -10,6 +11,11 @@ export enum FormActions {
   SetDisabled = '[Form] Disable Form',
   SetEnabled = '[Form] Enable Form',
   UpdateForm = '[Form] Update Form'
+}
+
+export class InitForm implements Action {
+  readonly type = FormActions.Init;
+  constructor(public payload: { value: any; path: string }) {}
 }
 
 export class UpdateFormStatus implements Action {
