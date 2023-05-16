@@ -5,6 +5,7 @@ import { SyncDirective } from "../shared/core";
 
 @Directive({
   selector: '[formGroup][ngStore]',
+  providers: [{provide: 'form', useExisting: FormGroupDirective}]
 })
 export class ReactiveStoreDirective extends SyncDirective implements OnInit, OnDestroy {
   constructor(f: FormGroupDirective, store: Store, cdr: ChangeDetectorRef) {

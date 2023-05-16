@@ -1,6 +1,6 @@
-import { EventEmitter, Directive, forwardRef, Host, Inject, Input, inject, OnDestroy, OnInit, Optional, Provider, Self, Output } from '@angular/core';
+import { EventEmitter, Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Provider, Self, Output } from '@angular/core';
 import { AbstractControl, AbstractControlDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgForm, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
-import { selectValueAccessor } from './accessors';
+import { selectValueAccessor } from '../shared/accessors';
 import { composeAsyncValidators, composeValidators } from '../shared/validators';
 import { CALL_SET_DISABLED_STATE } from '../shared/controls';
 import { FieldGroupDirective } from './group.directive';
@@ -23,18 +23,18 @@ const formControlBinding: Provider = {
   [{provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true}]
 ], exportAs: 'ngField'})
 export class FieldDirective extends AbstractControlDirective implements OnInit, OnDestroy, NgControl {
-  @Input("name") name!: string;
+  @Input("ngField") name!: string;
   @Output('ngFieldChange') update = new EventEmitter();
 
   form: FormControl<string | null>;
   valueAccessor: ControlValueAccessor | null;
   viewModel: any;
 
+  public _parent: ControlContainer;
   private _rawValidators!: (ValidatorFn | Validator)[];
   private _composedValidator!: ValidatorFn | null;
   private _composedAsyncValidator!: AsyncValidatorFn | null;
   private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
-  private _parent: ControlContainer;
   private _ngStore: DynamicStoreDirective | null | undefined;
 
   constructor(
@@ -47,7 +47,6 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
           SetDisabledStateOption,
           ) {
     super();
-    //this._ngStore = inject(StoreDirective);
 
     this._parent = parent;
     this._setValidators(validators);

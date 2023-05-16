@@ -5,7 +5,7 @@ import { DynamicStoreDirective } from './store.directive';
 import { FieldDirective } from './field.directive';
 import { FieldArrayDirective } from './array.directive';
 import { FieldGroupDirective } from './group.directive';
-import { BaseControlValueAccessor, BuiltInControlValueAccessor } from './accessors';
+import { BaseControlValueAccessor, BuiltInControlValueAccessor } from '../shared/accessors';
 
 @NgModule({
   imports: [FormsModule, StoreModule],

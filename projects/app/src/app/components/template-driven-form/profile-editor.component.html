@@ -1,24 +1,24 @@
 <form #form="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngStore="hero">
   <label for="first-name">First Name: </label>
-  <input id="first-name" type="text" ngField (change)="formChanged($event)" name="firstName">
+  <input id="first-name" type="text" ngField="firstName">
 
   <label for="last-name">Last Name: </label>
-  <input id="last-name" type="text" ngField name="lastName">
+  <input id="last-name" type="text" ngField="lastName">
 
   <div ngFieldGroup="address">
     <h2>Address</h2>
 
     <label for="street">Street: </label>
-    <input id="street" type="text" ngField name="street">
+    <input id="street" type="text" ngField="street">
 
     <label for="city">City: </label>
-    <input id="city" type="text" ngField name="city">
+    <input id="city" type="text" ngField="city">
 
     <label for="state">State: </label>
-    <input id="state" type="text" ngField name="state">
+    <input id="state" type="text" ngField="state">
 
     <label for="zip">Zip Code: </label>
-    <input id="zip" type="text" ngField name="zip">
+    <input id="zip" type="text" ngField="zip">
   </div>
 
   <div ngFieldArray="aliases">
@@ -27,8 +27,8 @@
 
     <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
       <!-- The repeated alias template -->
-      <label for="aliases.{{i}}">Alias:</label>
-      <input id="aliases.{{i}}" type="text" ngField name="{{i}}">
+      <label for="alias-{{i}}">Alias:</label>
+      <input id="alias-{{i}}" type="text" ngField="{{i}}">
     </div>
   </div>
 

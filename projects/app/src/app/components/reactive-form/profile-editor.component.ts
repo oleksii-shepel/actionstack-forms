@@ -12,8 +12,7 @@ import { ReactiveStoreDirective, UpdateFormValue, buildFormGroup } from '@ngrx/f
 @Component({
   selector: 'reactive-profile-editor',
   templateUrl: './profile-editor.component.html',
-  styleUrls: ['./profile-editor.component.css'],
-  providers: [{provide: 'form', useExisting: NgForm}]
+  styleUrls: ['./profile-editor.component.css']
 })
 export class ReactiveProfileEditorComponent {
   @Output() formSubmitted = new EventEmitter<Profile>();

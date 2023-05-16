@@ -21,7 +21,8 @@ import {
 } from '@angular/core';
 
 import { AbstractFormGroupDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validator, ValidatorFn } from '@angular/forms';
-import { selectValueAccessor } from './accessors';
+import { selectValueAccessor } from '../shared/accessors';
+import { composeAsyncValidators, composeValidators } from '../shared';
 
 const formGroupNameProvider: Provider = {
   provide: ControlContainer,
@@ -87,9 +88,11 @@ export class FieldGroupDirective extends AbstractFormGroupDirective implements O
    * to a key in the parent `NgForm`.
    */
   @Input('ngFieldGroup') override name: string = '';
-  private _parent: ControlContainer;
-  private _rawValidators!: (Validator | ValidatorFn)[];
-  private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
+  _parent: ControlContainer;
+  _rawValidators!: (Validator | ValidatorFn)[];
+  _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
+  _composedValidator!: ValidatorFn | null;
+  _composedAsyncValidator!: AsyncValidatorFn | null;
   valueAccessor: ControlValueAccessor | null;
 
   constructor(
@@ -104,13 +107,20 @@ export class FieldGroupDirective extends AbstractFormGroupDirective implements O
     this.valueAccessor = selectValueAccessor(this, valueAccessors);
   }
 
+  addControl(control: any): void {
+    this.formDirective!.addControl(control);
+  }
+
+  removeControl(control: any): void {
+    this.formDirective!.removeControl(control);}
+
   /**
    * Sets synchronous validators for this directive.
    * @internal
    */
   _setValidators(validators: Array<Validator|ValidatorFn>|undefined): void {
     this._rawValidators = validators || [];
-    // this._composedValidatorFn = composeValidators(this._rawValidators);
+    this._composedValidator = composeValidators(this._rawValidators);
   }
 
   /**
@@ -119,6 +129,6 @@ export class FieldGroupDirective extends AbstractFormGroupDirective implements O
    */
   _setAsyncValidators(validators: Array<AsyncValidator|AsyncValidatorFn>|undefined): void {
     this._rawAsyncValidators = validators || [];
-    // this._composedAsyncValidatorFn = composeAsyncValidators(this._rawAsyncValidators);
+    this._composedAsyncValidator = composeAsyncValidators(this._rawAsyncValidators);
   }
 }

@@ -11,7 +11,6 @@ import { UpdateFormValue } from '@ngrx/forms';
   selector: 'template-profile-editor',
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css'],
-  providers: [{provide: 'form', useExisting: FormGroupDirective}]
 })
 export class TemplateProfileEditorComponent {
   @Output() formSubmitted = new EventEmitter<Profile>();

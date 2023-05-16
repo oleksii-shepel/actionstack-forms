@@ -24,11 +24,11 @@ export class SyncDirective implements OnInit, OnDestroy {
 
   ngOnInit() {
     if(!this.path) {
-      throw new Error("Misuse of store directive");
+      throw new Error("Misuse of sync directive");
     }
 
     if(!this.form) {
-      throw new Error("Supported control not found");
+      throw new Error("Supported form control directive not found");
     }
 
     this.store
