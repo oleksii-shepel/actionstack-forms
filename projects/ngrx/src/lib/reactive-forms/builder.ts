@@ -2,16 +2,19 @@ import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder } from 
 
 
 export type ArrayToObject<T extends any[]> = {
-  [K in keyof T as string]: T[K];
+  [key in keyof T as string]: T[key];
 }
 
-export type Extract<T, V> = { [K in keyof T]: T[K] extends V ? K : never };
+export type Extract<T, V> = { [key in keyof T]: T[key] extends V ? key : never }[keyof T]
+export type SubType<Base, Condition> = Pick<Base, Extract<Base, Condition>>;
 
 export type ModelOptions<T> = {
-  [key in keyof Partial<T>]? : T[key] extends Array<unknown> ? ModelOptions<ArrayToObject<T[key]>> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
+  [key in keyof Partial<T>]? : T[key] extends Array<any> ? Array<AbstractControlOptions> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
 } & {
   ["__group"]?: T extends object ? AbstractControlOptions : never;
-}
+} & {
+  [key in keyof SubType<T, Array<any>> as key extends string ? `__array_${key}` : never]?: AbstractControlOptions;
+};
 
 const formBuilder = new FormBuilder();
 
@@ -24,7 +27,7 @@ export function buildFormArray(model: any, options: any = {}, groupOptions: Abst
       } else if (typeof item === 'object' && !Array.isArray(item)) {
         formControls.push(buildFormGroup(item, options[index] || {}, options[index] ? options[index]["__group"] : {}))
       } else if(Array.isArray(item)) {
-        formControls.push(buildFormArray(item, options[index] || {}, options[index] ? options[index]["__group"] : {}))
+        throw new Error("Nested arrays are not supported");
       }
     });
 
@@ -49,7 +52,7 @@ export function buildFormGroup(model: any, options: any = {}, groupOptions: Abst
       } else if (typeof value === 'object' && !Array.isArray(value)) {
         formGroup.addControl(key, buildFormGroup(value, options[key] || {}, options[key]? options[key]["__group"] : {}));
       } else if(Array.isArray(value)) {
-        let formArray = buildFormArray(value, options[key] || {}, options[key]? options[key]["__group"] : {}) as FormArray
+        let formArray = buildFormArray(value, options[key] || {}, options[`__array_${key}`] ? options[`__array_${key}`] : {}) as FormArray
         formGroup.addControl(key, formArray)
       }
     }

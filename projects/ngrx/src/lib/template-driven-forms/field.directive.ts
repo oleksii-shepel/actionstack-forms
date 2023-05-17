@@ -36,6 +36,8 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   private _composedAsyncValidator!: AsyncValidatorFn | null;
   private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   private _ngStore: DynamicStoreDirective | null | undefined;
+  private _onCollectionChange = () => {};
+  private _onChange = () => {};
 
   constructor(
       @Optional() @Host() parent: ControlContainer,
@@ -57,20 +59,23 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
     this.form.setValidators(this._composedValidator);
     this.form.setAsyncValidators(this._composedAsyncValidator);
     this.form.updateValueAndValidity({emitEvent: false});
+
+    this.form.setParent(this.formDirective.form);
   }
 
   onChange(value: any) {
     this.form.setValue(value);
-    this.control!.updateValueAndValidity();
+    this.form.updateValueAndValidity({emitEvent: true});
+    this.viewToModelUpdate(value);
   }
 
   onTouched() {
-    this.control!.markAsTouched();
+    this.form.markAsTouched();
   }
 
-  viewToModelUpdate(newValue: any): void {
-    this.viewModel = newValue;
-    this.update.emit(newValue);
+  viewToModelUpdate(value: any): void {
+    this.viewModel = value;
+    this.update.emit(value);
   }
 
   ngOnInit(): void {
@@ -79,24 +84,32 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
       this.form.patchValue(getValue(state, this.path.join('.')), {emitEvent: false});
     });
 
-    if(this._parent instanceof NgForm) {
-      this._parent.formDirective.addControl(this);
-    } else if(this._parent instanceof FieldGroupDirective) {
-      this._parent.formDirective!.addControl(this);
-    } else if(this._parent instanceof FieldArrayDirective) {
-      this._parent.formDirective!.addControl(this);
+    if(this.formDirective instanceof NgForm) {
+      this.formDirective.form.addControl(this.name, this.form);
+    } else if(this.formDirective instanceof FieldGroupDirective) {
+      this.formDirective.addControl(this);
+    } else if(this.formDirective instanceof FieldArrayDirective) {
+      this.formDirective.addControl(this);
     }
   }
 
   /** @nodoc */
   ngOnDestroy() {
-    if(this._parent instanceof NgForm) {
-      this._parent.formDirective.removeControl(this);
-    } else if(this._parent instanceof FieldGroupDirective) {
-      this._parent.formDirective!.removeControl(this);
-    } else if(this._parent instanceof FieldArrayDirective) {
-      this._parent.formDirective!.removeControl(this);
+    if(this.formDirective instanceof NgForm) {
+      this.formDirective.form.removeControl(this.name);
+    } else if(this.formDirective instanceof FieldGroupDirective) {
+      this.formDirective!.removeControl(this);
+    } else if(this.formDirective instanceof FieldArrayDirective) {
+      this.formDirective!.removeControl(this);
     }
+  }
+
+  setParent(parent: ControlContainer): void {
+    this._parent = parent;
+  }
+
+  registerOnChange(fn: () => void): void {
+    this._onChange = fn;
   }
 
   override get control(): AbstractControl<any, any> | null {
@@ -105,6 +118,10 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
 
   override set control( value: AbstractControl<any, any> | null) {
     this.form = value as any;
+  }
+
+  get formDirective(): any {
+    return this._parent;
   }
 
   /**
@@ -116,6 +133,9 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
     return [...this._parent.path!, this.name!.toString()];
   }
 
+  _registerOnCollectionChange(fn: () => void): void {
+    this._onCollectionChange = fn;
+  }
   /**
    * Sets synchronous validators for this directive.
    * @internal

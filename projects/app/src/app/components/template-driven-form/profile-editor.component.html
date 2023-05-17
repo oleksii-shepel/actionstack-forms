@@ -26,7 +26,6 @@
     <button type="button" (click)="addAlias()">+ Add another alias</button>
 
     <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
-      <!-- The repeated alias template -->
       <label for="alias-{{i}}">Alias:</label>
       <input id="alias-{{i}}" type="text" ngField="{{i}}">
     </div>

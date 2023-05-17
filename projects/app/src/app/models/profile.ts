@@ -21,7 +21,7 @@ export const initialProfile: Profile = {
     state: '',
     zip: ''
   },
-  aliases: ['']
+  aliases: [''],
 }
 
 export const options: ModelOptions<Profile> = {
@@ -33,5 +33,5 @@ export const options: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: {'0':{}}
+  aliases: [{}],
 }
