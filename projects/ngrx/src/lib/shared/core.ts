@@ -1,9 +1,10 @@
 import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, debounceTime } from 'rxjs';
+import { Subject, takeUntil, debounceTime, filter, takeWhile, repeat, from, first } from 'rxjs';
 import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, UpdateForm, InitForm } from './actions';
 import { getValue } from '.';
+import { checkFormGroup } from '../reactive-forms';
 
 @Directive({
    selector: 'sync-directive'
@@ -14,6 +15,9 @@ export class SyncDirective implements OnInit, OnDestroy {
   @Input('ngStoreClearOnDestroy') clearOnDestroy: boolean = false;
 
   private _destroyed$ = new Subject<boolean>();
+  private _initialized$ = new Subject<boolean>();
+
+  private _initialized = false;
   private _updating = false;
 
   constructor(
@@ -30,6 +34,18 @@ export class SyncDirective implements OnInit, OnDestroy {
     if(!this.form) {
       throw new Error("Supported form control directive not found");
     }
+
+    this.store.select(state => getValue(state, `${this.path}.model`)).pipe(
+      first(),
+      repeat({ count: 5, delay: this.debounce }),
+      takeWhile(() => !this._initialized),
+    ).subscribe((state) => {
+      if(!this._initialized && checkFormGroup(this.form.form, state)) {
+        this._initialized = true;
+        this.form.form.patchValue(state);
+        this.cdr.markForCheck();
+      }
+    });
 
     this.store
       .select(state => getValue(state, `${this.path}.model`))
@@ -74,8 +90,11 @@ export class SyncDirective implements OnInit, OnDestroy {
         }
       });
 
-    this.form.valueChanges!
-      .pipe(debounceTime(this.debounce), takeUntil(this._destroyed$))
+      this.form.valueChanges!
+      .pipe(
+        debounceTime(this.debounce),
+        takeUntil(this._destroyed$),
+        filter(() => this._initialized))
       .subscribe(_ => {
         this._updating = true;
         this.store.dispatch(
@@ -101,8 +120,11 @@ export class SyncDirective implements OnInit, OnDestroy {
       });
 
     this.form.statusChanges!
-      .pipe(debounceTime(this.debounce), takeUntil(this._destroyed$))
-      .subscribe(status => {
+      .pipe(
+        debounceTime(this.debounce),
+        takeUntil(this._destroyed$),
+        filter(() => this._initialized))
+        .subscribe(status => {
         this.store.dispatch(
           new UpdateFormStatus({
             path: this.path,

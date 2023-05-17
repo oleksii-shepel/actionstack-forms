@@ -1,4 +1,4 @@
-import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormGroup } from '@angular/forms';
 
 
 export type ArrayToObject<T extends any[]> = {
@@ -9,7 +9,7 @@ export type Extract<T, V> = { [key in keyof T]: T[key] extends V ? key : never }
 export type SubType<Base, Condition> = Pick<Base, Extract<Base, Condition>>;
 
 export type ModelOptions<T> = {
-  [key in keyof Partial<T>]? : T[key] extends Array<any> ? Array<AbstractControlOptions> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
+  [key in keyof Partial<T>]? : T[key] extends Array<any> ? ModelOptions<T[key]> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
 } & {
   ["__group"]?: T extends object ? AbstractControlOptions : never;
 } & {
@@ -41,12 +41,10 @@ export function buildFormArray(model: any, options: any = {}, groupOptions: Abst
 export function buildFormGroup(model: any, options: any = {}, groupOptions: AbstractControlOptions = {}): AbstractControl {
   if(Array.isArray(model)) {
     return buildFormArray(model, options, groupOptions)
-  }
-  else if(model !== null && typeof model === 'object') {
-
+  } else if(model !== null && typeof model === 'object') {
     let formGroup = formBuilder.group({}, (options["__group"] || groupOptions) as AbstractControlOptions);
 
-    for (let [key, value] of Object.entries(model as any)) {
+    for (let [key, value] of Object.entries(model)) {
       if(typeof value !== 'object') {
         formGroup.addControl(key, formBuilder.control(value, (options[key] || {}) as AbstractControlOptions));
       } else if (typeof value === 'object' && !Array.isArray(value)) {
@@ -64,4 +62,47 @@ export function buildFormGroup(model: any, options: any = {}, groupOptions: Abst
   return formBuilder.control("", options as AbstractControlOptions);
 }
 
+export function checkFormArray(form: FormArray, model: Array<any>): boolean {
+  if(!form || !form.controls) {
+    return false;
+  } else {
+    return model.every((item, index) => {
+      let ready = false;
+      if(typeof item !== 'object' && form.controls[index]) {
+        ready = true;
+      } else if (typeof item === 'object' && !Array.isArray(item)) {
+        ready = !!form.controls[index] ? checkFormGroup(form.controls[index] as FormGroup, item) : false;
+      } else if(Array.isArray(item)) {
+        throw new Error("Nested arrays are not supported");
+      }
+      return ready;
+    });
+  }
+}
 
+export function checkFormGroup(form: FormGroup, model: any): boolean {
+  if(!form) {
+    return false;
+  }
+
+  let ready = true;
+
+  if(Array.isArray(model)) {
+    ready = checkFormArray(form as any, model);
+  } else if(model !== null && typeof model === 'object') {
+
+    for (let [key, value] of Object.entries(model)) {
+      if(typeof value !== 'object' && !form.controls[key]) {
+        ready = false;
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        ready = !!form.controls[key] ? checkFormGroup(form.controls[key] as FormGroup, key) : false;
+      } else if(Array.isArray(value)) {
+        ready = checkFormArray(form.controls[key] as FormArray, value);
+      }
+      if(ready === false) {
+        break;
+      }
+    }
+  }
+  return ready;
+}

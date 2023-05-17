@@ -1,11 +1,11 @@
 import { Component, Output, EventEmitter, ViewChild } from '@angular/core';
-import { FormGroupDirective, NgForm } from '@angular/forms';
+import { NgForm } from '@angular/forms';
 import { Profile, initialProfile } from '../../models/profile';
 import { Store } from '@ngrx/store';
-import { HeroState } from '../../reducers/hero.reducer';
-import { getHero } from '../../reducers';
-import { Observable } from 'rxjs';
-import { UpdateFormValue } from '@ngrx/forms';
+import { HeroState, initialState } from '../../reducers/hero.reducer';
+import { ApplicationState, getHeroSlice } from '../../reducers';
+import { take, Observable } from 'rxjs';
+import { InitForm, UpdateFormValue } from '@ngrx/forms';
 
 @Component({
   selector: 'template-profile-editor',
@@ -16,11 +16,16 @@ export class TemplateProfileEditorComponent {
   @Output() formSubmitted = new EventEmitter<Profile>();
   @ViewChild('form') form: NgForm | null = null;
 
-  profile$: Observable<HeroState>;
+  profile$!: Observable<HeroState>;
   model = initialProfile;
 
-  constructor(private store: Store<HeroState>) {
-    this.profile$ = this.store.select(getHero);
+  constructor(private store: Store<ApplicationState>) {
+    this.store.select(getHeroSlice).pipe(take(1)).subscribe((state) => {
+      let value = state?.model ? state : initialState;
+      this.store.dispatch(new InitForm({ path: "hero", value: value }));
+    });
+
+    this.profile$ = this.store.select(getHeroSlice);
   }
 
   updateProfile() {
@@ -29,7 +34,7 @@ export class TemplateProfileEditorComponent {
       address: {
         street: '123 Drew Street'
       }
-    }, path: "profile"}));
+    }, path: "hero"}));
   }
 
   addAlias() {
@@ -43,9 +48,5 @@ export class TemplateProfileEditorComponent {
   onSubmit() {
     this.formSubmitted.emit(this.form!.value as Profile);
     alert("Form submitted successfully");
-  }
-
-  formChanged(event: any) {
-    console.log(event);
   }
 }

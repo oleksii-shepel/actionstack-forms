@@ -27,3 +27,4 @@ export function profileReducer(state = initialState, action: Action): HeroState 
  */
 
 export const getHeroState = (state: HeroState) => state;
+

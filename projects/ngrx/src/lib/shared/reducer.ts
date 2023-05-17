@@ -27,10 +27,11 @@ export const setValue = (obj: any, prop: string, val: any) => {
 
 export function form(reducer: Function) {
   return function(state: any, action: any) {
+    console.log('form reducer', state, action);
     let nextState = reducer(state, action);
 
     if (action.type === FormActions.Init) {
-      nextState = setValue(nextState, `${action.payload.path}.model`, { ...action.payload.value });
+      nextState = setValue(nextState, `${action.payload.path}`, { ...action.payload.value });
     }
 
     if (action.type === FormActions.UpdateValue || action.type === FormActions.UpdateForm) {

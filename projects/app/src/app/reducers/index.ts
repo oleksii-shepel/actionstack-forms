@@ -42,7 +42,7 @@ import * as fromHero from './hero.reducer';
  * As mentioned, we treat each reducer like a table in a database. This means
  * our top level state interface is just a map of keys to inner state types.
  */
-export interface State {
+export interface ApplicationState {
   profile: fromProfile.ProfileState;
   hero: fromHero.HeroState
 }
@@ -59,8 +59,8 @@ const reducers = {
   hero: fromHero.profileReducer
 };
 
-const developmentReducer: ActionReducer<State> = compose(storeFreeze, combineReducers)(reducers);
-const productionReducer: ActionReducer<State> = combineReducers(reducers);
+const developmentReducer: ActionReducer<ApplicationState> = compose(storeFreeze, combineReducers)(reducers);
+const productionReducer: ActionReducer<ApplicationState> = combineReducers(reducers);
 
 export function reducer(state: any, action: any) {
   if (environment.production) {
@@ -86,8 +86,8 @@ export function reducer(state: any, action: any) {
  * }
  * ```
  */
-export const getProfileSlice = (state: State) => state.profile;
-export const getHeroSlice = (state: State) => state.hero;
+export const getProfileSlice = (state: ApplicationState) => state.profile;
+export const getHeroSlice = (state: ApplicationState) => state.hero;
 /**
  * Every reducer module exports selector functions, however child reducers
  * have no knowledge of the overall state tree. To make them useable, we
@@ -98,5 +98,8 @@ export const getHeroSlice = (state: State) => state.hero;
  * The created selectors can also be composed together to select different
  * pieces of state.
  */
- export const getProfile = createSelector(fromProfile.getProfileState, fromProfile.getProfileState);
- export const getHero = createSelector(fromHero.getHeroState, fromHero.getHeroState);
+
+//export const getHero = (state: State) => state.hero;
+
+export const getProfile = createSelector(getProfileSlice, fromProfile.getProfileState);
+export const getHero = createSelector(getHeroSlice, fromHero.getHeroState);

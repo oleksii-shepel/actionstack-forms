@@ -7,6 +7,7 @@ import { FieldGroupDirective } from './group.directive';
 import { FieldArrayDirective } from './array.directive';
 import { DynamicStoreDirective } from './store.directive';
 import { getValue } from '../shared';
+import { Subject, takeUntil, distinctUntilChanged, map } from 'rxjs';
 
 const formControlBinding: Provider = {
   provide: NgControl,
@@ -30,17 +31,20 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   valueAccessor: ControlValueAccessor | null;
   viewModel: any;
 
-  public _parent: ControlContainer;
-  private _rawValidators!: (ValidatorFn | Validator)[];
-  private _composedValidator!: ValidatorFn | null;
-  private _composedAsyncValidator!: AsyncValidatorFn | null;
-  private _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
-  private _ngStore: DynamicStoreDirective | null | undefined;
-  private _onCollectionChange = () => {};
-  private _onChange = () => {};
+  _parent: ControlContainer;
+  _ngStore: DynamicStoreDirective;
+  _rawValidators!: (ValidatorFn | Validator)[];
+  _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
+  _composedValidator!: ValidatorFn | null;
+  _composedAsyncValidator!: AsyncValidatorFn | null;
+  _onCollectionChange = () => {};
+  _onChange = () => {};
+
+  private _destroyed$ = new Subject<boolean>();
 
   constructor(
       @Optional() @Host() parent: ControlContainer,
+      @Optional() @Host() ngStore: DynamicStoreDirective,
       @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator|ValidatorFn)[],
       @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators:
           (AsyncValidator|AsyncValidatorFn)[],
@@ -51,6 +55,8 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
     super();
 
     this._parent = parent;
+    this._ngStore = ngStore;
+
     this._setValidators(validators);
     this._setAsyncValidators(asyncValidators);
     this.valueAccessor = selectValueAccessor(this, valueAccessors);
@@ -58,14 +64,13 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
     this.form = new FormControl('');
     this.form.setValidators(this._composedValidator);
     this.form.setAsyncValidators(this._composedAsyncValidator);
-    this.form.updateValueAndValidity({emitEvent: false});
 
     this.form.setParent(this.formDirective.form);
   }
 
   onChange(value: any) {
     this.form.setValue(value);
-    this.form.updateValueAndValidity({emitEvent: true});
+    this.form.updateValueAndValidity();
     this.viewToModelUpdate(value);
   }
 
@@ -79,9 +84,13 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   }
 
   ngOnInit(): void {
-    this._ngStore?.store.select((state: any) => getValue(state, `${this._ngStore?.path}.model`)).subscribe(
-    (state: any) => {
-      this.form.patchValue(getValue(state, this.path.join('.')), {emitEvent: false});
+    this._ngStore.store.select((state: any) => state).pipe(
+      distinctUntilChanged(),
+      takeUntil(this._destroyed$),
+      map(state => getValue(state, `${this._ngStore.path}.model`))).subscribe(
+      (model: any) => {
+      let value = getValue(model, this.path.join('.'));
+      this.valueAccessor?.writeValue(value);
     });
 
     if(this.formDirective instanceof NgForm) {
@@ -91,6 +100,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
     } else if(this.formDirective instanceof FieldArrayDirective) {
       this.formDirective.addControl(this);
     }
+
   }
 
   /** @nodoc */
@@ -102,6 +112,9 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
     } else if(this.formDirective instanceof FieldArrayDirective) {
       this.formDirective!.removeControl(this);
     }
+
+    this._destroyed$.next(true);
+    this._destroyed$.complete();
   }
 
   setParent(parent: ControlContainer): void {

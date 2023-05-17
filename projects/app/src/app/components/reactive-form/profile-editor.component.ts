@@ -4,10 +4,10 @@ import { Validators } from '@angular/forms';
 import { FormArray } from '@angular/forms';
 import { Profile, initialProfile } from '../../models/profile';
 import { Store } from '@ngrx/store';
-import { ProfileState } from '../../reducers/profile.reducer';
-import { getProfile } from '../../reducers';
-import { Observable } from 'rxjs';
-import { ReactiveStoreDirective, UpdateFormValue, buildFormGroup } from '@ngrx/forms';
+import { ProfileState, initialState } from '../../reducers/profile.reducer';
+import { ApplicationState, getProfile, getProfileSlice } from '../../reducers';
+import { Observable, take } from 'rxjs';
+import { InitForm, ReactiveStoreDirective, UpdateFormValue, buildFormGroup } from '@ngrx/forms';
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -25,7 +25,13 @@ export class ReactiveProfileEditorComponent {
     return this.profileForm.get('aliases') as FormArray;
   }
 
-  constructor(private fb: FormBuilder, private store: Store<ProfileState>) {
+  constructor(private fb: FormBuilder, private store: Store<ApplicationState>) {
+
+    // this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
+    //   let value = state?.model ? state : initialState;
+    //   this.store.dispatch(new InitForm({ path: "hero", value: value }));
+    // });
+
     this.profile$ = this.store.select(getProfile);
   }
 

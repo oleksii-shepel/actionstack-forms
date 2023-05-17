@@ -34,6 +34,7 @@ import {
   composeValidators,
   selectValueAccessor,
 } from '../shared';
+import { DynamicStoreDirective } from './store.directive';
 
 const formControlBinding: Provider = {
   provide: ControlContainer,
@@ -86,7 +87,9 @@ export class FieldArrayDirective
     valueAccessors: ControlValueAccessor[]
   ) {
     super();
+
     this._parent = parent;
+
     this._setValidators(validators);
     this._setAsyncValidators(asyncValidators);
     this.valueAccessor = selectValueAccessor(this, valueAccessors);
@@ -141,11 +144,11 @@ export class FieldArrayDirective
   }
 
   addControl(control: any): void {
-    this.form.controls.push(control);
+    this.form.controls.push(control.form);
   }
 
   removeControl(control: any): void {
-    this.form.controls = this.form.controls.filter((item) => item !== control);
+    this.form.controls = this.form.controls.filter((item) => item !== control.form);
   }
 
   registerOnChange(fn: () => void): void {

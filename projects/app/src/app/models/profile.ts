@@ -33,5 +33,5 @@ export const options: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: [{}],
+  aliases: []
 }
