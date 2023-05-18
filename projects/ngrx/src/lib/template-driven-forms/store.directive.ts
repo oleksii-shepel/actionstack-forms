@@ -4,7 +4,7 @@ import { SyncDirective } from "../shared/core";
 import { Store } from "@ngrx/store";
 
 @Directive({
-  selector: 'form:not([ngNoForm]):not([formGroup])[ngStore],ng-form[ngStore],[ngForm][ngStore]',
+  selector: 'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync]',
   providers: [{provide: 'form', useExisting: NgForm}],
 })
 export class DynamicStoreDirective extends SyncDirective implements OnInit, OnDestroy {

@@ -77,9 +77,9 @@ export function logger(reducer: Function) {
   return (state: any, action: any): any => {
     const result = reducer(state, action);
     console.groupCollapsed(action.type);
-    console.log('prev state', state);
+    console.log('state before', state);
     console.log('action', action);
-    console.log('next state', result);
+    console.log('state after', result);
     console.groupEnd();
     return result;
   };

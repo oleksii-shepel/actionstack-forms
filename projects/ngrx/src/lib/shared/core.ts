@@ -17,7 +17,7 @@ export interface SyncDirectiveOptions {
    selector: 'sync-directive'
  })
 export class SyncDirective implements OnInit, OnDestroy {
-  @Input('ngStore') options!: string | SyncDirectiveOptions;
+  @Input('ngync') options!: string | SyncDirectiveOptions;
 
   path!: string;
   state!: any;
