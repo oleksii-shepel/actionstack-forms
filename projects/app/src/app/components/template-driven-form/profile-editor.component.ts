@@ -1,11 +1,12 @@
 import { Component, Output, EventEmitter, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Profile, initialProfile } from '../../models/profile';
+import { Profile, initialHero } from '../../models/profile';
 import { Store } from '@ngrx/store';
-import { HeroState, initialState } from '../../reducers/hero.reducer';
-import { ApplicationState, getHeroSlice } from '../../reducers';
+import { HeroState } from '../../reducers/hero.reducer';
+import { ApplicationState, getHeroSlice, getModelSlice } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { InitForm, UpdateFormValue } from '@ngrx/forms';
+import { UpdateFormValue } from '@ngrx/forms';
+import { initialState } from '../../reducers/standard.reducer';
 
 @Component({
   selector: 'template-profile-editor',
@@ -17,13 +18,19 @@ export class TemplateProfileEditorComponent {
   @ViewChild('form') form: NgForm | null = null;
 
   profile$!: Observable<HeroState>;
+  initialState = initialState;
 
-  model = initialProfile;
+  get model() {
+    return this.initialState.model;
+  }
+
+  set model(value: any) {
+    this.initialState.model = value;
+  }
 
   constructor(private store: Store<ApplicationState>) {
-    this.store.select(getHeroSlice).pipe(take(1)).subscribe((state) => {
-      let value = state?.model ? state : initialState;
-      this.store.dispatch(new InitForm({ path: "hero", value: value }));
+    this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
+      this.initialState = state? state : { model: initialHero };
     });
 
     this.profile$ = this.store.select(getHeroSlice);

@@ -28,8 +28,13 @@ export class NgModelArray extends FieldArrayDirective implements OnInit {
     Object.assign(FormArray.prototype, {
       registerControl: (name: string, control: any): AbstractControl => {
         control.setParent(this.control);
+        (this.control! as FormArray).push(control);
         control._registerOnCollectionChange((this.control as any)._onCollectionChange);
         return control;
+      }
+    }, {
+      removeControl: (name: string) => {
+        (this.control as any).removeAt(+name);
       }
     })
   }

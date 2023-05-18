@@ -1,24 +1,24 @@
 <form #form="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngStore="model">
   <label for="first-name">First Name: </label>
-  <input id="first-name" type="text" [ngModel]="model.firstName" name="firstName">
+  <input id="first-name" type="text" [(ngModel)]="model.firstName" name="firstName">
 
   <label for="last-name">Last Name: </label>
-  <input id="last-name" type="text" [ngModel]="model.lastName" name="lastName">
+  <input id="last-name" type="text" [(ngModel)]="model.lastName" name="lastName">
 
   <div ngModelGroup="address">
     <h2>Address</h2>
 
     <label for="street">Street: </label>
-    <input id="street" type="text" [ngModel]="model.address.street" name="street">
+    <input id="street" type="text" [(ngModel)]="model.address.street" name="street">
 
     <label for="city">City: </label>
-    <input id="city" type="text" [ngModel]="model.address.city" name="city">
+    <input id="city" type="text" [(ngModel)]="model.address.city" name="city">
 
     <label for="state">State: </label>
-    <input id="state" type="text" [ngModel]="model.address.state" name="state">
+    <input id="state" type="text" [(ngModel)]="model.address.state" name="state">
 
     <label for="zip">Zip Code: </label>
-    <input id="zip" type="text" [ngModel]="model.address.zip" name="zip">
+    <input id="zip" type="text" [(ngModel)]="model.address.zip" name="zip">
   </div>
 
   <div ngModelArray="aliases">

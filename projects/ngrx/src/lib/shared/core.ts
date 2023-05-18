@@ -1,18 +1,28 @@
 import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, debounceTime, filter, takeWhile, repeat, from, first, timer, take } from 'rxjs';
-import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, UpdateForm, InitForm } from './actions';
+import { Subject, takeUntil, debounceTime, filter, takeWhile, repeat, first, timer, take } from 'rxjs';
+import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, InitForm, ResetForm } from './actions';
 import { getValue } from '.';
-import { checkFormGroup } from '../reactive-forms';
+import { checkFormGroup } from '../shared';
+
+export interface SyncDirectiveOptions {
+  slice: string;
+  state?: any;
+  debounce?: number;
+  clearOnDestroy?: boolean;
+}
 
 @Directive({
    selector: 'sync-directive'
  })
 export class SyncDirective implements OnInit, OnDestroy {
-  @Input('ngStore') path!: string;
-  @Input('ngStoreDebounce') debounce = 100;
-  @Input('ngStoreClearOnDestroy') clearOnDestroy: boolean = false;
+  @Input('ngStore') options!: string | SyncDirectiveOptions;
+
+  path!: string;
+  state!: any;
+  debounce!: number;
+  clearOnDestroy!: boolean;
 
   private _destroyed$ = new Subject<boolean>();
   private _initialized$ = new Subject<boolean>();
@@ -24,9 +34,22 @@ export class SyncDirective implements OnInit, OnDestroy {
     @Inject('form') public form: NgForm | FormGroupDirective,
     public store: Store,
     public cdr: ChangeDetectorRef
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
+    if(typeof this.options === 'string') {
+      this.path = this.options;
+      this.state = undefined;
+      this.debounce = 100;
+      this.clearOnDestroy = false;
+    } else {
+      this.path = this.options.slice;
+      this.state = this.options.state;
+      this.debounce = this.options.debounce || 100;
+      this.clearOnDestroy = this.options.clearOnDestroy || false;
+    }
+
     if(!this.path) {
       throw new Error("Misuse of sync directive");
     }
@@ -35,20 +58,38 @@ export class SyncDirective implements OnInit, OnDestroy {
       throw new Error("Supported form control directive not found");
     }
 
-    this.store.select(state => getValue(state, `${this.path}.model`)).pipe(
-      first(),
-      repeat({ delay: (count) => timer(count * this.debounce) }),
-      take(5),
-      takeWhile(() => !this._initialized),
-    ).subscribe((state) => {
-      if(checkFormGroup(this.form.form, state)) {
-        this._initialized = true;
-        if(!!state) {
-          this.form.form.patchValue(state);
-          this.cdr.markForCheck();
+    if(!!this.state) {
+      this.store.dispatch(
+        new InitForm({
+          path: this.path,
+          value: this.state
+        })
+      );
+    } else {
+      // check if state is present in the store and if so initialize the form
+      this.store.select(state => getValue(state, `${this.path}`)).pipe(
+        first(),
+        repeat({ delay: (count) => timer(count * this.debounce) }),
+        take(5),
+        takeWhile(() => !this._initialized),
+      ).subscribe((state) => {
+        if(checkFormGroup(this.form.form, state?.model)) {
+          this._initialized = true;
+
+          if(!!state?.model) {
+            this.form.form.patchValue({... state.model});
+            this.cdr.markForCheck();
+          }
+
+          this.store.dispatch(
+            new InitForm({
+              path: this.path,
+              value: state
+            })
+          );
         }
-      }
-    });
+      });
+    }
 
     this.store
       .select(state => getValue(state, `${this.path}.model`))
@@ -57,7 +98,7 @@ export class SyncDirective implements OnInit, OnDestroy {
         if (!this._updating) {
           this._updating = false;
           if (model) {
-            this.form.form.patchValue(model);
+            this.form.form.patchValue({...model});
             this.cdr.markForCheck();
           }
         }
@@ -143,13 +184,7 @@ export class SyncDirective implements OnInit, OnDestroy {
 
     if (this.clearOnDestroy) {
       this.store.dispatch(
-        new UpdateForm({
-          path: this.path,
-          value: null,
-          dirty: null,
-          status: null,
-          errors: null
-        })
+        new ResetForm({value: this.state })
       );
     }
   }

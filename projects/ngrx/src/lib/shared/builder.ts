@@ -1,6 +1,5 @@
 import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormGroup } from '@angular/forms';
 
-
 export type ArrayToObject<T extends any[]> = {
   [key in keyof T as string]: T[key];
 }
@@ -71,7 +70,7 @@ export function checkFormArray(form: FormArray, model: Array<any>): boolean {
       if(typeof item !== 'object' && form.controls[index]) {
         ready = true;
       } else if (typeof item === 'object' && !Array.isArray(item)) {
-        ready = !!form.controls[index]; // ? checkFormGroup(form.controls[index] as FormGroup, item) : false;
+        ready = !!form.controls[index] ? checkFormGroup(form.controls[index] as FormGroup, item) : false;
       } else if(Array.isArray(item)) {
         throw new Error("Nested arrays are not supported");
       }
@@ -96,8 +95,8 @@ export function checkFormGroup(form: FormGroup, model: any): boolean {
         ready = false;
       } else if (typeof value === 'object' && !Array.isArray(value)) {
         ready = !!form.controls[key] ? checkFormGroup(form.controls[key] as FormGroup, key) : false;
-      } else if(Array.isArray(value)) {
-        ready = checkFormArray(form.controls[key] as FormArray, value);
+      } else if(Array.isArray(value) && !form.controls[key]) {
+        ready = false;
       }
       if(ready === false) {
         break;
@@ -105,4 +104,17 @@ export function checkFormGroup(form: FormGroup, model: any): boolean {
     }
   }
   return ready;
+}
+
+export function deepClone(objectToClone: any) {
+  if (!objectToClone) return objectToClone;
+
+  let array = Array.isArray(objectToClone) ? [] : {};
+
+  for (const key in objectToClone) {
+    let value = objectToClone[key];
+    (array as any)[key] = (typeof value === "object") ? deepClone(value) : value;
+  }
+
+  return array;
 }

@@ -17,7 +17,8 @@ const formControlBinding: Provider = {
 @Directive({selector: '[ngField]:not([formControlName]):not([formControl])',
   host: {
     '(input)': 'onChange($event.target.value)',
-    '(blur)': 'onTouched()'
+    '(blur)': 'onTouched()',
+    '(keydown.enter)': 'onEnter()'
   },
  providers: [
   formControlBinding,
@@ -76,6 +77,10 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
 
   onTouched() {
     this.form.markAsTouched();
+  }
+
+  onEnter() {
+    console.log('enter');
   }
 
   viewToModelUpdate(value: any): void {

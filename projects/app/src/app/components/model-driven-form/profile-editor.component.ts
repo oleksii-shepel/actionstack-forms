@@ -4,8 +4,9 @@ import { Profile, initialModel, initialProfile } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { ApplicationState, getModelSlice } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { InitForm, UpdateFormValue } from '@ngrx/forms';
+import { UpdateFormValue, deepClone } from '@ngrx/forms';
 import { ModelState } from '../../reducers/standard.reducer';
+import { initialState } from '../../reducers/hero.reducer';
 
 @Component({
   selector: 'standard-profile-editor',
@@ -17,13 +18,24 @@ export class StandardProfileEditorComponent {
   @ViewChild('form') form: NgForm | null = null;
 
   profile$!: Observable<ModelState>;
+  initialState = initialState;
 
-  model = initialProfile;
+  get model() {
+    return this.initialState.model;
+  }
+
+  set model(value: any) {
+    this.initialState.model = value;
+  }
+
+  firstName(event: any) {
+    console.log(this.model, event);
+  }
 
   constructor(private store: Store<ApplicationState>) {
     this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
-      let value = state?.model ? state : initialModel;
-      this.store.dispatch(new InitForm({ path: "model", value: value }));
+      // we need to deep clone the state to prevent the storeFreeze from throwing an error
+      this.initialState = state? deepClone(state) : { model: initialModel };
     });
 
     this.profile$ = this.store.select(getModelSlice);
@@ -40,10 +52,6 @@ export class StandardProfileEditorComponent {
 
   addAlias() {
     this.model.aliases.push("")
-    // let index = Math.max(...Object.keys(this.model.aliases)
-    //   .map(key => parseInt(key))
-    //   .filter((key) => !isNaN(key)));
-    // (this.model.aliases as any)[(index + 1).toString()]= "";
   }
 
   trackById(index: number, obj: string): any {

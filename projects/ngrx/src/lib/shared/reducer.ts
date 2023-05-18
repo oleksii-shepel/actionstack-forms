@@ -3,7 +3,6 @@ import { FormActions } from './actions';
 
 export interface FormState<T> {
   model: T;
-  modelId?: string;
   errors?: { [k: string]: string };
   dirty?: boolean;
   status?: string;
@@ -64,6 +63,10 @@ export function form(reducer: Function) {
 
     if (action.type === FormActions.SetEnabled) {
       nextState = setValue(nextState, `${action.payload}.disabled`, false);
+    }
+
+    if (action.type === FormActions.Reset) {
+      nextState = setValue(nextState, `${action.payload.path}`, { ...action.payload.value });
     }
 
     return nextState;

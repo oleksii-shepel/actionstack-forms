@@ -10,7 +10,8 @@ export enum FormActions {
   UpdateErrors = '[Form] Update Errors',
   SetDisabled = '[Form] Disable Form',
   SetEnabled = '[Form] Enable Form',
-  UpdateForm = '[Form] Update Form'
+  UpdateForm = '[Form] Update Form',
+  Reset = '[Form] Reset',
 }
 
 export class InitForm implements Action {
@@ -69,4 +70,9 @@ export class SetFormDisabled implements Action {
 export class SetFormEnabled implements Action {
   readonly type = FormActions.SetEnabled;
   constructor(public payload: string) {}
+}
+
+export class ResetForm implements Action {
+  readonly type = FormActions.Reset;
+  constructor(public payload: { value: any; }) {}
 }

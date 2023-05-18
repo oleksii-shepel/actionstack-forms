@@ -38,6 +38,7 @@ import { combineReducers } from '@ngrx/store';
 import * as fromProfile from './profile.reducer';
 import * as fromHero from './hero.reducer';
 import * as fromStandard from './standard.reducer';
+import { deepClone } from '@ngrx/forms';
 /**
  * As mentioned, we treat each reducer like a table in a database. This means
  * our top level state interface is just a map of keys to inner state types.
@@ -66,7 +67,7 @@ const productionReducer: ActionReducer<ApplicationState> = combineReducers(reduc
 
 export function reducer(state: any, action: any) {
   if (environment.production) {
-    // supress console output
+    // suppress console output
     console.log = function () {};
     return productionReducer(state, action);
   } else {
@@ -90,6 +91,7 @@ export function reducer(state: any, action: any) {
  * }
  * ```
  */
+
 export const getProfileSlice = (state: ApplicationState) => state.profile;
 export const getHeroSlice = (state: ApplicationState) => state.hero;
 export const getModelSlice = (state: ApplicationState) => state.model;
