@@ -1,7 +1,7 @@
 import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil, debounceTime, filter, takeWhile, repeat, from, first } from 'rxjs';
+import { Subject, takeUntil, debounceTime, filter, takeWhile, repeat, from, first, timer, take } from 'rxjs';
 import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, UpdateForm, InitForm } from './actions';
 import { getValue } from '.';
 import { checkFormGroup } from '../reactive-forms';
@@ -37,13 +37,16 @@ export class SyncDirective implements OnInit, OnDestroy {
 
     this.store.select(state => getValue(state, `${this.path}.model`)).pipe(
       first(),
-      repeat({ count: 5, delay: this.debounce }),
+      repeat({ delay: (count) => timer(count * this.debounce) }),
+      take(5),
       takeWhile(() => !this._initialized),
     ).subscribe((state) => {
-      if(!this._initialized && checkFormGroup(this.form.form, state)) {
+      if(checkFormGroup(this.form.form, state)) {
         this._initialized = true;
-        this.form.form.patchValue(state);
-        this.cdr.markForCheck();
+        if(!!state) {
+          this.form.form.patchValue(state);
+          this.cdr.markForCheck();
+        }
       }
     });
 

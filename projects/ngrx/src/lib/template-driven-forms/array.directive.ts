@@ -122,11 +122,6 @@ export class FieldArrayDirective
     throw new Error('Method not implemented.');
   }
 
-  /**
-   * @description
-   * Returns an array that represents the path from the top-level form to this control.
-   * Each index is the string name of the control on that level.
-   */
   override get path(): string[] {
     return [...this._parent.path!, this.name!.toString()];
   }

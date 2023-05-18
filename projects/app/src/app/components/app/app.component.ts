@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-export type EditorType = 'reactive' | 'template-driven';
+export type EditorType = 'reactive' | 'template-driven' | 'standard';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +16,10 @@ export class AppComponent {
 
   get showTemplateProfileEditor() {
     return this.editor === 'template-driven';
+  }
+
+  get showStandardProfileEditor() {
+    return this.editor === 'standard';
   }
 
   toggleEditor(type: EditorType) {

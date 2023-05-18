@@ -35,3 +35,40 @@ export const options: ModelOptions<Profile> = {
   },
   aliases: []
 }
+
+export interface Model {
+  firstName: string;
+  lastName: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  aliases: string[];
+}
+
+export const initialModel: Model = {
+  firstName: '',
+  lastName: '',
+  address: {
+    street: '',
+    city: '',
+    state: '',
+    zip: ''
+  },
+  aliases: [''],
+}
+
+export const modelOptions: ModelOptions<Model> = {
+  firstName: {},
+  lastName: {},
+  address: {
+    street: {},
+    city: {},
+    state: {},
+    zip: {},
+  },
+  aliases: [{}]
+}
+

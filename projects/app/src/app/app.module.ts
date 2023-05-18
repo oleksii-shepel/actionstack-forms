@@ -7,12 +7,14 @@ import { StoreModule } from '@ngrx/store';
 import { reducer } from './reducers';
 import { ReactiveFormsModule as ReactiveModule, form, TemplateDrivenFormsModule } from '@ngrx/forms';
 import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
+import { StandardProfileEditorComponent } from './components/standard-driven-form/profile-editor.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ReactiveProfileEditorComponent,
-    TemplateProfileEditorComponent
+    TemplateProfileEditorComponent,
+    StandardProfileEditorComponent,
   ],
   imports: [
     BrowserModule,

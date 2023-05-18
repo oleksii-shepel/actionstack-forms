@@ -14,8 +14,8 @@ export const setValue = (obj: any, prop: string, val: any) => {
   obj = { ...obj };
   const split = prop.split('.');
   const last = split[split.length - 1];
-  split.reduce((acc, part) => {
-    if (part === last) {
+  split.reduce((acc, part, index, array) => {
+    if (index === array.length - 1) {
       acc[part] = val;
     } else {
       acc[part] = { ...acc[part] };

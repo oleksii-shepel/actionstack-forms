@@ -71,7 +71,7 @@ export function checkFormArray(form: FormArray, model: Array<any>): boolean {
       if(typeof item !== 'object' && form.controls[index]) {
         ready = true;
       } else if (typeof item === 'object' && !Array.isArray(item)) {
-        ready = !!form.controls[index] ? checkFormGroup(form.controls[index] as FormGroup, item) : false;
+        ready = !!form.controls[index]; // ? checkFormGroup(form.controls[index] as FormGroup, item) : false;
       } else if(Array.isArray(item)) {
         throw new Error("Nested arrays are not supported");
       }
