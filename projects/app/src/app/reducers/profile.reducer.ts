@@ -9,7 +9,6 @@ export const initialState: ProfileState = {
 };
 
 export function profileReducer(state = initialState, action: Action): ProfileState {
-  console.log('profileReducer', state, action);
   switch (action.type) {
     default: {
       return state;

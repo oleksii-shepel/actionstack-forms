@@ -27,10 +27,10 @@ export class ReactiveProfileEditorComponent {
 
   constructor(private fb: FormBuilder, private store: Store<ApplicationState>) {
 
-    // this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
-    //   let value = state?.model ? state : initialState;
-    //   this.store.dispatch(new InitForm({ path: "hero", value: value }));
-    // });
+    this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
+      let value = state?.model ? state : initialState;
+      this.store.dispatch(new InitForm({ path: "profile", value: value }));
+    });
 
     this.profile$ = this.store.select(getProfile);
   }

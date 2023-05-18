@@ -1,3 +1,4 @@
+import { ActionReducer, State } from '@ngrx/store';
 import { FormActions } from './actions';
 
 export interface FormState<T> {
@@ -27,7 +28,6 @@ export const setValue = (obj: any, prop: string, val: any) => {
 
 export function form(reducer: Function) {
   return function(state: any, action: any) {
-    console.log('form reducer', state, action);
     let nextState = reducer(state, action);
 
     if (action.type === FormActions.Init) {
@@ -67,5 +67,17 @@ export function form(reducer: Function) {
     }
 
     return nextState;
+  }
+}
+
+export function logger(reducer: Function) {
+  return (state: any, action: any): any => {
+    const result = reducer(state, action);
+    console.groupCollapsed(action.type);
+    console.log('prev state', state);
+    console.log('action', action);
+    console.log('next state', result);
+    console.groupEnd();
+    return result;
   };
 }
