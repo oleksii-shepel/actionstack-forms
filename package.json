@@ -1,7 +1,7 @@
 {
-  "name": "angular.io-example",
-  "version": "0.0.0",
-  "description": "Example project from an angular.io guide.",
+  "name": "ngync",
+  "version": "0.0.1",
+  "description": "Project aimed at binding of Angular forms with NgRx",
   "license": "MIT",
   "scripts": {
     "ng": "ng",

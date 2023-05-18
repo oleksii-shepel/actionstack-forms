@@ -6,7 +6,7 @@ import { CALL_SET_DISABLED_STATE } from '../shared/controls';
 import { FieldGroupDirective } from './group.directive';
 import { FieldArrayDirective } from './array.directive';
 import { DynamicStoreDirective } from './store.directive';
-import { getValue } from '../shared';
+import { deepClone, getValue } from '../shared';
 import { Subject, takeUntil, distinctUntilChanged, map } from 'rxjs';
 
 const formControlBinding: Provider = {
@@ -80,7 +80,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   }
 
   onEnter() {
-    console.log('enter');
+    Function.prototype
   }
 
   viewToModelUpdate(value: any): void {
@@ -89,7 +89,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   }
 
   ngOnInit(): void {
-    this._ngStore.store.select((state: any) => state).pipe(
+    this._ngStore?.store.select((state: any) => state).pipe(
       distinctUntilChanged(),
       takeUntil(this._destroyed$),
       map(state => getValue(state, `${this._ngStore.path}.model`))).subscribe(

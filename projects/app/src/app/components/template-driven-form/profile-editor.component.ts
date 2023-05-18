@@ -2,11 +2,10 @@ import { Component, Output, EventEmitter, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Profile, initialHero } from '../../models/profile';
 import { Store } from '@ngrx/store';
-import { HeroState } from '../../reducers/hero.reducer';
-import { ApplicationState, getHeroSlice, getModelSlice } from '../../reducers';
+import { HeroState, initialState } from '../../reducers/hero.reducer';
+import { ApplicationState, getHeroSlice } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { UpdateFormValue } from '@ngrx/forms';
-import { initialState } from '../../reducers/standard.reducer';
+import { InitForm, UpdateFormValue, deepClone } from 'ngync';
 
 @Component({
   selector: 'template-profile-editor',
@@ -19,18 +18,14 @@ export class TemplateProfileEditorComponent {
 
   profile$!: Observable<HeroState>;
   initialState = initialState;
-
-  get model() {
-    return this.initialState.model;
-  }
-
-  set model(value: any) {
-    this.initialState.model = value;
-  }
+  model = initialState.model;
 
   constructor(private store: Store<ApplicationState>) {
-    this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
-      this.initialState = state? state : { model: initialHero };
+
+    this.store.select(getHeroSlice).pipe(take(1)).subscribe((state) => {
+      this.initialState = deepClone(state? state: { model: initialHero });
+      this.model = this.initialState.model;
+      this.store.dispatch(new InitForm({ path: "hero", value: this.initialState}));
     });
 
     this.profile$ = this.store.select(getHeroSlice);

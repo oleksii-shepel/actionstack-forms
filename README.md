@@ -1,6 +1,6 @@
 # ngync
 
-ngrx is a state management library for Angular applications. It provides a way to manage the state of your application in a predictable way. Also it helps you write applications that behave consistently, run in different environments (client, server, and native), and are easy to test.
+NgRx is a state management library for Angular applications. It provides a way to manage the state of your application in a predictable way. Also it helps you write applications that behave consistently, run in different environments (client, server, and native), and are easy to test.
 
 Angular in its turn provides two different approaches to handling user input through forms: reactive and template-driven. Both capture user input events from the view, validate the user input, create a form model and data model to update, and provide a way to track changes.
 
@@ -17,7 +17,7 @@ That's it, all other staff relates to Redux pattern and have to be implemented i
 
 Currently there are no docs of the library except this readme. But you probably do not need them at all. The code is concise and self describing. The library goes along with sample application which will help you make first steps. 
 
-The work on the project is almost done and “alpha” version of software is ready for download. It is free. You are allowed to use, copy and modify the codebase. I kindly recommend to join the project development in this repo. 
+The work on the project is almost done and “alpha” version of software is ready for download. It is free. You are allowed to use, copy and modify the codebase. I kindly recommend to join the project development in this repo. You are welcome!
 
 There are some technical topics under consideration that will be taken into an account in common future. This is about store syncing strategies: onblur and onchange. Now due to ease of realisation the library utilizes only onchange one. But I hope both of them will be supported soon or later.
 

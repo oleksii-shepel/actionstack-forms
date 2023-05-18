@@ -2,12 +2,12 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, NgForm } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { FormArray } from '@angular/forms';
-import { Profile, initialProfile } from '../../models/profile';
+import { Profile, initialProfile, profileOptions } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { ProfileState, initialState } from '../../reducers/profile.reducer';
 import { ApplicationState, getProfile, getProfileSlice } from '../../reducers';
 import { Observable, take } from 'rxjs';
-import { UpdateFormValue, buildFormGroup } from '@ngrx/forms';
+import { InitForm, UpdateFormValue, buildFormGroup, deepClone } from 'ngync';
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -19,25 +19,21 @@ export class ReactiveProfileEditorComponent {
 
   profile$: Observable<ProfileState>;
 
-  profileForm = buildFormGroup(initialProfile) as FormGroup;
+  profileForm = buildFormGroup(initialProfile, profileOptions) as FormGroup;
+
   initialState = initialState;
+  model = initialState.model;
 
   get aliases() {
     return this.profileForm.get('aliases') as FormArray;
   }
 
-  get model() {
-    return this.initialState.model;
-  }
-
-  set model(value: any) {
-    this.initialState.model = value;
-  }
-
   constructor(private fb: FormBuilder, private store: Store<ApplicationState>) {
 
     this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
-      this.initialState = state? state : { model: initialProfile };
+      this.initialState = deepClone(state? state : { model: initialProfile });
+      this.model = this.initialState.model;
+      this.store.dispatch(new InitForm({ path: "profile", value: this.initialState}));
     });
 
     this.profile$ = this.store.select(getProfile);

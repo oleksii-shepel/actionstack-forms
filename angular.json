@@ -3,23 +3,23 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "@ngrx/forms": {
+    "ngync": {
       "projectType": "library",
-      "root": "projects/ngrx/src",
-      "sourceRoot": "projects/ngrx/src/lib",
+      "root": "projects/ngync/src",
+      "sourceRoot": "projects/ngync/src/lib",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/ngrx/src/ng-package.json"
+            "project": "projects/ngync/src/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngrx/src/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ngync/src/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngrx/src/tsconfig.lib.json"
+              "tsConfig": "projects/ngync/src/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -27,7 +27,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "projects/ngrx/src/tsconfig.spec.json",
+            "tsConfig": "projects/ngync/src/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"

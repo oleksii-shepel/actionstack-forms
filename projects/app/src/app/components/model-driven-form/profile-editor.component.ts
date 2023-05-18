@@ -1,12 +1,11 @@
 import { Component, Output, EventEmitter, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Profile, initialModel, initialProfile } from '../../models/profile';
+import { Profile, initialModel } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { ApplicationState, getModelSlice } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { UpdateFormValue, deepClone } from '@ngrx/forms';
-import { ModelState } from '../../reducers/standard.reducer';
-import { initialState } from '../../reducers/hero.reducer';
+import { InitForm, UpdateFormValue, deepClone } from 'ngync';
+import { ModelState, initialState } from '../../reducers/standard.reducer';
 
 @Component({
   selector: 'standard-profile-editor',
@@ -19,23 +18,14 @@ export class StandardProfileEditorComponent {
 
   profile$!: Observable<ModelState>;
   initialState = initialState;
-
-  get model() {
-    return this.initialState.model;
-  }
-
-  set model(value: any) {
-    this.initialState.model = value;
-  }
-
-  firstName(event: any) {
-    console.log(this.model, event);
-  }
+  model = initialState.model;
 
   constructor(private store: Store<ApplicationState>) {
+
     this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
-      // we need to deep clone the state to prevent the storeFreeze from throwing an error
-      this.initialState = state? deepClone(state) : { model: initialModel };
+      this.initialState = deepClone(state? state : { model: initialModel });
+      this.model = this.initialState.model;
+      this.store.dispatch(new InitForm({ path: "model", value: this.initialState}));
     });
 
     this.profile$ = this.store.select(getModelSlice);

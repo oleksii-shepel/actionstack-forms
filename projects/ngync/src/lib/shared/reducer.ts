@@ -1,5 +1,6 @@
 import { ActionReducer, State } from '@ngrx/store';
 import { FormActions } from './actions';
+import { deepClone } from './builder';
 
 export interface FormState<T> {
   model: T;
@@ -9,6 +10,15 @@ export interface FormState<T> {
 }
 
 export const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
+
+// export function getValue(object: any, path: string) {
+//   const paths = path.split('.')
+//   let result = object;
+//   paths.forEach(path => {
+//     result = result ? result[path] : result;
+//   });
+//   return result;
+// }
 
 export const setValue = (obj: any, prop: string, val: any) => {
   obj = { ...obj };
@@ -30,11 +40,11 @@ export function form(reducer: Function) {
     let nextState = reducer(state, action);
 
     if (action.type === FormActions.Init) {
-      nextState = setValue(nextState, `${action.payload.path}`, { ...action.payload.value });
+      nextState = setValue(nextState, `${action.payload.path}`, deepClone(action.payload.value));
     }
 
     if (action.type === FormActions.UpdateValue || action.type === FormActions.UpdateForm) {
-      nextState = setValue(nextState, `${action.payload.path}.model`, { ...action.payload.value });
+      nextState = setValue(nextState, `${action.payload.path}.model`, deepClone(action.payload.value));
     }
 
     if (action.type === FormActions.UpdateStatus || action.type === FormActions.UpdateForm) {
@@ -42,7 +52,7 @@ export function form(reducer: Function) {
     }
 
     if (action.type === FormActions.UpdateErrors || action.type === FormActions.UpdateForm) {
-      nextState = setValue(nextState, `${action.payload.path}.errors`, { ...action.payload.errors });
+      nextState = setValue(nextState, `${action.payload.path}.errors`, deepClone(action.payload.errors));
     }
 
     if (action.type === FormActions.UpdateDirty || action.type === FormActions.UpdateForm) {
@@ -66,7 +76,7 @@ export function form(reducer: Function) {
     }
 
     if (action.type === FormActions.Reset) {
-      nextState = setValue(nextState, `${action.payload.path}`, { ...action.payload.value });
+      nextState = setValue(nextState, `${action.payload.path}`, deepClone(action.payload.value));
     }
 
     return nextState;

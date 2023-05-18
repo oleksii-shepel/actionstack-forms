@@ -17,7 +17,7 @@ export type ModelOptions<T> = {
 
 const formBuilder = new FormBuilder();
 
-export function buildFormArray(model: any, options: any = {}, groupOptions: AbstractControlOptions): AbstractControl {
+export function buildFormArray(model: any, options: any = {}, groupOptions: AbstractControlOptions = {}): AbstractControl {
   if(Array.isArray(model)) {
     let formControls: AbstractControl[] = [];
     model.forEach((item, index) => {
@@ -95,8 +95,8 @@ export function checkFormGroup(form: FormGroup, model: any): boolean {
         ready = false;
       } else if (typeof value === 'object' && !Array.isArray(value)) {
         ready = !!form.controls[key] ? checkFormGroup(form.controls[key] as FormGroup, key) : false;
-      } else if(Array.isArray(value) && !form.controls[key]) {
-        ready = false;
+      } else if(Array.isArray(value) && Array.isArray(form.controls[key])) {
+        ready = (form.controls[key] as any).length === value.length;
       }
       if(ready === false) {
         break;
@@ -106,15 +106,40 @@ export function checkFormGroup(form: FormGroup, model: any): boolean {
   return ready;
 }
 
+// export function deepClone(objectToClone: any) {
+//   if (!objectToClone) return objectToClone;
+//   return JSON.parse(JSON.stringify(objectToClone));
+// }
+
+
 export function deepClone(objectToClone: any) {
   if (!objectToClone) return objectToClone;
 
-  let array = Array.isArray(objectToClone) ? [] : {};
+  let obj = Array.isArray(objectToClone) ? [] : typeof objectToClone === 'object' ? {} : objectToClone;
 
   for (const key in objectToClone) {
     let value = objectToClone[key];
-    (array as any)[key] = (typeof value === "object") ? deepClone(value) : value;
+    (obj as any)[key] = (typeof value === "object") ? deepClone(value) : value;
   }
 
-  return array;
+  return obj;
+}
+
+export function patchValue(form: any, model: any) {
+  if(!form || !model) {
+    return;
+  }
+
+  for (const key in form.controls) {
+    let value = model[key];
+    form.controls[key].value = (typeof value === "object") ? patchValue(form.controls[key], model[key]) : model[key];
+  }
+
+  return model;
+}
+
+export function deepEqual(x: any, y: any): boolean {
+  return (x && y && typeof x === 'object' && typeof y === 'object') ?
+    (Object.keys(x).length === Object.keys(y).length) &&
+      Object.keys(x).reduce((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true) : (x === y);
 }

@@ -1,4 +1,4 @@
-import { ModelOptions } from "@ngrx/forms";
+import { ModelOptions } from "ngync";
 
 export interface Profile {
   firstName: string;
@@ -13,13 +13,13 @@ export interface Profile {
 }
 
 export const initialProfile: Profile = {
-  firstName: '',
-  lastName: '',
+  firstName: 'Ian',
+  lastName: 'Fleming',
   address: {
-    street: '',
-    city: '',
-    state: '',
-    zip: ''
+    street: 'Mayfair',
+    city: 'London',
+    state: 'England',
+    zip: 'W1J'
   },
   aliases: [''],
 }
@@ -49,15 +49,15 @@ export interface Hero {
 }
 
 export const initialHero: Hero = {
-  firstName: '',
-  lastName: '',
+  firstName: 'James',
+  lastName: 'Bond',
   address: {
     street: '',
-    city: '',
-    state: '',
-    zip: ''
+    city: 'Ao Phang Nga National Park',
+    state: 'Phangnga',
+    zip: '82130'
   },
-  aliases: [''],
+  aliases: ['Mr Fisher', 'Robert Sterling', 'St. John Smyth'],
 }
 
 export const heroOptions: ModelOptions<Profile> = {
@@ -69,7 +69,7 @@ export const heroOptions: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: [{}]
+  aliases: [{}, {}, {}]
 }
 
 export interface Model {
@@ -85,15 +85,15 @@ export interface Model {
 }
 
 export const initialModel: Model = {
-  firstName: '',
-  lastName: '',
+  firstName: 'Dominique',
+  lastName: 'Derval',
   address: {
     street: '',
-    city: '',
-    state: '',
-    zip: ''
+    city: 'Nassau',
+    state: 'The Bahamas, New Providence Island',
+    zip: '00000'
   },
-  aliases: [''],
+  aliases: ['Domino'],
 }
 
 export const modelOptions: ModelOptions<Model> = {

@@ -38,7 +38,7 @@ import { combineReducers } from '@ngrx/store';
 import * as fromProfile from './profile.reducer';
 import * as fromHero from './hero.reducer';
 import * as fromStandard from './standard.reducer';
-import { deepClone } from '@ngrx/forms';
+import { deepClone } from 'ngync';
 /**
  * As mentioned, we treat each reducer like a table in a database. This means
  * our top level state interface is just a map of keys to inner state types.

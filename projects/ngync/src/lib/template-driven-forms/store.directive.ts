@@ -1,5 +1,5 @@
-import { ChangeDetectorRef, Directive, OnDestroy, OnInit } from "@angular/core";
-import { NgForm } from "@angular/forms";
+import { ChangeDetectorRef, Directive, OnDestroy, OnInit, ViewChildren, ViewContainerRef } from "@angular/core";
+import { NgForm, NgModel } from "@angular/forms";
 import { SyncDirective } from "../shared/core";
 import { Store } from "@ngrx/store";
 
@@ -8,9 +8,6 @@ import { Store } from "@ngrx/store";
   providers: [{provide: 'form', useExisting: NgForm}],
 })
 export class DynamicStoreDirective extends SyncDirective implements OnInit, OnDestroy {
-  constructor(f: NgForm, store: Store, cdr: ChangeDetectorRef) {
-    super(f, store, cdr);
-  }
 
   override ngOnInit() {
     super.ngOnInit();

@@ -3,9 +3,9 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "@ngrx/forms": [
-        "dist/ngrx/forms",
-        "projects/ngrx/src/lib"
+      "ngync": [
+        "dist/ngync",
+        "projects/ngync/src/lib"
       ],
     },
     "baseUrl": "./",
