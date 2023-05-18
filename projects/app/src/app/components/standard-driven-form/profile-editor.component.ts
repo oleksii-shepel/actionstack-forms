@@ -27,9 +27,6 @@ export class StandardProfileEditorComponent {
     });
 
     this.profile$ = this.store.select(getModelSlice);
-    this.profile$.subscribe((state) => {
-      console.log('profile$', state);
-    });
   }
 
   updateProfile() {
