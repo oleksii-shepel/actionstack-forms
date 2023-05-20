@@ -4,7 +4,7 @@ import { Profile, initialModel } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { ApplicationState, getModelSlice } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { InitForm, UpdateFormValue, deepClone } from 'ngync';
+import { InitForm, UpdateFormValue, deepClone, deepCloneJSON } from 'ngync';
 import { ModelState, initialState } from '../../reducers/standard.reducer';
 
 @Component({
@@ -23,7 +23,7 @@ export class StandardProfileEditorComponent {
   constructor(private store: Store<ApplicationState>) {
 
     this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
-      this.initialState = deepClone(state? state : { model: initialModel });
+      this.initialState = deepCloneJSON(state? state : { model: initialModel });
       this.model = this.initialState.model;
       this.store.dispatch(new InitForm({ path: "model", value: this.initialState}));
     });
@@ -41,7 +41,10 @@ export class StandardProfileEditorComponent {
   }
 
   addAlias() {
-    this.model.aliases.push("")
+    // you cannot modify separate properties of the model directly
+    // replace the entire model with a new one
+    this.model = deepClone(this.model);
+    this.model.aliases.push('');
   }
 
   trackById(index: number, obj: string): any {

@@ -48,7 +48,7 @@ export class NgModelArray extends FieldArrayDirective implements OnInit {
       removeControl: (name: string, options: {emitEvent?: boolean} = {}) => {
         if ((this.control as any)[name])
         (this.control as any)[name]._registerOnCollectionChange(() => {});
-        (this.control as any).removeAt(+name);
+        (this.control as FormArray).removeAt(+name);
         this.control!.updateValueAndValidity(options);
         (this.control as any)._onCollectionChange();
       }

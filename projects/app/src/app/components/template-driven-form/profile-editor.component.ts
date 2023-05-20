@@ -41,6 +41,9 @@ export class TemplateProfileEditorComponent {
   }
 
   addAlias() {
+    // you cannot modify separate properties of the model directly
+    // replace the entire model with a new one
+    this.model = deepClone(this.model);
     this.model.aliases.push('');
   }
 

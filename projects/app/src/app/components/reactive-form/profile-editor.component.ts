@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { ProfileState, initialState } from '../../reducers/profile.reducer';
 import { ApplicationState, getProfile, getProfileSlice } from '../../reducers';
 import { Observable, take } from 'rxjs';
-import { InitForm, UpdateFormValue, buildFormGroup, deepClone } from 'ngync';
+import { InitForm, UpdateFormValue, buildForm, deepClone } from 'ngync';
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -19,7 +19,7 @@ export class ReactiveProfileEditorComponent {
 
   profile$: Observable<ProfileState>;
 
-  profileForm = buildFormGroup(initialProfile, profileOptions) as FormGroup;
+  profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
 
   initialState = initialState;
   model = initialState.model;

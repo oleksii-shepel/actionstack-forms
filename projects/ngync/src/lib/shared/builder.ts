@@ -1,4 +1,4 @@
-import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormBuilder } from '@angular/forms';
 
 export type ArrayToObject<T extends any[]> = {
   [key in keyof T as string]: T[key];
@@ -15,102 +15,50 @@ export type ModelOptions<T> = {
   [key in keyof SubType<T, Array<any>> as key extends string ? `__array_${key}` : never]?: AbstractControlOptions;
 };
 
-const formBuilder = new FormBuilder();
+export const fb = new FormBuilder();
 
-export function buildFormArray(model: any, options: any = {}, groupOptions: AbstractControlOptions = {}): AbstractControl {
-  if(Array.isArray(model)) {
-    let formControls: AbstractControl[] = [];
-    model.forEach((item, index) => {
-      if(typeof item !== 'object') {
-        formControls.push(formBuilder.control(item, (options[index] || {}) as AbstractControlOptions))
-      } else if (typeof item === 'object' && !Array.isArray(item)) {
-        formControls.push(buildFormGroup(item, options[index] || {}, options[index] ? options[index]["__group"] : {}))
-      } else if(Array.isArray(item)) {
-        throw new Error("Nested arrays are not supported");
-      }
-    });
+export function buildForm<T>(model: T, options: ModelOptions<T> = {}, name: string =''): AbstractControl {
+  if (!model) return fb.control(name, (options || {}) as AbstractControlOptions);
 
-    return formBuilder.array(formControls, groupOptions)
+  let obj = Array.isArray(model) ? fb.array([], options as AbstractControlOptions) :
+    typeof model === 'object' ? fb.group({}, (options["__group"] || options) as AbstractControlOptions) :
+    fb.control(name, (options || {}) as AbstractControlOptions);
+
+  for (const key in model) {
+    let value = model[key];
+    let control = Array.isArray(value) ? buildForm(value, (options as any)[`__array_${key}`] || {}, key) :
+    typeof value === 'object' ? buildForm(value, (options as any)[key] || {}, key) :
+    fb.control(value, (options[key] || {}) as AbstractControlOptions);
+
+    (obj as any).controls[key] = control;
   }
-  else {
-    return formBuilder.control("", []);
-  }
+
+  obj.updateValueAndValidity();
+  return obj;
 }
 
-export function buildFormGroup(model: any, options: any = {}, groupOptions: AbstractControlOptions = {}): AbstractControl {
-  if(Array.isArray(model)) {
-    return buildFormArray(model, options, groupOptions)
-  } else if(model !== null && typeof model === 'object') {
-    let formGroup = formBuilder.group({}, (options["__group"] || groupOptions) as AbstractControlOptions);
+export function checkForm<T>(form: any, model: T): boolean {
+  if (!form || !form.controls) return false;
 
-    for (let [key, value] of Object.entries(model)) {
-      if(typeof value !== 'object') {
-        formGroup.addControl(key, formBuilder.control(value, (options[key] || {}) as AbstractControlOptions));
-      } else if (typeof value === 'object' && !Array.isArray(value)) {
-        formGroup.addControl(key, buildFormGroup(value, options[key] || {}, options[key]? options[key]["__group"] : {}));
-      } else if(Array.isArray(value)) {
-        let formArray = buildFormArray(value, options[key] || {}, options[`__array_${key}`] ? options[`__array_${key}`] : {}) as FormArray
-        formGroup.addControl(key, formArray)
-      }
-    }
-    return formGroup;
-  } else if(typeof model === 'string' || typeof model === 'number' || typeof model === 'boolean') {
-    return formBuilder.control(model, options as AbstractControlOptions);
+  let ready = false;
+
+  for (const key in model) {
+    let control = form.controls[key];
+    ready = control ? !!control : Array.isArray(model[key]) ?
+     Array.isArray(control) && control.every((item: any, index: number) => {
+      return (typeof item === "object") ? checkForm(item, (model[key] as any)[index]) : true;
+    }) : (typeof model[key] === "object") ? checkForm(control, model[key]) : true;
+
+    if(ready === false) break;
   }
 
-  return formBuilder.control("", options as AbstractControlOptions);
-}
-
-export function checkFormArray(form: FormArray, model: Array<any>): boolean {
-  if(!form || !form.controls) {
-    return false;
-  } else {
-    return model.every((item, index) => {
-      let ready = false;
-      if(typeof item !== 'object' && form.controls[index]) {
-        ready = true;
-      } else if (typeof item === 'object' && !Array.isArray(item)) {
-        ready = !!form.controls[index] ? checkFormGroup(form.controls[index] as FormGroup, item) : false;
-      } else if(Array.isArray(item)) {
-        throw new Error("Nested arrays are not supported");
-      }
-      return ready;
-    });
-  }
-}
-
-export function checkFormGroup(form: FormGroup, model: any): boolean {
-  if(!form) {
-    return false;
-  }
-
-  let ready = true;
-
-  if(Array.isArray(model)) {
-    ready = checkFormArray(form as any, model);
-  } else if(model !== null && typeof model === 'object') {
-
-    for (let [key, value] of Object.entries(model)) {
-      if(typeof value !== 'object' && !form.controls[key]) {
-        ready = false;
-      } else if (typeof value === 'object' && !Array.isArray(value)) {
-        ready = !!form.controls[key] ? checkFormGroup(form.controls[key] as FormGroup, key) : false;
-      } else if(Array.isArray(value) && Array.isArray(form.controls[key])) {
-        ready = (form.controls[key] as any).length === value.length;
-      }
-      if(ready === false) {
-        break;
-      }
-    }
-  }
   return ready;
 }
 
-// export function deepClone(objectToClone: any) {
-//   if (!objectToClone) return objectToClone;
-//   return JSON.parse(JSON.stringify(objectToClone));
-// }
-
+export function deepCloneJSON(objectToClone: any) {
+  if (!objectToClone) return objectToClone;
+  return JSON.parse(JSON.stringify(objectToClone));
+}
 
 export function deepClone(objectToClone: any) {
   if (!objectToClone) return objectToClone;
@@ -125,8 +73,8 @@ export function deepClone(objectToClone: any) {
   return obj;
 }
 
-export function patchValue(form: any, model: any) {
-  if(!form || !model) {
+export function patchValue(form: any, model: any, options: any = {}) {
+  if(!form || !form.controls || !model) {
     return;
   }
 

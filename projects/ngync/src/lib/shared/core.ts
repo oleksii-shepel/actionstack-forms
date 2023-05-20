@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter, takeWhile, repeat, first } from 'rxjs';
 import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, ResetForm } from './actions';
 import { getValue, patchValue } from '.';
-import { checkFormGroup } from '../shared';
+import { checkForm } from '../shared';
 
 export interface SyncDirectiveOptions {
   slice: string;
@@ -163,7 +163,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     this.e = this.store.select(state => getValue(state, `${this.path}`)).pipe(
       first(),
       repeat({ count: 5, delay: this.debounce }),
-      filter(state => checkFormGroup(this.dir.form, state?.model)),
+      filter(state => checkForm(this.dir.form, state?.model)),
       takeWhile(() => !this._initialized),
     ).subscribe((state) => {
       if (!this._updating) {
