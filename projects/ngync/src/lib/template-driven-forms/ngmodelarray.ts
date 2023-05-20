@@ -33,8 +33,24 @@ export class NgModelArray extends FieldArrayDirective implements OnInit {
         return control;
       }
     }, {
-      removeControl: (name: string) => {
+      addControl: (name: string, control: any, options: {
+        emitEvent?: boolean
+      } = {}) => {
+        (this.control as any).registerControl(name, control);
+        (this.control as FormArray).updateValueAndValidity(options);
+        (this.control as any)._onCollectionChange();
+      }
+    }, {
+      contains: (name: string) => {
+        return this.control!.hasOwnProperty(name) && (this.control as any)[name].enabled;
+      }
+    }, {
+      removeControl: (name: string, options: {emitEvent?: boolean} = {}) => {
+        if ((this.control as any)[name])
+        (this.control as any)[name]._registerOnCollectionChange(() => {});
         (this.control as any).removeAt(+name);
+        this.control!.updateValueAndValidity(options);
+        (this.control as any)._onCollectionChange();
       }
     })
   }

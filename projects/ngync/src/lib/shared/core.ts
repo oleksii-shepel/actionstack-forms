@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
+import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf, AfterViewInit } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter, takeWhile, repeat, first } from 'rxjs';
@@ -21,7 +21,7 @@ export interface SyncDirectiveOptions {
     deps: [ Injector, [ new Optional(), new SkipSelf(), NgForm ], [ new Optional(), new SkipSelf(), FormGroupDirective ]],
   }]
 })
-export class SyncDirective implements OnInit, OnDestroy {
+export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   @Input('ngync') options!: string | SyncDirectiveOptions;
 
   path!: string;
@@ -42,7 +42,13 @@ export class SyncDirective implements OnInit, OnDestroy {
     public cdr: ChangeDetectorRef,
     public elRef: ElementRef
   ) {
-
+    if(dir instanceof NgForm) {
+      Object.assign(dir.form, {
+        patchValue: (value: any, options?: any) => {
+          patchValue(dir, value, options);
+        }
+      });
+    }
   }
 
   ngOnInit() {
@@ -149,6 +155,10 @@ export class SyncDirective implements OnInit, OnDestroy {
         }
       });
 
+    // we need to replace patchValue method if two-way binding for ngModels directives is used
+    // if(this.dir instanceof NgForm) {
+    //   patchValue(this.dir, state?.model);
+    // }
     // check if state is present in the store and if so initialize the form
     this.e = this.store.select(state => getValue(state, `${this.path}`)).pipe(
       first(),
@@ -160,14 +170,16 @@ export class SyncDirective implements OnInit, OnDestroy {
         this._updating = true;
         if(!!state?.model) {
           this._initialized = true;
-          // unfortunately native patchValue method fires exception
-          patchValue(this.dir.form, state.model);
+          this.dir.form.patchValue(state.model);
         }
         this._updating = false;
-        this.dir.form.updateValueAndValidity();
+        this.dir.control.updateValueAndValidity();
         this.cdr.markForCheck();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
   }
 
   ngOnDestroy() {
