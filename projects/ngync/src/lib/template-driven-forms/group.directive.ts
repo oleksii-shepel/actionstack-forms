@@ -33,7 +33,6 @@ import {
 import { selectValueAccessor } from '../shared/accessors';
 import { composeAsyncValidators, composeValidators } from '../shared';
 import { FieldArrayDirective } from './array.directive';
-import { DynamicStoreDirective } from './store.directive';
 
 const formGroupNameProvider: Provider = {
   provide: ControlContainer,
@@ -68,7 +67,6 @@ export class FieldGroupDirective
 
   constructor(
     @Host() @SkipSelf() parent: ControlContainer,
-    @Optional() @Host() ngStore: DynamicStoreDirective,
     @Optional()
     @Self()
     @Inject(NG_VALIDATORS)

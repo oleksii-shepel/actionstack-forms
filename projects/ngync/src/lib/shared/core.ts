@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef } from '@angular/core';
+import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter, takeWhile, repeat, first } from 'rxjs';
@@ -14,7 +14,12 @@ export interface SyncDirectiveOptions {
 }
 
 @Directive({
-  selector: 'sync,[ngync]'
+  selector: 'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]',
+  providers: [{
+    provide: 'form',
+    useFactory: (injector: Injector) => injector.get(FormGroupDirective, null) ?? injector.get(NgForm, null),
+    deps: [ Injector, [ new Optional(), new SkipSelf(), NgForm ], [ new Optional(), new SkipSelf(), FormGroupDirective ]],
+  }]
 })
 export class SyncDirective implements OnInit, OnDestroy {
   @Input('ngync') options!: string | SyncDirectiveOptions;

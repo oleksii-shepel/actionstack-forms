@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
-import { ReactiveStoreDirective } from './directive';
+import { SyncDirective } from './core';
 
 @NgModule({
   imports: [FormsModule, StoreModule],
-  declarations: [ReactiveStoreDirective],
-  exports: [ReactiveStoreDirective]
+  declarations: [SyncDirective],
+  exports: [SyncDirective]
 })
-export class ReactiveFormsModule {}
+export class SharedModule {}

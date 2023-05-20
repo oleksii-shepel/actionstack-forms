@@ -5,8 +5,7 @@ import { composeAsyncValidators, composeValidators } from '../shared/validators'
 import { CALL_SET_DISABLED_STATE } from '../shared/controls';
 import { FieldGroupDirective } from './group.directive';
 import { FieldArrayDirective } from './array.directive';
-import { DynamicStoreDirective } from './store.directive';
-import { deepClone, getValue } from '../shared';
+import { SyncDirective, deepClone, getValue } from '../shared';
 import { Subject, takeUntil, distinctUntilChanged, map } from 'rxjs';
 
 const formControlBinding: Provider = {
@@ -33,7 +32,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
   viewModel: any;
 
   _parent: ControlContainer;
-  _ngStore: DynamicStoreDirective;
+  _ngStore: SyncDirective;
   _rawValidators!: (ValidatorFn | Validator)[];
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
@@ -45,7 +44,7 @@ export class FieldDirective extends AbstractControlDirective implements OnInit, 
 
   constructor(
       @Optional() @Host() parent: ControlContainer,
-      @Optional() @Host() ngStore: DynamicStoreDirective,
+      @Optional() @Host() ngStore: SyncDirective,
       @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator|ValidatorFn)[],
       @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators:
           (AsyncValidator|AsyncValidatorFn)[],

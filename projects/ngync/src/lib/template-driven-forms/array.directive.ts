@@ -33,8 +33,8 @@ import {
   composeAsyncValidators,
   composeValidators,
   selectValueAccessor,
+  SyncDirective
 } from '../shared';
-import { DynamicStoreDirective } from './store.directive';
 
 const formControlBinding: Provider = {
   provide: ControlContainer,
