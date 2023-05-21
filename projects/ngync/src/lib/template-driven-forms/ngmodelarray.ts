@@ -20,38 +20,5 @@ export class NgModelArray extends FieldArrayDirective implements OnInit {
 
   override ngOnInit() {
     super.ngOnInit();
-
-    Object.assign(NgModel.prototype, {
-      _checkParentType() {}
-    })
-
-    Object.assign(FormArray.prototype, {
-      registerControl: (name: string, control: any): AbstractControl => {
-        control.setParent(this.control);
-        (this.control! as FormArray).push(control);
-        control._registerOnCollectionChange((this.control as any)._onCollectionChange);
-        return control;
-      }
-    }, {
-      addControl: (name: string, control: any, options: {
-        emitEvent?: boolean
-      } = {}) => {
-        (this.control as any).registerControl(name, control);
-        (this.control as FormArray).updateValueAndValidity(options);
-        (this.control as any)._onCollectionChange();
-      }
-    }, {
-      contains: (name: string) => {
-        return this.control!.hasOwnProperty(name) && (this.control as any)[name].enabled;
-      }
-    }, {
-      removeControl: (name: string, options: {emitEvent?: boolean} = {}) => {
-        if ((this.control as any)[name])
-        (this.control as any)[name]._registerOnCollectionChange(() => {});
-        (this.control as FormArray).removeAt(+name);
-        this.control!.updateValueAndValidity(options);
-        (this.control as any)._onCollectionChange();
-      }
-    })
   }
 }

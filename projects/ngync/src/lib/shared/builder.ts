@@ -1,4 +1,5 @@
-import { AbstractControl, AbstractControlOptions, FormBuilder } from '@angular/forms';
+import { EventEmitter } from '@angular/core';
+import { AbstractControl, AbstractControlOptions, FormBuilder, FormControlStatus, NgControl, NgForm, NgModel } from '@angular/forms';
 
 export type ArrayToObject<T extends any[]> = {
   [key in keyof T as string]: T[key];
@@ -73,17 +74,48 @@ export function deepClone(objectToClone: any) {
   return obj;
 }
 
-export function patchValue(form: any, model: any, options: any = {}) {
-  if(!form || !form.controls || !model) {
-    return;
+export function patchValue<T>(form: NgForm, model: T, options: {
+  onlySelf?: boolean,
+  emitEvent?: boolean,
+  emitModelToViewChange?: boolean,
+  emitViewToModelChange?: boolean
+} = {}) {
+
+  const iterable = (val: any) => {
+    return { [Symbol.iterator]: function* () {
+      while(val._parent) { yield val.name; val = val._parent; }
+    }}
   }
 
-  for (const key in form.controls) {
-    let value = model[key];
-    form.controls[key].value = (typeof value === "object") ? patchValue(form.controls[key], model[key]) : model[key];
-  }
+  const getValue = (dir: NgModel, model: any) => [...iterable(dir)].reverse().reduce((acc, part) => acc && acc[part], model);
 
-  return model;
+  if(form.hasOwnProperty('_directives')) {
+    for (var it = form['_directives'].values(), dir: any = null; dir = it.next().value; ) {
+      if(dir.hasOwnProperty('valueAccessor') && dir.hasOwnProperty('_parent')) {
+
+        const value = getValue(dir, model);
+        const control = dir.control as any;
+
+        control.value = value;
+        // (dir as NgControl).valueAccessor?.writeValue(value);
+
+        if (dir._onChange.length && options.emitModelToViewChange !== false) {
+          dir._onChange.forEach(
+              (changeFn: any) => changeFn(value, false));
+        }
+
+        if (options.emitEvent !== false) {
+          (control as {status: FormControlStatus}).status = control._calculateStatus();
+          (control.valueChanges as EventEmitter<T>).emit(value);
+          (control.statusChanges as EventEmitter<FormControlStatus>).emit(control.status);
+        }
+
+        if (control._parent && !options.onlySelf) {
+          control._parent.updateValueAndValidity(options);
+        }
+      }
+    }
+  }
 }
 
 export function deepEqual(x: any, y: any): boolean {

@@ -25,15 +25,15 @@ import {
   NG_VALUE_ACCESSOR,
   NgControl,
   NgForm,
+  NgModel,
   Validator,
   ValidatorFn,
 } from '@angular/forms';
-import { FieldGroupDirective } from './group.directive';
 import {
   composeAsyncValidators,
   composeValidators,
+  mergeValidators,
   selectValueAccessor,
-  SyncDirective
 } from '../shared';
 
 const formControlBinding: Provider = {
@@ -60,15 +60,15 @@ export class FieldArrayDirective
    */
   @Input('ngFieldArray') name: string = '';
   valueAccessor: ControlValueAccessor | null;
-  form: FormArray<any>;
+  fa: FormArray<any>;
 
   _parent: ControlContainer;
   _rawValidators!: (Validator | ValidatorFn)[];
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
-  _onDisabledChange = (_: boolean) => {};
-  _onChange = (_: any) => {};
+  _onDisabledChange: Array<(isDisabled: boolean) => void> = [];
+  _onChange: Array<Function> = [];
   _onCollectionChange = (_: any) => {};
 
   constructor(
@@ -94,26 +94,61 @@ export class FieldArrayDirective
     this._setAsyncValidators(asyncValidators);
     this.valueAccessor = selectValueAccessor(this, valueAccessors);
 
-    this.form = new FormArray<any>([]);
-    this.form.setValidators(this._composedValidator);
-    this.form.setAsyncValidators(this._composedAsyncValidator);
+    this.fa = new FormArray<any>([]);
+    this.fa.setValidators(this._composedValidator);
+    this.fa.setAsyncValidators(this._composedAsyncValidator);
 
-    this.form.setParent(this.formDirective.form);
+    this.fa.setParent(this.formDirective.form);
+
+    Object.assign(NgModel.prototype, {
+      _checkParentType() {}
+    })
+
+    Object.assign(this.fa, {
+      registerControl: (name: string, control: any): AbstractControl => {
+        control.setParent(this.control);
+        (this.control! as FormArray).push(control);
+        control._registerOnCollectionChange((this.control as any)._onCollectionChange);
+        return control;
+      }
+    }, {
+      registerOnChange: (fn: (_: any) => {}) => {
+        this._onChange.push(fn);
+      }
+    }, {
+      registerOnDisabledChange: (fn: (_: boolean) => {}) => {
+        this._onDisabledChange.push(fn);
+      }
+    }, {
+      addControl: (name: string, control: any, options: {
+        emitEvent?: boolean
+      } = {}) => {
+        (this.control as any).registerControl(name, control);
+        (this.control as FormArray).updateValueAndValidity(options);
+        (this.control as any)._onCollectionChange();
+      }
+    }, {
+      contains: (name: string) => {
+        return this.control!.hasOwnProperty(name) && (this.control as any)[name].enabled;
+      }
+    }, {
+      removeControl: (name: string, options: {emitEvent?: boolean} = {}) => {
+        if ((this.control as any)[name])
+        (this.control as any)[name]._registerOnCollectionChange(() => {});
+        (this.control as FormArray).removeAt(+name);
+        this.control!.updateValueAndValidity(options);
+        (this.control as any)._onCollectionChange();
+      }
+    })
   }
 
   ngOnInit(): void {
-    if(this.formDirective instanceof NgForm) {
-      this.formDirective.form.addControl(this.name, this.form);
-    } else if(this.formDirective instanceof FieldGroupDirective) {
-      this.formDirective.addControl(this);
-    } else if(this.formDirective instanceof FieldArrayDirective) {
-      this.formDirective.addControl(this);
-    }
+    this.formDirective.addControl(this);
   }
 
   ngOnDestroy(): void {
-    this.form.disable();
-    this.form.clear();
+    this.control.disable();
+    this.control.clear();
     if (this.formDirective) {
       this.formDirective.removeControl(this);
     }
@@ -127,28 +162,36 @@ export class FieldArrayDirective
     return [...this._parent.path!, this.name!.toString()];
   }
 
-  override get control(): AbstractControl<any, any> | null {
-    return this.form;
+  get directives(): Set<NgModel> {
+    let container = this.formDirective;
+    while(!(container instanceof NgForm)) {
+      container = container.formDirective;
+    }
+    return container['_directives'];
   }
 
-  override set control(control: AbstractControl<any, any> | null) {
-    this.form = control as FormArray<any>;
+  override get control(): any {
+    return this.fa;
+  }
+
+  override set control(value: FormArray<any>) {
+    this.fa = value;
   }
 
   get formDirective(): any {
     return this._parent;
   }
 
-  addControl(control: any): void {
-    this.form.controls.push(control.form);
+  addControl(control: NgModel): void {
+    this.control.controls.push(control.control);
   }
 
-  removeControl(control: any): void {
-    this.form.controls = this.form.controls.filter((item) => item !== control.form);
+  removeControl(control: NgModel): void {
+    this.control.controls = this.control.controls.filter((item: any) => item !== control.control);
   }
 
   registerOnChange(fn: () => void): void {
-    this.form.valueChanges.subscribe(fn);
+    this.control.valueChanges.subscribe(fn);
   }
 
   /**
