@@ -123,7 +123,7 @@ export class FieldGroupDirective
   }
 
   viewToModelUpdate(newValue: any): void {
-    throw new Error('Method not implemented.');
+    Function.prototype
   }
 
   override get formDirective(): any {

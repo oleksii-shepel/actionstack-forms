@@ -155,7 +155,7 @@ export class FieldArrayDirective
   }
 
   viewToModelUpdate(value: any): void {
-    throw new Error('Method not implemented.');
+    Function.prototype
   }
 
   override get path(): string[] {
@@ -183,6 +183,7 @@ export class FieldArrayDirective
   }
 
   addControl(control: NgModel): void {
+    if(this.control.controls.includes(control.control)) return;
     this.control.controls.push(control.control);
   }
 

@@ -96,11 +96,16 @@ export function patchValue<T>(form: NgForm, model: T, options: {
         const value = getValue(dir, model);
         const control = dir.control as any;
 
-        (dir as NgControl).valueAccessor!.writeValue(value);
+        //(dir as NgControl).valueAccessor!.writeValue(value);
+        control.setValue(value, options);
 
-        if (dir._onChange.length) {
-          dir._onChange.forEach(
-              (changeFn: any) => changeFn(value, true));
+        if(dir.hasOwnProperty('_onChange')){
+          if (Array.isArray(dir._onChange) && dir._onChange.length) {
+            dir._onChange.forEach(
+                (changeFn: any) => changeFn(value, true));
+          } else if (typeof dir._onChange === 'function'){
+            dir._onChange(value, true);
+          }
         }
 
         if (options.emitEvent !== false) {
