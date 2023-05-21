@@ -11,15 +11,6 @@ export interface FormState<T> {
 
 export const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
 
-// export function getValue(object: any, path: string) {
-//   const paths = path.split('.')
-//   let result = object;
-//   paths.forEach(path => {
-//     result = result ? result[path] : result;
-//   });
-//   return result;
-// }
-
 export const setValue = (obj: any, prop: string, val: any) => {
   obj = { ...obj };
   const split = prop.split('.');

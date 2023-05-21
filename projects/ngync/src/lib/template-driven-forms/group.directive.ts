@@ -62,9 +62,6 @@ export class FieldGroupDirective
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
-  _onDisabledChange: Array<(isDisabled: boolean) => void> = [];
-  _onChange: Array<Function> = [];
-  _onCollectionChange = () => {};
 
   constructor(
     @Host() @SkipSelf() parent: ControlContainer,
@@ -102,11 +99,17 @@ export class FieldGroupDirective
 
     Object.assign(this.fg, {
       registerOnChange: (fn: (_: any) => {}) => {
-        this._onChange.push(fn);
+        for(let key of Object.keys(this.control.controls)) {
+          if(this.control.controls[key].hasOwnProperty('_onChange')) {
+            (this.control.controls[key] as any)['_onChange'].push(fn);
+          }
+        }
       }
     }, {
       registerOnDisabledChange: (fn: (_: boolean) => {}) => {
-        this._onDisabledChange.push(fn);
+        if(this.control.hasOwnProperty('_onDisabledChange')) {
+          (this.control as any)['_onDisabledChange'].push(fn);
+        }
       }
     })
   }

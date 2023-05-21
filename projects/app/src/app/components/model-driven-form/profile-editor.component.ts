@@ -20,12 +20,14 @@ export class StandardProfileEditorComponent {
   initialState = initialState;
   model = initialState.model;
 
+  a: any;
+
   constructor(private store: Store<ApplicationState>) {
 
-    this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
-      this.initialState = deepCloneJSON(state? state : { model: initialModel });
-      this.model = this.initialState.model;
+    this.a = this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
+      this.initialState = state ? state : { model: initialModel };
       this.store.dispatch(new InitForm({ path: "model", value: this.initialState}));
+      this.model = deepClone(this.initialState.model);
     });
 
     this.profile$ = this.store.select(getModelSlice);

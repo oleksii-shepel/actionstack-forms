@@ -67,9 +67,6 @@ export class FieldArrayDirective
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
-  _onDisabledChange: Array<(isDisabled: boolean) => void> = [];
-  _onChange: Array<Function> = [];
-  _onCollectionChange = (_: any) => {};
 
   constructor(
     @Host() @SkipSelf() parent: ControlContainer,
@@ -108,16 +105,23 @@ export class FieldArrayDirective
       registerControl: (name: string, control: any): AbstractControl => {
         control.setParent(this.control);
         (this.control! as FormArray).push(control);
+
         control._registerOnCollectionChange((this.control as any)._onCollectionChange);
         return control;
       }
     }, {
       registerOnChange: (fn: (_: any) => {}) => {
-        this._onChange.push(fn);
+        this.control.controls.forEach((control: any) => {
+          if(control.hasOwnProperty('_onChange')) {
+            (control as any)['_onChange'].push(fn);
+          }
+        });
       }
     }, {
       registerOnDisabledChange: (fn: (_: boolean) => {}) => {
-        this._onDisabledChange.push(fn);
+        if(this.control.hasOwnProperty('_onDisabledChange')) {
+          (this.control as any)['_onDisabledChange'].push(fn);
+        }
       }
     }, {
       addControl: (name: string, control: any, options: {

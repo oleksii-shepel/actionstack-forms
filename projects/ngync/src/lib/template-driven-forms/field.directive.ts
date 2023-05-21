@@ -1,5 +1,5 @@
 import { EventEmitter, Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Provider, Self, Output, ChangeDetectorRef } from '@angular/core';
-import { AbstractControl, AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgForm, NgModel, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
+import { AbstractControl, AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormArray, FormControl, FormGroup, FormGroupDirective, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgForm, NgModel, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
 import { selectValueAccessor } from '../shared/accessors';
 import { composeAsyncValidators, composeValidators } from '../shared/validators';
 import { CALL_SET_DISABLED_STATE } from '../shared/controls';
@@ -37,8 +37,6 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
-  _onCollectionChange = () => {};
-  _onChange: Array<Function> = [];
 
   private _destroyed$ = new Subject<boolean>();
 
@@ -66,7 +64,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this.control.setValidators(this._composedValidator);
     this.control.setAsyncValidators(this._composedAsyncValidator);
 
-    this.control.setParent(this.formDirective.form);
+    this.control.setParent(this.formDirective.control);
   }
 
   onChange(value: any) {
@@ -114,11 +112,13 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   }
 
   registerOnChange(fn: () => void): void {
-    this._onChange.push(fn);
+    if(this.control.hasOwnProperty('_onChange')) {
+      (this.control as any)['_onChange'].push(fn);
+    }
   }
 
-  override get formDirective(): any {
-    return this._parent;
+  override get formDirective(): FieldGroupDirective | FieldArrayDirective {
+    return this._parent as any;
   }
 
   /**
@@ -131,7 +131,9 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   }
 
   _registerOnCollectionChange(fn: () => void): void {
-    this._onCollectionChange = fn;
+    if(this.control.hasOwnProperty('_onCollectionChange')) {
+      (this.control as any)['_onCollectionChange'] = fn;
+    }
   }
   /**
    * Sets synchronous validators for this directive.

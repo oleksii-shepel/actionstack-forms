@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf, AfterViewInit } from '@angular/core';
+import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter, takeWhile, repeat, first } from 'rxjs';
@@ -8,7 +8,6 @@ import { checkForm } from '../shared';
 
 export interface SyncDirectiveOptions {
   slice: string;
-  state?: any;
   debounce?: number;
   clearOnDestroy?: boolean;
 }
@@ -21,7 +20,7 @@ export interface SyncDirectiveOptions {
     deps: [ Injector, [ new Optional(), new SkipSelf(), NgForm ], [ new Optional(), new SkipSelf(), FormGroupDirective ]],
   }]
 })
-export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
+export class SyncDirective implements OnInit, OnDestroy {
   @Input('ngync') options!: string | SyncDirectiveOptions;
 
   path!: string;
@@ -54,12 +53,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     if(typeof this.options === 'string') {
       this.path = this.options;
-      this.state = undefined;
       this.debounce = 100;
       this.clearOnDestroy = false;
     } else {
       this.path = this.options.slice;
-      this.state = this.options.state;
       this.debounce = this.options.debounce || 100;
       this.clearOnDestroy = this.options.clearOnDestroy || false;
     }
@@ -173,13 +170,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
           this.dir.form.patchValue(state.model);
         }
         this._updating = false;
-        this.dir.control.updateValueAndValidity();
+        this.dir.form.updateValueAndValidity();
         this.cdr.markForCheck();
       }
     });
-  }
-
-  ngAfterViewInit(): void {
   }
 
   ngOnDestroy() {

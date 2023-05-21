@@ -1,5 +1,5 @@
 import { EventEmitter } from '@angular/core';
-import { AbstractControl, AbstractControlOptions, FormBuilder, FormControlStatus, NgControl, NgForm, NgModel } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormControl, FormControlStatus, FormGroup, NgControl, NgForm, NgModel } from '@angular/forms';
 
 export type ArrayToObject<T extends any[]> = {
   [key in keyof T as string]: T[key];
@@ -18,7 +18,7 @@ export type ModelOptions<T> = {
 
 export const fb = new FormBuilder();
 
-export function buildForm<T>(model: T, options: ModelOptions<T> = {}, name: string =''): AbstractControl {
+export function buildForm<T>(model: T, options: ModelOptions<T> = {}): AbstractControl {
   if (!model) return fb.control(name, (options || {}) as AbstractControlOptions);
 
   let obj = Array.isArray(model) ? fb.array([], options as AbstractControlOptions) :
@@ -27,28 +27,32 @@ export function buildForm<T>(model: T, options: ModelOptions<T> = {}, name: stri
 
   for (const key in model) {
     let value = model[key];
-    let control = Array.isArray(value) ? buildForm(value, (options as any)[`__array_${key}`] || {}, key) :
-    typeof value === 'object' ? buildForm(value, (options as any)[key] || {}, key) :
+    let control = Array.isArray(value) ? buildForm(value, (options as any)[`__array_${key}`] || {}) :
+    typeof value === 'object' ? buildForm(value, (options as any)[key] || {}) :
     fb.control(value, (options[key] || {}) as AbstractControlOptions);
 
-    (obj as any).controls[key] = control;
+    if(obj instanceof FormGroup){
+      (obj as FormGroup).addControl(key, control);
+    } else if(obj instanceof FormArray) {
+      (obj as FormArray).push(control);
+    }
+
   }
 
-  obj.updateValueAndValidity();
   return obj;
 }
 
 export function checkForm<T>(form: any, model: T): boolean {
   if (!form || !form.controls) return false;
 
-  let ready = false;
+  let ready = true;
 
   for (const key in model) {
+    let value = model[key];
     let control = form.controls[key];
-    ready = control ? !!control : Array.isArray(model[key]) ?
-     Array.isArray(control) && control.every((item: any, index: number) => {
-      return (typeof item === "object") ? checkForm(item, (model[key] as any)[index]) : true;
-    }) : (typeof model[key] === "object") ? checkForm(control, model[key]) : true;
+    ready = Array.isArray(value) ? Array.isArray(control.controls) && control.controls.every((item: any, index: number) => {
+      return !(item instanceof FormControl) ? checkForm(item, (value as any)[index]) : true;
+    }) : !(control instanceof FormControl) ? checkForm(control, value) : true;
 
     if(ready === false) break;
   }
@@ -97,7 +101,7 @@ export function patchValue<T>(form: NgForm, model: T, options: {
         const control = dir.control as any;
 
         //(dir as NgControl).valueAccessor!.writeValue(value);
-        control.setValue(value, options);
+        control.setValue(value);
 
         if(dir.hasOwnProperty('_onChange')){
           if (Array.isArray(dir._onChange) && dir._onChange.length) {
@@ -121,6 +125,19 @@ export function patchValue<T>(form: NgForm, model: T, options: {
     }
   }
 }
+
+// export function patchValue(form: any, model: any) {
+//   if(!form || !form.controls || !model) {
+//     return;
+//   }
+
+//   for (const key in form.controls) {
+//     let value = model[key];
+//     form.controls[key].value = (typeof value === "object") ? patchValue(form.controls[key], value) : value;
+//   }
+
+//   return model;
+// }
 
 export function deepEqual(x: any, y: any): boolean {
   return (x && y && typeof x === 'object' && typeof y === 'object') ?
