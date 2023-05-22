@@ -3,7 +3,7 @@ import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil, filter, takeWhile, repeat, first } from 'rxjs';
 import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, ResetForm } from './actions';
-import { getValue, patchValue } from '.';
+import { DomObserver, getValue, patchValue } from '.';
 import { checkForm } from '../shared';
 
 export interface SyncDirectiveOptions {
@@ -28,10 +28,11 @@ export class SyncDirective implements OnInit, OnDestroy {
   debounce!: number;
   clearOnDestroy!: boolean;
 
-  private _destroyed$ = new Subject<boolean>();
+  private _unmounted$ = new Subject<boolean>();
 
   private _initialized = false;
   private _updating = false;
+  private _observer!: MutationObserver;
 
   a: any; b: any; c: any; d: any; e: any;
 
@@ -39,7 +40,7 @@ export class SyncDirective implements OnInit, OnDestroy {
     @Inject('form') public dir: NgForm | FormGroupDirective,
     public store: Store,
     public cdr: ChangeDetectorRef,
-    public elRef: ElementRef
+    public elRef: ElementRef,
   ) {
   }
 
@@ -65,7 +66,7 @@ export class SyncDirective implements OnInit, OnDestroy {
   this.a = this.dir.valueChanges!
     .pipe(
       takeWhile(()=> document.contains(this.elRef.nativeElement)),
-      takeUntil(this._destroyed$),
+      takeUntil(this._unmounted$),
       filter(() => this._initialized))
     .subscribe(value => {
       if(!this._updating) {
@@ -99,7 +100,7 @@ export class SyncDirective implements OnInit, OnDestroy {
   this.b = this.dir.statusChanges!
     .pipe(
       takeWhile(()=> document.contains(this.elRef.nativeElement)),
-      takeUntil(this._destroyed$),
+      takeUntil(this._unmounted$),
       filter(() => this._initialized))
     .subscribe(status => {
         if(!this._updating) {
@@ -117,7 +118,7 @@ export class SyncDirective implements OnInit, OnDestroy {
 
     this.c = this.store
       .select(state => getValue(state, `${this.path}.dirty`))
-      .pipe(takeUntil(this._destroyed$))
+      .pipe(takeUntil(this._unmounted$))
       .subscribe(dirty => {
         if (this.dir.form.dirty !== dirty) {
           if (dirty === true) {
@@ -132,7 +133,7 @@ export class SyncDirective implements OnInit, OnDestroy {
 
     this.d = this.store
       .select(state => getValue(state, `${this.path}.disabled`))
-      .pipe(takeUntil(this._destroyed$))
+      .pipe(takeUntil(this._unmounted$))
       .subscribe(disabled => {
         if (this.dir.form.disabled !== disabled) {
           if (disabled === true) {
@@ -163,6 +164,15 @@ export class SyncDirective implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       }
     });
+
+    this._observer = DomObserver.unmounted(this.elRef.nativeElement, this.componentUnmounted.bind(this));
+  }
+
+  componentUnmounted() {
+    DomObserver.disconnect(this._observer);
+
+    this._unmounted$.next(true);
+    this._unmounted$.complete();
   }
 
   ngOnDestroy() {
@@ -171,8 +181,5 @@ export class SyncDirective implements OnInit, OnDestroy {
         new ResetForm({value: this.state })
       );
     }
-
-    this._destroyed$.next(true);
-    this._destroyed$.complete();
   }
 }
