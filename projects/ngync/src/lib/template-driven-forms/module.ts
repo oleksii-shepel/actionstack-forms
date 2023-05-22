@@ -2,10 +2,10 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { FieldDirective } from './field.directive';
-import { FieldArrayDirective } from './array.directive';
+import { NgModelArray } from './ngmodelarray';
 import { FieldGroupDirective } from './group.directive';
 import { BaseControlValueAccessor, BuiltInControlValueAccessor } from '../shared/accessors';
-import { NgModelArray } from './ngmodelarray';
+import { FieldArrayDirective } from './array.directive';
 import { SharedModule } from '../shared/module';
 
 @NgModule({
