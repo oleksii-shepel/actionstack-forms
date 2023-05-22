@@ -1,5 +1,5 @@
-import { Component, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, NgForm } from '@angular/forms';
+import { Component, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { FormArray } from '@angular/forms';
 import { Profile, initialProfile, profileOptions } from '../../models/profile';
@@ -14,14 +14,12 @@ import { InitForm, UpdateFormValue, buildForm, deepClone, getValue } from 'ngync
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css']
 })
-export class ReactiveProfileEditorComponent {
+export class ReactiveProfileEditorComponent implements OnDestroy {
   @Output() formSubmitted = new EventEmitter<Profile>();
 
   profile$: Observable<ProfileState>;
-
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
-
-  model = initialProfile;
+  a: any;
 
   get aliases() {
     return this.profileForm.get('aliases') as FormArray;
@@ -29,10 +27,9 @@ export class ReactiveProfileEditorComponent {
 
   constructor(private fb: FormBuilder, private store: Store<ApplicationState>) {
 
-    this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
+    this.a = this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
       let model = getValue(state, "model") ?? initialProfile;
       this.store.dispatch(new InitForm({ path: "profile", value: model}));
-      this.model = deepClone(model);
     });
 
     this.profile$ = this.store.select(getProfile);
@@ -54,5 +51,9 @@ export class ReactiveProfileEditorComponent {
   onSubmit() {
     this.formSubmitted.emit(this.profileForm.value as Profile);
     alert("Form submitted successfully");
+  }
+
+  ngOnDestroy() {
+    this.a.unsubscribe();
   }
 }

@@ -18,7 +18,6 @@ export class StandardProfileEditorComponent implements OnDestroy {
 
   profile$!: Observable<ModelState>;
   model = initialModel;
-
   a: any;
 
   constructor(private store: Store<ApplicationState>) {

@@ -1,7 +1,7 @@
 import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, filter, takeWhile, repeat, first } from 'rxjs';
+import { Subject, filter, takeWhile, repeat, first, tap } from 'rxjs';
 import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, ResetForm } from './actions';
 import { DomObserver, getValue } from '.';
 import { checkForm } from '../shared';
@@ -47,11 +47,11 @@ export class SyncDirective implements OnInit, OnDestroy {
   ngOnInit() {
     if(typeof this.options === 'string') {
       this.path = this.options;
-      this.debounce = 100;
+      this.debounce = 0;
       this.clearOnDestroy = false;
     } else {
       this.path = this.options.slice;
-      this.debounce = this.options.debounce || 100;
+      this.debounce = this.options.debounce || 0;
       this.clearOnDestroy = this.options.clearOnDestroy || false;
     }
 
@@ -147,20 +147,18 @@ export class SyncDirective implements OnInit, OnDestroy {
     // check if state is present in the store and if so initialize the form
     this.e = this.store.select(state => getValue(state, `${this.path}`)).pipe(
       first(),
-      repeat({ count: 5, delay: this.debounce }),
-      filter(state => checkForm(this.dir.form, state?.model)),
+      filter(state => state?.model),
+      tap((state) => this.dir.form.patchValue(state.model)),
+      filter((state) => checkForm(this.dir.form, state.model)),
+      repeat({ count: 10, delay: this.debounce }),
       takeWhile(() => !this._initialized),
     ).subscribe((state) => {
-      console.log(state);
       if (!this._updating) {
         this._updating = true;
-        if(!!state?.model) {
-          this._initialized = true;
-          this.dir.form.patchValue(state.model);
-        }
-        this._updating = false;
+        this._initialized = true;
         this.dir.form.updateValueAndValidity();
         this.cdr.markForCheck();
+        this._updating = false;
       }
     });
 
