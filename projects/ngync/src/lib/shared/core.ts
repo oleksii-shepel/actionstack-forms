@@ -32,8 +32,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
 
   private _initialized = false;
   private _updating = false;
-  private _observer!: MutationObserver;
-  private _viewInitialized = false;
 
   a: any; b: any; c: any; d: any; e: any;
 
@@ -48,11 +46,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     if(typeof this.options === 'string') {
       this.path = this.options;
-      this.debounce = 0;
+      this.debounce = 25;
       this.clearOnDestroy = false;
     } else {
       this.path = this.options.slice;
-      this.debounce = this.options.debounce || 0;
+      this.debounce = this.options.debounce || 25;
       this.clearOnDestroy = this.options.clearOnDestroy || false;
     }
 
@@ -168,23 +166,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    this._observer = DomObserver.unmounted(this.elRef.nativeElement, this.componentUnmounted.bind(this));
+    DomObserver.unmounted(this.elRef.nativeElement, this.ngOnComponentUnmounted.bind(this));
   }
 
   ngAfterViewInit() {
-    this._viewInitialized = true;
     if(this.dir instanceof FormGroupDirective) {
       this.formInitialized();
-    }
-  }
-
-  formInitialized() {
-    let directives = (this.dir instanceof FormGroupDirective) ?
-    this.dir.directives : (this.dir as any)._directives;
-
-    for(const directive of directives) {
-      let nativeElement = directive.valueAccessor?._elementRef?.nativeElement;
-      console.log(nativeElement);
     }
   }
 
@@ -196,9 +183,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  componentUnmounted() {
+  ngOnComponentUnmounted() {
     this._unmounted$.next(true);
     this._unmounted$.complete();
   }
 
+  formInitialized() {
+    let directives = (this.dir instanceof FormGroupDirective) ?
+    this.dir.directives : (this.dir as any)._directives;
+
+    for(const directive of directives) {
+      let nativeElement = directive.valueAccessor?._elementRef?.nativeElement;
+    }
+  }
 }

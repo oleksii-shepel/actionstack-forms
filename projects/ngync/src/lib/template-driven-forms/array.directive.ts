@@ -1,5 +1,5 @@
 import { Input, OnInit, Directive, Provider, forwardRef } from '@angular/core';
-import { ControlContainer, DefaultValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { ControlContainer, DefaultValueAccessor, NG_VALUE_ACCESSOR, NgModel } from "@angular/forms";
 import { NgModelArray } from "./ngmodelarray";
 
 const formControlBinding: Provider = {
@@ -11,7 +11,6 @@ const formControlBinding: Provider = {
   selector: '[ngFieldArray]',
   providers: [
     formControlBinding,
-    {provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true},
   ],
   exportAs: 'ngFieldArray',
 })

@@ -1,169 +1,88 @@
-import {
-  Directive,
-  forwardRef,
-  Host,
-  Inject,
-  Input,
-  OnDestroy,
-  OnInit,
-  Optional,
-  Provider,
-  Self,
-  SkipSelf,
-} from '@angular/core';
+import {Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf} from '@angular/core';
+import { AbstractFormGroupDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, FormGroup, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from '@angular/forms';
+import { composeAsyncValidators, composeValidators } from '../shared';
 
-import {
-  AbstractControl,
-  AbstractControlDirective,
-  AsyncValidator,
-  AsyncValidatorFn,
-  ControlContainer,
-  ControlValueAccessor,
-  DefaultValueAccessor,
-  Form,
-  FormGroup,
-  NG_ASYNC_VALIDATORS,
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  NgControl,
-  NgForm,
-  NgModel,
-  NgModelGroup,
-  Validator,
-  ValidatorFn,
-} from '@angular/forms';
-import { selectValueAccessor } from '../shared/accessors';
-import { composeAsyncValidators, composeValidators, mergeValidators } from '../shared';
-
-const formGroupNameProvider: Provider = {
+export const modelGroupProvider: any = {
   provide: ControlContainer,
-  useExisting: forwardRef(() => FieldGroupDirective),
+  useExisting: forwardRef(() => FieldGroupDirective)
 };
 
-@Directive({
-  selector: '[ngFieldGroup]',
-  providers: [
-    formGroupNameProvider,
-    { provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true },
-  ],
-  exportAs: 'ngFieldGroup',
-})
-export class FieldGroupDirective
-  extends NgModelGroup
-  implements ControlContainer, NgControl, OnInit, OnDestroy
-{
+@Directive({selector: '[ngFieldGroup]', providers: [modelGroupProvider], exportAs: 'ngFieldGroup'})
+export class FieldGroupDirective extends AbstractFormGroupDirective implements OnInit, OnDestroy {
+
   @Input('ngFieldGroup') override name: string = '';
-
-  valueAccessor: ControlValueAccessor | null;
-  fg: FormGroup<any>
-
-  _parent: ControlContainer;
   _rawValidators!: (Validator | ValidatorFn)[];
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
+  _parent: ControlContainer;
+  form: FormGroup<any>;
 
   constructor(
-    @Host() @SkipSelf() parent: ControlContainer,
-    @Optional()
-    @Self()
-    @Inject(NG_VALIDATORS)
-    validators: (Validator | ValidatorFn)[],
-    @Optional()
-    @Self()
-    @Inject(NG_ASYNC_VALIDATORS)
-    asyncValidators: (AsyncValidator | AsyncValidatorFn)[],
-    @Optional()
-    @Self()
-    @Inject(NG_VALUE_ACCESSOR)
-    valueAccessors: ControlValueAccessor[]
-  ) {
-    super(parent, validators, asyncValidators);
-
+      @Host() @SkipSelf() parent: ControlContainer,
+      @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator|ValidatorFn)[],
+      @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators:
+          (AsyncValidator|AsyncValidatorFn)[]) {
+    super();
     this._parent = parent;
-
     this._setValidators(validators);
     this._setAsyncValidators(asyncValidators);
 
-    this.valueAccessor = selectValueAccessor(this, valueAccessors);
+    this.form = new FormGroup({});
+    this.form.setValidators(this._composedValidator);
+    this.form.setAsyncValidators(this._composedAsyncValidator);
 
-    this.fg = new FormGroup({});
-    this.fg.setValidators(this._composedValidator);
-    this.fg.setAsyncValidators(this._composedAsyncValidator);
+  }
 
-    this.fg.setParent(this.formDirective.control);
+  _checkParentType(): void {
   }
 
   override ngOnInit(): void {
-    this.formDirective.addControl(this);
-
-    Object.assign(this.fg, {
-      registerOnChange: (fn: (_: any) => {}) => {
-        for(let key of Object.keys(this.control.controls)) {
-          if(this.control.controls[key].hasOwnProperty('_onChange')) {
-            (this.control.controls[key] as any)['_onChange'].push(fn);
-          }
-        }
-      }
-    }, {
-      registerOnDisabledChange: (fn: (_: boolean) => {}) => {
-        if(this.control.hasOwnProperty('_onDisabledChange')) {
-          (this.control as any)['_onDisabledChange'].push(fn);
-        }
-      }
-    })
+    const self: any = this._parent.formDirective;
+    const container = self._findContainer(this.path);
+    const group = this.form;
+    container?.registerControl(this.name, group);
+    // group.updateValueAndValidity({emitEvent: false});
   }
 
   override ngOnDestroy(): void {
-    this.control.disable();
-    Object.keys(this.control).forEach((controlName) => {
-      this.control.removeControl(controlName);
-    });
-
-    if (this.formDirective) {
-      this.formDirective.removeControl(this);
-    }
+    const self: any = this._parent.formDirective;
+    const container = self._findContainer(this.path);
+    container?.removeControl(this.name);
   }
 
-  viewToModelUpdate(newValue: any): void {
-    Function.prototype
+  override get control(): FormGroup {
+    const self: any = this._parent.formDirective;
+    return self.form.get(this.path) as FormGroup;
   }
 
   override get formDirective(): any {
-    return this._parent;
+    return (this._parent as any).formDirective;
   }
 
   override get path(): string[] {
     return [...this._parent.path!, this.name!.toString()];
   }
 
-  override get control(): FormGroup<any> {
-    return this.fg;
-  }
-
-  override set control(value: FormGroup<any>) {
-    this.fg = value;
-  }
-
-  get directives(): Set<NgModel> {
-    let container = this.formDirective;
-    while(!(container instanceof NgForm)) {
-      container = container.formDirective;
+  get ngForm(): any {
+    let directive: any = this._parent.formDirective;
+    while(!(directive instanceof NgForm)) {
+      directive = directive.formDirective;
     }
-    return container['_directives'];
+    return directive;
   }
 
   addControl(control: NgModel): void {
-    let controls: any = this.control.controls;
-    controls[control.name] = control.control;
+    const self: any = this._parent.formDirective;
+    const container = self._findContainer(control.path);
+    container?.addControl(control.name, control.control);
+    this.ngForm._directives.add(control);
   }
 
   removeControl(control: NgModel): void {
-    this.control.removeControl(control.name);
-  }
-
-  registerOnChange(fn: () => void): void {
-    this.control.valueChanges.subscribe(fn);
+    const self: any = this._parent.formDirective;
+    const container = self._findContainer(control.path);
+    container?.removeControl(control.name, control.control);
   }
 
   _setValidators(validators: Array<Validator | ValidatorFn> | undefined): void {

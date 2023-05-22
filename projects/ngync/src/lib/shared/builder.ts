@@ -50,9 +50,9 @@ export function checkForm<T>(form: any, model: T): boolean {
   for (const key in model) {
     let value = model[key];
     let control = form.controls[key];
-    ready = Array.isArray(value) ? Array.isArray(control.controls) && control.controls.every((item: any, index: number) => {
+    ready = Array.isArray(value) ? Array.isArray(control?.controls) && control.controls.every((item: any, index: number) => {
       return !(item instanceof FormControl) ? checkForm(item, (value as any)[index]) : true;
-    }) : !(control instanceof FormControl) ? checkForm(control, value) : true;
+    }) : !(control instanceof FormControl) ? checkForm(control, value) : !!control;
 
     if(ready === false) break;
   }
