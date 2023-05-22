@@ -17,6 +17,7 @@ export class DomObserver implements OnDestroy {
             treeItem = treeItem.parentNode as HTMLElement;
           }
           if(node === treeItem) {
+            DomObserver.disconnect(observer);
             callback();
           }
         });

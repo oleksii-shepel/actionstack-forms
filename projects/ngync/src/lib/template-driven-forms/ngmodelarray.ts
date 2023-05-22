@@ -94,7 +94,7 @@ export class NgModelArray
     this.fa.setValidators(this._composedValidator);
     this.fa.setAsyncValidators(this._composedAsyncValidator);
 
-    this.fa.setParent(this.formDirective.form);
+    this.fa.setParent(this.formDirective.control);
 
     Object.assign(NgModel.prototype, {
       _checkParentType() {}

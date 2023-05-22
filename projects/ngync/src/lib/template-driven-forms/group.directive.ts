@@ -91,7 +91,7 @@ export class FieldGroupDirective
     this.fg.setValidators(this._composedValidator);
     this.fg.setAsyncValidators(this._composedAsyncValidator);
 
-    this.fg.setParent(this.formDirective.form);
+    this.fg.setParent(this.formDirective.control);
   }
 
   override ngOnInit(): void {

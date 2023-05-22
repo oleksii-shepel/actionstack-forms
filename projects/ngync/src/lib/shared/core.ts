@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, OnDestroy, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
+import { Directive, Input, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subject, filter, takeWhile, repeat, first, tap } from 'rxjs';
@@ -20,11 +20,11 @@ export interface SyncDirectiveOptions {
     deps: [ Injector, [ new Optional(), new SkipSelf(), NgForm ], [ new Optional(), new SkipSelf(), FormGroupDirective ]],
   }]
 })
-export class SyncDirective implements OnInit, OnDestroy {
+export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   @Input('ngync') options!: string | SyncDirectiveOptions;
 
   path!: string;
-  state!: any;
+  model!: any;
   debounce!: number;
   clearOnDestroy!: boolean;
 
@@ -33,6 +33,7 @@ export class SyncDirective implements OnInit, OnDestroy {
   private _initialized = false;
   private _updating = false;
   private _observer!: MutationObserver;
+  private _viewInitialized = false;
 
   a: any; b: any; c: any; d: any; e: any;
 
@@ -158,25 +159,46 @@ export class SyncDirective implements OnInit, OnDestroy {
         this._initialized = true;
         this.dir.form.updateValueAndValidity();
         this.cdr.markForCheck();
+        this.model = state.model;
         this._updating = false;
+
+        if(this.dir instanceof NgForm) {
+          this.formInitialized();
+        }
       }
     });
 
     this._observer = DomObserver.unmounted(this.elRef.nativeElement, this.componentUnmounted.bind(this));
   }
 
-  componentUnmounted() {
-    DomObserver.disconnect(this._observer);
+  ngAfterViewInit() {
+    this._viewInitialized = true;
+    if(this.dir instanceof FormGroupDirective) {
+      this.formInitialized();
+    }
+  }
 
-    this._unmounted$.next(true);
-    this._unmounted$.complete();
+  formInitialized() {
+    let directives = (this.dir instanceof FormGroupDirective) ?
+    this.dir.directives : (this.dir as any)._directives;
+
+    for(const directive of directives) {
+      let nativeElement = directive.valueAccessor?._elementRef?.nativeElement;
+      console.log(nativeElement);
+    }
   }
 
   ngOnDestroy() {
     if (this.clearOnDestroy) {
       this.store.dispatch(
-        new ResetForm({value: this.state })
+        new ResetForm({ value: this.model })
       );
     }
   }
+
+  componentUnmounted() {
+    this._unmounted$.next(true);
+    this._unmounted$.complete();
+  }
+
 }
