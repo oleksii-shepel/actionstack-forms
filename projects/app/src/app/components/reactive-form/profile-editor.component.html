@@ -1,9 +1,9 @@
 <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" autocomplete="off" ngync="profile">
-  <label for="first-name">First Name: </label>
-  <input id="first-name" type="text" formControlName="firstName">
+  <label for="firstName">First Name: </label>
+  <input id="firstName" type="text" formControlName="firstName">
 
-  <label for="last-name">Last Name: </label>
-  <input id="last-name" type="text" formControlName="lastName">
+  <label for="lastName">Last Name: </label>
+  <input id="lastName" type="text" formControlName="lastName">
 
   <div formGroupName="address">
     <h2>Address</h2>
@@ -26,8 +26,8 @@
     <button type="button" (click)="addAlias()">+ Add another alias</button>
 
     <div *ngFor="let alias of aliases.controls; let i=index">
-      <label for="alias-{{i}}">Alias:</label>
-      <input id="alias-{{i}}" type="text" formControlName="{{i}}">
+      <label for="aliases.{{i}}">Alias:</label>
+      <input id="aliases.{{i}}" type="text" formControlName="{{i}}">
     </div>
   </div>
 

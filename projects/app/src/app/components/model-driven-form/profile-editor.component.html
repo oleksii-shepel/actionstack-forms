@@ -1,9 +1,9 @@
 <form #modelForm="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngync="model">
-  <label for="first-name">First Name: </label>
-  <input id="first-name" type="text" [(ngModel)]="model.firstName" name="firstName">
+  <label for="firstName">First Name: </label>
+  <input id="firstName" type="text" [(ngModel)]="model.firstName" name="firstName">
 
-  <label for="last-name">Last Name: </label>
-  <input id="last-name" type="text" [(ngModel)]="model.lastName" name="lastName">
+  <label for="lastName">Last Name: </label>
+  <input id="lastName" type="text" [(ngModel)]="model.lastName" name="lastName">
 
   <div ngModelGroup="address">
     <h2>Address</h2>
@@ -26,8 +26,8 @@
     <button type="button" (click)="addAlias()">+ Add another alias</button>
 
     <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
-      <label for="alias-{{i}}">Alias:</label>
-      <input id="alias-{{i}}" type="text" [(ngModel)]="model.aliases[i]" name="{{i}}">
+      <label for="aliases.{{i}}">Alias:</label>
+      <input id="aliases.{{i}}" type="text" [(ngModel)]="model.aliases[i]" name="{{i}}">
     </div>
   </div>
 

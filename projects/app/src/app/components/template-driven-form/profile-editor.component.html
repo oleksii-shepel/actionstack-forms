@@ -1,9 +1,9 @@
 <form #heroForm="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngync="hero">
-  <label for="first-name">First Name: </label>
-  <input id="first-name" type="text" ngField="firstName">
+  <label for="firstName">First Name: </label>
+  <input id="firstName" type="text" ngField="firstName">
 
-  <label for="last-name">Last Name: </label>
-  <input id="last-name" type="text" ngField="lastName">
+  <label for="lastName">Last Name: </label>
+  <input id="lastName" type="text" ngField="lastName">
 
   <div ngFieldGroup="address">
     <h2>Address</h2>
@@ -26,8 +26,8 @@
     <button type="button" (click)="addAlias()">+ Add another alias</button>
 
     <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
-      <label for="alias-{{i}}">Alias:</label>
-      <input id="alias-{{i}}" type="text" ngField="{{i}}">
+      <label for="aliases.{{i}}">Alias:</label>
+      <input id="aliases.{{i}}" type="text" ngField="{{i}}">
     </div>
   </div>
 

@@ -33,6 +33,10 @@ export class DomObserver implements OnDestroy {
     return observer;
   }
 
+  static mounted(element: HTMLElement) {
+    return document.contains(element);
+  }
+
   static disconnect(observer: MutationObserver) {
     observer.disconnect();
     DomObserver.observers.delete(observer);
