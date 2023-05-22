@@ -31,7 +31,7 @@ export function form(reducer: Function) {
     let nextState = reducer(state, action);
 
     if (action.type === FormActions.Init) {
-      nextState = setValue(nextState, `${action.payload.path}`, deepClone(action.payload.value));
+      nextState = setValue(nextState, `${action.payload.path}.model`, deepClone(action.payload.value));
     }
 
     if (action.type === FormActions.UpdateValue || action.type === FormActions.UpdateForm) {

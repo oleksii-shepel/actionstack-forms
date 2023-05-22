@@ -41,13 +41,6 @@ export class SyncDirective implements OnInit, OnDestroy {
     public cdr: ChangeDetectorRef,
     public elRef: ElementRef
   ) {
-    if(dir instanceof NgForm) {
-      Object.assign(dir.form, {
-        patchValue: (value: any, options?: any) => {
-          patchValue(dir, value, options);
-        }
-      });
-    }
   }
 
   ngOnInit() {
@@ -152,10 +145,6 @@ export class SyncDirective implements OnInit, OnDestroy {
         }
       });
 
-    // we need to replace patchValue method if two-way binding for ngModels directives is used
-    // if(this.dir instanceof NgForm) {
-    //   patchValue(this.dir, state?.model);
-    // }
     // check if state is present in the store and if so initialize the form
     this.e = this.store.select(state => getValue(state, `${this.path}`)).pipe(
       first(),

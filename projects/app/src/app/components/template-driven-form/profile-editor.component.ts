@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { HeroState, initialState } from '../../reducers/hero.reducer';
 import { ApplicationState, getHeroSlice } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { InitForm, UpdateFormValue, deepClone } from 'ngync';
+import { InitForm, UpdateFormValue, deepClone, getValue } from 'ngync';
 
 @Component({
   selector: 'template-profile-editor',
@@ -17,15 +17,14 @@ export class TemplateProfileEditorComponent {
   @ViewChild('form') form: NgForm | null = null;
 
   profile$!: Observable<HeroState>;
-  initialState = initialState;
-  model = initialState.model;
+  model = initialHero;
 
   constructor(private store: Store<ApplicationState>) {
 
     this.store.select(getHeroSlice).pipe(take(1)).subscribe((state) => {
-      this.initialState = deepClone(state? state: { model: initialHero });
-      this.model = this.initialState.model;
-      this.store.dispatch(new InitForm({ path: "hero", value: this.initialState}));
+      let model = getValue(state, "model") ?? initialHero;
+      this.store.dispatch(new InitForm({ path: "hero", value: model}));
+      this.model = deepClone(model);
     });
 
     this.profile$ = this.store.select(getHeroSlice);
@@ -41,9 +40,6 @@ export class TemplateProfileEditorComponent {
   }
 
   addAlias() {
-    // you cannot modify separate properties of the model directly
-    // replace the entire model with a new one
-    this.model = deepClone(this.model);
     this.model.aliases.push('');
   }
 

@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { ProfileState, initialState } from '../../reducers/profile.reducer';
 import { ApplicationState, getProfile, getProfileSlice } from '../../reducers';
 import { Observable, take } from 'rxjs';
-import { InitForm, UpdateFormValue, buildForm, deepClone } from 'ngync';
+import { InitForm, UpdateFormValue, buildForm, deepClone, getValue } from 'ngync';
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -21,8 +21,7 @@ export class ReactiveProfileEditorComponent {
 
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
 
-  initialState = initialState;
-  model = initialState.model;
+  model = initialProfile;
 
   get aliases() {
     return this.profileForm.get('aliases') as FormArray;
@@ -31,9 +30,9 @@ export class ReactiveProfileEditorComponent {
   constructor(private fb: FormBuilder, private store: Store<ApplicationState>) {
 
     this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
-      this.initialState = deepClone(state? state : { model: initialProfile });
-      this.model = this.initialState.model;
-      this.store.dispatch(new InitForm({ path: "profile", value: this.initialState}));
+      let model = getValue(state, "model") ?? initialProfile;
+      this.store.dispatch(new InitForm({ path: "profile", value: model}));
+      this.model = deepClone(model);
     });
 
     this.profile$ = this.store.select(getProfile);

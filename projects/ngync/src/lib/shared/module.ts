@@ -6,6 +6,7 @@ import { SyncDirective } from './core';
 @NgModule({
   imports: [FormsModule, StoreModule],
   declarations: [SyncDirective],
-  exports: [SyncDirective]
+  exports: [SyncDirective],
+  providers: []
 })
 export class SharedModule {}
