@@ -13,16 +13,12 @@ export interface SyncDirectiveOptions {
 }
 
 @Directive({
-  selector: 'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]',
-  providers: [{
-    provide: 'form',
-    useFactory: (injector: Injector) => injector.get(FormGroupDirective, null) ?? injector.get(NgForm, null),
-    deps: [ Injector, [ new Optional(), new SkipSelf(), NgForm ], [ new Optional(), new SkipSelf(), FormGroupDirective ]],
-  }]
+  selector: 'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]'
 })
 export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   @Input('ngync') options!: string | SyncDirectiveOptions;
 
+  dir!: FormGroupDirective | NgForm;
   path!: string;
   model!: any;
   debounce!: number;
@@ -36,11 +32,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   a: any; b: any; c: any; d: any; e: any;
 
   constructor(
-    @Inject('form') public dir: NgForm | FormGroupDirective,
+    public injector: Injector,
     public store: Store,
     public cdr: ChangeDetectorRef,
     public elRef: ElementRef,
   ) {
+    this.dir = injector.get(FormGroupDirective, null) ?? injector.get(NgForm, null) as any;
   }
 
   ngOnInit() {
