@@ -12,6 +12,8 @@ export enum FormActions {
   SetEnabled = '[Form] Enable Form',
   UpdateForm = '[Form] Update Form',
   Reset = '[Form] Reset',
+  Submitted = '[Form] Submitted',
+  UpdateSubmitted = '[Form] Update Submitted',
 }
 
 export class InitForm implements Action {
@@ -49,12 +51,12 @@ export class UpdateFormDirty implements Action {
 
 export class SetFormDirty implements Action {
   readonly type = FormActions.SetDirty;
-  constructor(public payload: string) {}
+  constructor(public payload: { path: string }) {}
 }
 
 export class SetFormPristine implements Action {
   readonly type = FormActions.SetPrestine;
-  constructor(public payload: string) {}
+  constructor(public payload: { path: string }) {}
 }
 
 export class UpdateFormErrors implements Action {
@@ -64,15 +66,25 @@ export class UpdateFormErrors implements Action {
 
 export class SetFormDisabled implements Action {
   readonly type = FormActions.SetDisabled;
-  constructor(public payload: string) {}
+  constructor(public payload: { path: string }) {}
 }
 
 export class SetFormEnabled implements Action {
   readonly type = FormActions.SetEnabled;
-  constructor(public payload: string) {}
+  constructor(public payload: { path: string }) {}
 }
 
 export class ResetForm implements Action {
   readonly type = FormActions.Reset;
-  constructor(public payload: { value: any; }) {}
+  constructor(public payload: { value: any; path: string }) {}
+}
+
+export class FormSubmitted implements Action {
+  readonly type = FormActions.Submitted;
+  constructor(public payload: { path: string }) {}
+}
+
+export class UpdateSubmitted implements Action {
+  readonly type = FormActions.UpdateSubmitted;
+  constructor(public payload: { path: string, value: boolean }) {}
 }

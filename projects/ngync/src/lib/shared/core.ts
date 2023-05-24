@@ -178,7 +178,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     if (this.clearOnDestroy) {
       this.store.dispatch(
-        new ResetForm({ value: this.model })
+        new ResetForm({ value: this.model, path: this.path })
       );
     }
   }

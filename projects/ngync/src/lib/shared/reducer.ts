@@ -1,4 +1,3 @@
-import { ActionReducer, State } from '@ngrx/store';
 import { FormActions } from './actions';
 import { deepClone } from './builder';
 
@@ -7,22 +6,33 @@ export interface FormState<T> {
   errors?: { [k: string]: string };
   dirty?: boolean;
   status?: string;
+  submitted?: boolean;
+}
+
+const iterable = (obj: any) => {
+  return { [Symbol.iterator]: function* () {
+    for(let element in obj) { yield element; }
+  }}
 }
 
 export const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
 
+const isArray = (split: string[]) => split.length >= 2 && !isNaN(+split[1]);
+const isObject = (split: string[]) => split.length > 1 || isArray(split);
+
 export const setValue = (obj: any, prop: string, val: any) => {
-  obj = { ...obj };
+  obj = {...obj};
   const split = prop.split('.');
-  const last = split[split.length - 1];
-  split.reduce((acc, part, index, array) => {
-    if (index === array.length - 1) {
-      acc[part] = val;
-    } else {
-      acc[part] = { ...acc[part] };
+  if(split.length === 0) { obj = val }
+  else {
+    let item = obj;
+    while(split.length >= 1) {
+      const key = split.at(0)!;
+      item[key] = isArray(split) ? item[key] || [] : isObject(split) ? {...item[key]} || {} : val;
+      item = item[key];
+      split.shift()
     }
-    return acc && acc[part];
-  }, obj);
+  }
   return obj;
 };
 
@@ -51,23 +61,31 @@ export function form(reducer: Function) {
     }
 
     if (action.type === FormActions.SetDirty) {
-      nextState = setValue(nextState, `${action.payload}.dirty`, true);
+      nextState = setValue(nextState, `${action.payload.path}.dirty`, true);
     }
 
     if (action.type === FormActions.SetPrestine) {
-      nextState = setValue(nextState, `${action.payload}.dirty`, false);
+      nextState = setValue(nextState, `${action.payload.path}.dirty`, false);
     }
 
     if (action.type === FormActions.SetDisabled) {
-      nextState = setValue(nextState, `${action.payload}.disabled`, true);
+      nextState = setValue(nextState, `${action.payload.path}.disabled`, true);
     }
 
     if (action.type === FormActions.SetEnabled) {
-      nextState = setValue(nextState, `${action.payload}.disabled`, false);
+      nextState = setValue(nextState, `${action.payload.path}.disabled`, false);
     }
 
     if (action.type === FormActions.Reset) {
       nextState = setValue(nextState, `${action.payload.path}`, deepClone(action.payload.value));
+    }
+
+    if (action.type === FormActions.Submitted) {
+      nextState = setValue(nextState, `${action.payload.path}.submitted`, true);
+    }
+
+    if (action.type === FormActions.UpdateSubmitted) {
+      nextState = setValue(nextState, `${action.payload.path}.submitted`, action.payload.value);
     }
 
     return nextState;

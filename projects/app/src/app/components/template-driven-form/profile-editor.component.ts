@@ -1,20 +1,20 @@
-import { Component, OnDestroy,Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Profile, initialHero } from '../../models/profile';
+import { initialHero } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { HeroState } from '../../reducers/hero.reducer';
 import { ApplicationState, getHeroSlice } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { InitForm, UpdateFormValue, deepClone, getValue } from 'ngync';
+import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getValue } from 'ngync';
 
 @Component({
   selector: 'template-profile-editor',
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TemplateProfileEditorComponent implements OnDestroy {
-  @Output() formSubmitted = new EventEmitter<Profile>();
-  @ViewChild('form') form: NgForm | null = null;
+  @ViewChild('heroForm') form: NgForm | null = null;
 
   profile$!: Observable<HeroState>;
   model = initialHero;
@@ -50,8 +50,10 @@ export class TemplateProfileEditorComponent implements OnDestroy {
   }
 
   onSubmit() {
-    this.formSubmitted.emit(this.form!.value as Profile);
-    alert("Form submitted successfully");
+    if(this.form?.valid) {
+      this.store.dispatch(new FormSubmitted({path: "hero"}));
+      alert("Form submitted successfully");
+    }
   }
 
   ngOnDestroy() {

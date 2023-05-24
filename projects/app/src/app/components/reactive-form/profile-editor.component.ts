@@ -1,24 +1,26 @@
-import { Component, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { FormArray } from '@angular/forms';
-import { Profile, initialProfile, profileOptions } from '../../models/profile';
+import { initialProfile, profileOptions } from '../../models/profile';
 import { Store } from '@ngrx/store';
-import { ProfileState, initialState } from '../../reducers/profile.reducer';
+import { ProfileState } from '../../reducers/profile.reducer';
 import { ApplicationState, getProfile, getProfileSlice } from '../../reducers';
 import { Observable, take } from 'rxjs';
-import { InitForm, UpdateFormValue, buildForm, deepClone, getValue } from 'ngync';
+import { FormSubmitted, InitForm, UpdateFormValue, buildForm, getValue } from 'ngync';
 
 @Component({
   selector: 'reactive-profile-editor',
   templateUrl: './profile-editor.component.html',
-  styleUrls: ['./profile-editor.component.css']
+  styleUrls: ['./profile-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReactiveProfileEditorComponent implements OnDestroy {
-  @Output() formSubmitted = new EventEmitter<Profile>();
 
   profile$: Observable<ProfileState>;
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
+  form = this.profileForm;
+
   a: any;
 
   get aliases() {
@@ -49,8 +51,10 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
   }
 
   onSubmit() {
-    this.formSubmitted.emit(this.profileForm.value as Profile);
-    alert("Form submitted successfully");
+    if(this.form?.valid) {
+      this.store.dispatch(new FormSubmitted({path: "profile"}));
+      alert("Form submitted successfully");
+    }
   }
 
   ngOnDestroy() {

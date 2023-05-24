@@ -78,67 +78,6 @@ export function deepClone(objectToClone: any) {
   return obj;
 }
 
-export function patchValue<T>(form: NgForm, model: T, options: {
-  onlySelf?: boolean,
-  emitEvent?: boolean,
-  emitModelToViewChange?: boolean,
-  emitViewToModelChange?: boolean
-} = {}) {
-
-  const iterable = (val: any) => {
-    return { [Symbol.iterator]: function* () {
-      while(val._parent) { yield val.name; val = val._parent; }
-    }}
-  }
-
-  const getValue = (dir: NgModel, model: any) => [...iterable(dir)].reverse().reduce((acc, part) => acc && acc[part], model);
-
-  if(form.hasOwnProperty('_directives')) {
-    for (var it = form['_directives'].values(), dir: any = null; dir = it.next().value; ) {
-      if(dir.hasOwnProperty('valueAccessor') && dir.hasOwnProperty('_parent')) {
-
-        const value = getValue(dir, model);
-        const control = dir.control as any;
-
-        //(dir as NgControl).valueAccessor!.writeValue(value);
-        control.setValue(value);
-
-        if(dir.hasOwnProperty('_onChange')){
-          if (Array.isArray(dir._onChange) && dir._onChange.length) {
-            dir._onChange.forEach(
-                (changeFn: any) => changeFn(value, true));
-          } else if (typeof dir._onChange === 'function'){
-            dir._onChange(value, true);
-          }
-        }
-
-        if (options.emitEvent !== false) {
-          (control as {status: FormControlStatus}).status = control._calculateStatus();
-          (control.valueChanges as EventEmitter<T>).emit(value);
-          (control.statusChanges as EventEmitter<FormControlStatus>).emit(control.status);
-        }
-
-        if (control._parent && !options.onlySelf) {
-          control._parent.updateValueAndValidity(options);
-        }
-      }
-    }
-  }
-}
-
-// export function patchValue(form: any, model: any) {
-//   if(!form || !form.controls || !model) {
-//     return;
-//   }
-
-//   for (const key in form.controls) {
-//     let value = model[key];
-//     form.controls[key].value = (typeof value === "object") ? patchValue(form.controls[key], value) : value;
-//   }
-
-//   return model;
-// }
-
 export function deepEqual(x: any, y: any): boolean {
   return (x && y && typeof x === 'object' && typeof y === 'object') ?
     (Object.keys(x).length === Object.keys(y).length) &&
