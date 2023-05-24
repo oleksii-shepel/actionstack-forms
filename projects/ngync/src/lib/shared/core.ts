@@ -1,7 +1,7 @@
 import { Directive, Input, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
 import { FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, filter, takeWhile, repeat, first, tap } from 'rxjs';
+import { Subject, filter, takeWhile, repeat, first, tap, takeUntil } from 'rxjs';
 import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, ResetForm } from './actions';
 import { DomObserver, getValue } from '.';
 import { checkForm } from '../shared';
@@ -61,7 +61,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
 
   this.a = this.dir.valueChanges!
     .pipe(
-      takeWhile(()=> DomObserver.mounted(this.elRef.nativeElement)),
+      takeUntil(DomObserver.unmounted(this.elRef.nativeElement)),
       filter(() => this._initialized))
     .subscribe(value => {
       if(!this._updating) {
@@ -94,7 +94,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
 
   this.b = this.dir.statusChanges!
     .pipe(
-      takeWhile(()=> DomObserver.mounted(this.elRef.nativeElement)),
+      takeUntil(DomObserver.unmounted(this.elRef.nativeElement)),
       filter(() => this._initialized))
     .subscribe(status => {
         if(!this._updating) {
@@ -112,7 +112,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
 
     this.c = this.store
       .select(state => getValue(state, `${this.path}.dirty`))
-      .pipe(takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)))
+      .pipe(takeUntil(DomObserver.unmounted(this.elRef.nativeElement)))
       .subscribe(dirty => {
         if (this.dir.form.dirty !== dirty) {
           if (dirty === true) {
@@ -127,7 +127,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
 
     this.d = this.store
       .select(state => getValue(state, `${this.path}.disabled`))
-      .pipe(takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)))
+      .pipe(takeUntil(DomObserver.unmounted(this.elRef.nativeElement)))
       .subscribe(disabled => {
         if (this.dir.form.disabled !== disabled) {
           if (disabled === true) {
@@ -162,8 +162,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     });
-
-    DomObserver.unmounted(this.elRef.nativeElement, this.ngOnComponentUnmounted.bind(this));
   }
 
   ngAfterViewInit() {

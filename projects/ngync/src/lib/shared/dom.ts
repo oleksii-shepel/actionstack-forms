@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from "@angular/core";
+import { Observable, Subject } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +9,9 @@ export class DomObserver implements OnDestroy {
 
   constructor() {}
 
-  static unmounted(element: HTMLElement, callback: () => void) {
+  static unmounted(element: HTMLElement): Observable<boolean> {
+    let event = new Subject<boolean>();
+
     const observer = new MutationObserver(elements => {
       elements.forEach(item => {
         item.removedNodes.forEach(node => {
@@ -18,7 +21,8 @@ export class DomObserver implements OnDestroy {
           }
           if(node === treeItem) {
             DomObserver.disconnect(observer);
-            callback();
+            event.next(true);
+            event.complete();
           }
         });
       });
@@ -31,7 +35,7 @@ export class DomObserver implements OnDestroy {
     }
 
     DomObserver.observers.add(observer);
-    return observer;
+    return event;
   }
 
   static mounted(element: HTMLElement) {
