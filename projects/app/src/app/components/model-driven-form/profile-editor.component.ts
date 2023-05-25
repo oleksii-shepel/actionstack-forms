@@ -2,9 +2,9 @@ import { Component, ViewChild, OnDestroy, ChangeDetectionStrategy } from '@angul
 import { NgForm } from '@angular/forms';
 import { initialModel } from '../../models/profile';
 import { Store } from '@ngrx/store';
-import { ApplicationState, getModelSlice } from '../../reducers';
+import { ApplicationState } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getValue } from 'ngync';
+import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getModel, getSlice, getValue } from 'ngync';
 import { ModelState } from '../../reducers/standard.reducer';
 
 @Component({
@@ -16,19 +16,20 @@ import { ModelState } from '../../reducers/standard.reducer';
 export class StandardProfileEditorComponent implements OnDestroy {
   @ViewChild('modelForm') form: NgForm | null = null;
 
+  slice = "model";
   profile$!: Observable<ModelState>;
   model = initialModel;
   a: any;
 
   constructor(private store: Store<ApplicationState>) {
 
-    this.a = this.store.select(getModelSlice).pipe(take(1)).subscribe((state) => {
+    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model = getValue(state, "model") ?? initialModel;
-      this.store.dispatch(new InitForm({ path: "model", value: model}));
+      this.store.dispatch(new InitForm({ path: this.slice, value: model}));
       this.model = deepClone(model);
     });
 
-    this.profile$ = this.store.select(getModelSlice);
+    this.profile$ = this.store.select(getSlice(this.slice));
   }
 
   updateProfile() {

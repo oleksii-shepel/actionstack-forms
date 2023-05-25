@@ -1,4 +1,4 @@
-import { createSelector, ActionReducer } from '@ngrx/store';
+import { ActionReducer } from '@ngrx/store';
 import { environment } from '../../environments/environment';
 
 /**
@@ -38,7 +38,8 @@ import { combineReducers } from '@ngrx/store';
 import * as fromProfile from './profile.reducer';
 import * as fromHero from './hero.reducer';
 import * as fromStandard from './standard.reducer';
-import { deepClone } from 'ngync';
+
+
 /**
  * As mentioned, we treat each reducer like a table in a database. This means
  * our top level state interface is just a map of keys to inner state types.
@@ -74,38 +75,3 @@ export function reducer(state: any, action: any) {
     return developmentReducer(state, action);
   }
 }
-
-
-/**
- * A selector function is a map function factory. We pass it parameters and it
- * returns a function that maps from the larger state tree into a smaller
- * piece of state. This selector simply selects the `books` state.
- *
- * Selectors are used with the `select` operator.
- *
- * ```ts
- * class MyComponent {
- * 	constructor(state$: Observable<State>) {
- * 	  this.booksState$ = state$.select(getBooksState);
- * 	}
- * }
- * ```
- */
-
-export const getProfileSlice = (state: ApplicationState) => state.profile;
-export const getHeroSlice = (state: ApplicationState) => state.hero;
-export const getModelSlice = (state: ApplicationState) => state.model;
-
-/**
- * Every reducer module exports selector functions, however child reducers
- * have no knowledge of the overall state tree. To make them useable, we
- * need to make new selectors that wrap them.
- *
- * The createSelector function from the reselect library creates
- * very efficient selectors that are memoized and only recompute when arguments change.
- * The created selectors can also be composed together to select different
- * pieces of state.
- */
-export const getProfile = createSelector(getProfileSlice, fromProfile.getProfileState);
-export const getHero = createSelector(getHeroSlice, fromHero.getHeroState);
-export const getModel = createSelector(getModelSlice, fromStandard.getModelState);

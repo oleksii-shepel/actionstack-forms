@@ -1,4 +1,4 @@
-<form [formGroup]="profileForm" (ngSubmit)="onSubmit()" autocomplete="off" ngync="profile">
+<form [formGroup]="profileForm" (ngSubmit)="onSubmit()" autocomplete="off" [ngync]="this.slice">
   <label for="firstName">First Name: </label>
   <input id="firstName" type="text" formControlName="firstName">
 

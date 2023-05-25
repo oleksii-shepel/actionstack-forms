@@ -3,9 +3,9 @@ import { NgForm } from '@angular/forms';
 import { initialHero } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { HeroState } from '../../reducers/hero.reducer';
-import { ApplicationState, getHeroSlice } from '../../reducers';
+import { ApplicationState } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getValue } from 'ngync';
+import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getSlice, getValue } from 'ngync';
 
 @Component({
   selector: 'template-profile-editor',
@@ -16,19 +16,20 @@ import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getValue } from 'n
 export class TemplateProfileEditorComponent implements OnDestroy {
   @ViewChild('heroForm') form: NgForm | null = null;
 
+  slice = "hero";
   profile$!: Observable<HeroState>;
   model = initialHero;
   a: any;
 
   constructor(private store: Store<ApplicationState>) {
 
-    this.a = this.store.select(getHeroSlice).pipe(take(1)).subscribe((state) => {
+    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model = getValue(state, "model") ?? initialHero;
-      this.store.dispatch(new InitForm({ path: "hero", value: model}));
+      this.store.dispatch(new InitForm({ path: this.slice, value: model}));
       this.model = deepClone(model);
     });
 
-    this.profile$ = this.store.select(getHeroSlice);
+    this.profile$ = this.store.select(getSlice(this.slice));
   }
 
   updateProfile() {

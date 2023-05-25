@@ -4,7 +4,7 @@ import { selectValueAccessor } from '../shared/accessors';
 import { composeAsyncValidators, composeValidators } from '../shared/validators';
 import { CALL_SET_DISABLED_STATE } from '../shared/controls';
 import { FieldGroupDirective } from './group.directive';
-import { SyncDirective, getValue } from '../shared';
+import { SyncDirective, getSlice, getValue } from '../shared';
 import { Subject, takeUntil, distinctUntilChanged, map } from 'rxjs';
 import { FieldArrayDirective } from './array.directive';
 
@@ -90,7 +90,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this._ngStore?.store.select((state: any) => state).pipe(
       distinctUntilChanged(),
       takeUntil(this._destroyed$),
-      map(state => getValue(state, `${this._ngStore.path}.model`))).subscribe(
+      map(state => getSlice(this._ngStore.path)(state).model)).subscribe(
       (model: any) => {
       let value = getValue(model, this.path.join('.'));
       this.valueAccessor?.writeValue(value);

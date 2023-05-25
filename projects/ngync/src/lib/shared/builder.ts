@@ -1,22 +1,11 @@
-import { EventEmitter } from '@angular/core';
-import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormControl, FormControlStatus, FormGroup, NgControl, NgForm, NgModel } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ModelOptions } from '.';
 
-export type ArrayToObject<T extends any[]> = {
-  [key in keyof T as string]: T[key];
-}
 
-export type Extract<T, V> = { [key in keyof T]: T[key] extends V ? key : never }[keyof T]
-export type SubType<Base, Condition> = Pick<Base, Extract<Base, Condition>>;
-
-export type ModelOptions<T> = {
-  [key in keyof Partial<T>]? : T[key] extends Array<any> ? ModelOptions<T[key]> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
-} & {
-  ["__group"]?: T extends object ? AbstractControlOptions : never;
-} & {
-  [key in keyof SubType<T, Array<any>> as key extends string ? `__array_${key}` : never]?: AbstractControlOptions;
-};
 
 export const fb = new FormBuilder();
+
+
 
 export function buildForm<T>(model: T, options: ModelOptions<T> = {}): AbstractControl {
   if (!model) return fb.control(name, (options || {}) as AbstractControlOptions);
@@ -42,6 +31,8 @@ export function buildForm<T>(model: T, options: ModelOptions<T> = {}): AbstractC
   return obj;
 }
 
+
+
 export function checkForm<T>(form: any, model: T): boolean {
   if (!form || !form.controls) return false;
 
@@ -60,10 +51,14 @@ export function checkForm<T>(form: any, model: T): boolean {
   return ready;
 }
 
+
+
 export function deepCloneJSON(objectToClone: any) {
   if (!objectToClone) return objectToClone;
   return JSON.parse(JSON.stringify(objectToClone));
 }
+
+
 
 export function deepClone(objectToClone: any) {
   if (!objectToClone) return objectToClone;
@@ -77,6 +72,8 @@ export function deepClone(objectToClone: any) {
 
   return obj;
 }
+
+
 
 export function deepEqual(x: any, y: any): boolean {
   return (x && y && typeof x === 'object' && typeof y === 'object') ?

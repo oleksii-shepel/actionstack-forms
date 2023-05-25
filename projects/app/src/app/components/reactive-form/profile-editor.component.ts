@@ -5,9 +5,9 @@ import { FormArray } from '@angular/forms';
 import { initialProfile, profileOptions } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { ProfileState } from '../../reducers/profile.reducer';
-import { ApplicationState, getProfile, getProfileSlice } from '../../reducers';
+import { ApplicationState } from '../../reducers';
 import { Observable, take } from 'rxjs';
-import { FormSubmitted, InitForm, UpdateFormValue, buildForm, getValue } from 'ngync';
+import { FormSubmitted, InitForm, UpdateFormValue, buildForm, getSlice, getValue } from 'ngync';
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -17,6 +17,7 @@ import { FormSubmitted, InitForm, UpdateFormValue, buildForm, getValue } from 'n
 })
 export class ReactiveProfileEditorComponent implements OnDestroy {
 
+  slice = "profile";
   profile$: Observable<ProfileState>;
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
   form = this.profileForm;
@@ -29,12 +30,12 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   constructor(private fb: FormBuilder, private store: Store<ApplicationState>) {
 
-    this.a = this.store.select(getProfileSlice).pipe(take(1)).subscribe((state) => {
+    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model = getValue(state, "model") ?? initialProfile;
-      this.store.dispatch(new InitForm({ path: "profile", value: model}));
+      this.store.dispatch(new InitForm({ path: this.slice, value: model}));
     });
 
-    this.profile$ = this.store.select(getProfile);
+    this.profile$ = this.store.select(getSlice(this.slice));
   }
 
   updateProfile() {

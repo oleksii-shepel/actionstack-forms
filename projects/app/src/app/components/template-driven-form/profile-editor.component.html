@@ -1,4 +1,4 @@
-<form #heroForm="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" ngync="hero">
+<form #heroForm="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" [ngync]="this.slice">
   <label for="firstName">First Name: </label>
   <input id="firstName" type="text" ngField="firstName">
 

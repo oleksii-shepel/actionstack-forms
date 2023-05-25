@@ -5,7 +5,7 @@ import { AppComponent } from './components/app/app.component';
 import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
 import { StoreModule } from '@ngrx/store';
 import { reducer } from './reducers';
-import { SharedModule, form, TemplateDrivenFormsModule, logger } from 'ngync';
+import { SharedModule, forms, TemplateDrivenFormsModule, logger } from 'ngync';
 import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
 
@@ -21,7 +21,7 @@ import { StandardProfileEditorComponent } from './components/model-driven-form/p
     ReactiveFormsModule,
     FormsModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [form, logger]
+      metaReducers: [forms, logger]
     }),
     SharedModule,
     TemplateDrivenFormsModule
