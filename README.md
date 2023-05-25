@@ -13,9 +13,17 @@ ngync is a top-notch library to unite both the worlds. You can use all types of 
   ...
 </form>
 ```
-That's it, all other staff relates to Redux pattern and have to be implemented in all cases. This is foreign parish and we have to deal with it with all our passion and devotion.
+Additionally, you have to import meta-reducers from ngync package and initialize store module with them. They are responsible for boilerplate functionality that is not needed to implement time after time. The code snippet of main NgModule shows how to import them properly:
 
-Currently there are no docs of the library except this readme. But you probably do not need them at all. The code is concise and self describing. The library goes along with sample application which will help you make first steps. 
+```angular
+  StoreModule.forRoot(reducer, {
+    metaReducers: [forms, logger]
+  })
+   
+``` 
+That's it, you are completely redeemed from tedious chores of Redux pattern. In all other cases NgRx usage does not differ from ones described in its documentation. This is foreign parish and we have to deal with it with all our passion and devotion.
+
+Currently there are no other docs of the library except this readme. But you probably do not need them at all. The code is concise and self describing. The library goes along with sample application which will help you take the first steps. 
 
 The work on the project is almost done and “alpha” version of software is ready for download. It is free. You are allowed to use, copy and modify the codebase. I kindly recommend to join the project development in this repo. You are welcome!
 
