@@ -6,11 +6,17 @@ import { Observable, Subject } from "rxjs";
 })
 export class DomObserver implements OnDestroy {
   static observers = new Set<MutationObserver>();
+  static elements = new Map();
 
   constructor() {}
 
   static unmounted(element: HTMLElement): Observable<boolean> {
+    if(DomObserver.elements.has(element)) {
+      return DomObserver.elements.get(element);
+    }
+
     let event = new Subject<boolean>();
+    DomObserver.elements.set(element, event);
 
     const observer = new MutationObserver(elements => {
       elements.forEach(item => {
@@ -50,6 +56,10 @@ export class DomObserver implements OnDestroy {
   ngOnDestroy() {
     for (const observer of DomObserver.observers) {
       observer.disconnect();
+    }
+
+    for (const [key, value] of DomObserver.elements) {
+      value.complete();
     }
   }
 }
