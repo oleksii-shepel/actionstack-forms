@@ -1,75 +1,57 @@
 import { Action } from '@ngrx/store';
 
 export enum FormActions {
-  Init = '[Form] Init',
-  UpdateStatus = '[Form] Update Status',
-  UpdateValue = '[Form] Update Value',
-  UpdateDirty = '[Form] Update Dirty',
-  SetDirty = '[Form] Set Dirty',
-  SetPrestine = '[Form] Set Prestine',
-  UpdateErrors = '[Form] Update Errors',
-  UpdateForm = '[Form] Update Form',
-  Reset = '[Form] Reset',
-  Submitted = '[Form] Submitted',
+  InitForm        = '[Form] Init',
+  ResetForm       = '[Form] Reset',
+  UpdateForm      = '[Form] Update Form',
+  UpdateValue     = '[Form] Update Value',
+  UpdateStatus    = '[Form] Update Status',
+  UpdateDirty     = '[Form] Update Dirty',
+  UpdateErrors    = '[Form] Update Errors',
   UpdateSubmitted = '[Form] Update Submitted',
 }
 
 export class InitForm implements Action {
-  readonly type = FormActions.Init;
-  constructor(public payload: { value: any; path: string }) {}
+  readonly type = FormActions.InitForm;
+  constructor(public payload: { path: string; value: any; opts?: any }) {}
 }
 
 export class UpdateFormStatus implements Action {
   readonly type = FormActions.UpdateStatus;
-  constructor(public payload: { status: string | null; path: string }) {}
+  constructor(public payload: { path: string; status: string | null }) {}
 }
 
 export class UpdateFormValue implements Action {
   readonly type = FormActions.UpdateValue;
-  constructor(public payload: { value: any; path: string }) {}
+  constructor(public payload: { path: string; value: any }) {}
 }
 
 export class UpdateForm implements Action {
   readonly type = FormActions.UpdateForm;
   constructor(
     public payload: {
+      path: string;
       value: any;
       errors: { [k: string]: string } | null;
       dirty: boolean | null;
       status: string | null;
-      path: string;
     }
   ) {}
 }
 
 export class UpdateFormDirty implements Action {
   readonly type = FormActions.UpdateDirty;
-  constructor(public payload: { dirty: boolean | null; path: string }) {}
-}
-
-export class SetFormDirty implements Action {
-  readonly type = FormActions.SetDirty;
-  constructor(public payload: { path: string }) {}
-}
-
-export class SetFormPristine implements Action {
-  readonly type = FormActions.SetPrestine;
-  constructor(public payload: { path: string }) {}
+  constructor(public payload: { path: string; dirty: boolean | null; }) {}
 }
 
 export class UpdateFormErrors implements Action {
   readonly type = FormActions.UpdateErrors;
-  constructor(public payload: { errors: { [k: string]: string } | null; path: string }) {}
+  constructor(public payload: { path: string; errors: { [k: string]: string } | null }) {}
 }
 
 export class ResetForm implements Action {
-  readonly type = FormActions.Reset;
-  constructor(public payload: { value: any; path: string }) {}
-}
-
-export class FormSubmitted implements Action {
-  readonly type = FormActions.Submitted;
-  constructor(public payload: { path: string }) {}
+  readonly type = FormActions.ResetForm;
+  constructor(public payload: { path: string; value: any }) {}
 }
 
 export class UpdateSubmitted implements Action {

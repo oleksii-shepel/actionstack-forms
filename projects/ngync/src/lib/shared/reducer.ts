@@ -88,40 +88,33 @@ export function forms(reducer: Function) {
     let nextState = reducer(state, action);
     let path = action?.payload?.path;
 
-    if (action.type === FormActions.Init) {
+    if (action.type === FormActions.InitForm) {
       nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.payload.value));
     }
 
-    if (action.type === FormActions.UpdateValue || action.type === FormActions.UpdateForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.payload.value));
-    }
-
-    if (action.type === FormActions.UpdateStatus || action.type === FormActions.UpdateForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.status)}`, action.payload.status);
-    }
-
-    if (action.type === FormActions.UpdateErrors || action.type === FormActions.UpdateForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.errors)}`, deepClone(action.payload.errors));
-    }
-
-    if (action.type === FormActions.UpdateDirty || action.type === FormActions.UpdateForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.dirty)}`, action.payload.dirty);
-    }
-
-    if (action.type === FormActions.SetDirty) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.dirty)}`, true);
-    }
-
-    if (action.type === FormActions.SetPrestine) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.dirty)}`, false);
-    }
-
-    if (action.type === FormActions.Reset) {
+    if (action.type === FormActions.ResetForm) {
       nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path)}`, deepClone(action.payload.value));
     }
 
-    if (action.type === FormActions.Submitted) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.submitted)}`, true);
+    if (action.type === FormActions.UpdateForm) {
+      let value = deepClone(action.payload); delete value.path;
+      nextState = setValue(nextState, path, value);
+    }
+
+    if (action.type === FormActions.UpdateValue) {
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.payload.value));
+    }
+
+    if (action.type === FormActions.UpdateStatus) {
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.status)}`, action.payload.status);
+    }
+
+    if (action.type === FormActions.UpdateErrors) {
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.errors)}`, deepClone(action.payload.errors));
+    }
+
+    if (action.type === FormActions.UpdateDirty) {
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.dirty)}`, action.payload.dirty);
     }
 
     if (action.type === FormActions.UpdateSubmitted) {
