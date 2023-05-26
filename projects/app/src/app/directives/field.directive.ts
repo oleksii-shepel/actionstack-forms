@@ -1,10 +1,10 @@
 import { EventEmitter, Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Provider, Self, Output, ChangeDetectorRef } from '@angular/core';
 import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
-import { selectValueAccessor } from '../shared/accessors';
-import { composeAsyncValidators, composeValidators } from '../shared/validators';
-import { CALL_SET_DISABLED_STATE } from '../shared/controls';
+import { selectValueAccessor } from 'ngync';
+import { composeAsyncValidators, composeValidators } from 'ngync';
+import { CALL_SET_DISABLED_STATE } from 'ngync';
 import { FieldGroupDirective } from './group.directive';
-import { SyncDirective, getSlice, getValue } from '../shared';
+import { SyncDirective, getSlice, getValue } from 'ngync';
 import { Subject, takeUntil, distinctUntilChanged, map } from 'rxjs';
 import { FieldArrayDirective } from './array.directive';
 
@@ -90,8 +90,8 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this._ngStore?.store.select((state: any) => state).pipe(
       distinctUntilChanged(),
       takeUntil(this._destroyed$),
-      map(state => getSlice(this._ngStore.path)(state).model)).subscribe(
-      (model: any) => {
+      map(state => getSlice(this._ngStore.path)(state).model))
+    .subscribe((model: any) => {
       let value = getValue(model, this.path.join('.'));
       this.valueAccessor?.writeValue(value);
     });

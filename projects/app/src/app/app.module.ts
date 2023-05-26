@@ -8,6 +8,9 @@ import { reducer } from './reducers';
 import { SharedModule, forms, TemplateDrivenFormsModule, logger } from 'ngync';
 import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
+import { FieldDirective } from './directives/field.directive';
+import { FieldArrayDirective } from './directives/array.directive';
+import { FieldGroupDirective } from './directives/group.directive';
 
 @NgModule({
   declarations: [
@@ -15,6 +18,9 @@ import { StandardProfileEditorComponent } from './components/model-driven-form/p
     ReactiveProfileEditorComponent,
     TemplateProfileEditorComponent,
     StandardProfileEditorComponent,
+    FieldDirective,
+    FieldArrayDirective,
+    FieldGroupDirective
   ],
   imports: [
     BrowserModule,
