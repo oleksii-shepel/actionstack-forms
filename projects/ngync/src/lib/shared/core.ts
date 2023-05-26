@@ -1,10 +1,10 @@
-import { Directive, Input, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef, ElementRef, Injector } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Directive, ElementRef, Injector, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, filter, takeWhile, repeat, first, tap, combineLatest, startWith, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, ResetForm, UpdateSubmitted } from './actions';
+import { Subject, combineLatest, debounceTime, distinctUntilChanged, filter, first, repeat, startWith, takeUntil, takeWhile, tap } from 'rxjs';
 import { DomObserver, deepClone, deepEqual, getSlice, setValue } from '.';
 import { checkForm } from '../shared';
+import { ResetForm, UpdateFormDirty, UpdateFormErrors, UpdateFormStatus, UpdateFormValue, UpdateSubmitted } from './actions';
 
 export interface SyncDirectiveOptions {
   slice: string;
@@ -149,7 +149,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     // check if state is present in the store and if so initialize the form
     this._subs.c = this.store.select(getSlice(this.slice)).pipe(
       first(),
-      tap(state => console.log(state)),
       filter(state => state?.model),
       repeat({ count: 10, delay: 0 }),
       tap((state) => this.dir.form.patchValue(state.model)),
