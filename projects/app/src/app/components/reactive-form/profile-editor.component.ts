@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { ProfileState } from '../../reducers/profile.reducer';
 import { ApplicationState } from '../../reducers';
 import { Observable, take } from 'rxjs';
-import { FormSubmitted, InitForm, UpdateFormValue, buildForm, getSlice, getValue } from 'ngync';
+import { UpdateSubmitted, InitForm, UpdateFormValue, buildForm, getSlice, getValue } from 'ngync';
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -53,7 +53,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   onSubmit() {
     if(this.form?.valid) {
-      this.store.dispatch(new FormSubmitted({path: "profile"}));
+      this.store.dispatch(new UpdateSubmitted({path: "profile", value: true}));
       alert("Form submitted successfully");
     }
   }

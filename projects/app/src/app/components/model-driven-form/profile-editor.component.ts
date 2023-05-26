@@ -4,7 +4,7 @@ import { initialModel } from '../../models/profile';
 import { Store } from '@ngrx/store';
 import { ApplicationState } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getModel, getSlice, getValue } from 'ngync';
+import { UpdateSubmitted, InitForm, UpdateFormValue, deepClone, getSlice, getValue } from 'ngync';
 import { ModelState } from '../../reducers/standard.reducer';
 
 @Component({
@@ -51,7 +51,7 @@ export class StandardProfileEditorComponent implements OnDestroy {
 
   onSubmit() {
     if(this.form?.valid) {
-      this.store.dispatch(new FormSubmitted({path: "model"}));
+      this.store.dispatch(new UpdateSubmitted({path: "model", value: true}));
       alert("Form submitted successfully");
     }
   }

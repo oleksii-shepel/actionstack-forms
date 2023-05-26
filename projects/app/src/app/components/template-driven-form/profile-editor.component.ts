@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { HeroState } from '../../reducers/hero.reducer';
 import { ApplicationState } from '../../reducers';
 import { take, Observable } from 'rxjs';
-import { FormSubmitted, InitForm, UpdateFormValue, deepClone, getSlice, getValue } from 'ngync';
+import { UpdateSubmitted, InitForm, UpdateFormValue, deepClone, getSlice, getValue } from 'ngync';
 
 @Component({
   selector: 'template-profile-editor',
@@ -52,7 +52,7 @@ export class TemplateProfileEditorComponent implements OnDestroy {
 
   onSubmit() {
     if(this.form?.valid) {
-      this.store.dispatch(new FormSubmitted({path: "hero"}));
+      this.store.dispatch(new UpdateSubmitted({path: "hero", value: true}));
       alert("Form submitted successfully");
     }
   }

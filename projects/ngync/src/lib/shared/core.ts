@@ -1,9 +1,9 @@
-import { Directive, Input, OnInit, OnDestroy, AfterViewInit, ViewChild, ChangeDetectorRef, Inject, ElementRef, Injector, Optional, SkipSelf } from '@angular/core';
+import { Directive, Input, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef, ElementRef, Injector } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Subject, filter, takeWhile, repeat, first, tap, combineLatest, startWith, map, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, ResetForm, UpdateSubmitted, FormSubmitted } from './actions';
-import { DomObserver, deepClone, deepEqual, getDirty, getSlice, getSubmitted, getValue, setValue } from '.';
+import { Subject, filter, takeWhile, repeat, first, tap, combineLatest, startWith, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { UpdateFormStatus, UpdateFormValue, UpdateFormDirty, UpdateFormErrors, ResetForm, UpdateSubmitted } from './actions';
+import { DomObserver, deepClone, deepEqual, getSlice, setValue } from '.';
 import { checkForm } from '../shared';
 
 export interface SyncDirectiveOptions {
