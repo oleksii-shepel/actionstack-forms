@@ -1,17 +1,19 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AppComponent } from './components/app/app.component';
-import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
+import { BrowserModule } from '@angular/platform-browser';
 import { StoreModule } from '@ngrx/store';
-import { reducer } from './reducers';
-import { SharedModule, forms, TemplateDrivenFormsModule, logger } from 'ngync';
-import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
+import { NGYNC_CONFIG_TOKEN, SharedModule, TemplateDrivenFormsModule, forms, logger } from 'ngync';
+import { AppComponent } from './components/app/app.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
-import { FieldDirective } from './directives/field.directive';
+import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
+import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
 import { FieldArrayDirective } from './directives/array.directive';
+import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
+import { reducer } from './reducers';
 
+
+export const NGYNC_CONFIG = { debounce: 75, clearOnDestroy: false, updateOn: 'submit' };
 @NgModule({
   declarations: [
     AppComponent,
@@ -32,7 +34,7 @@ import { FieldGroupDirective } from './directives/group.directive';
     SharedModule,
     TemplateDrivenFormsModule
   ],
-  providers: [],
+  providers: [{ provide: NGYNC_CONFIG_TOKEN, useValue: NGYNC_CONFIG }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

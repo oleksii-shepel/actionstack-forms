@@ -1,60 +1,58 @@
-import { Action } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 
 export enum FormActions {
-  InitForm        = '[Form] Init',
-  ResetForm       = '[Form] Reset',
-  UpdateForm      = '[Form] Update Form',
-  UpdateValue     = '[Form] Update Value',
-  UpdateStatus    = '[Form] Update Status',
-  UpdateDirty     = '[Form] Update Dirty',
-  UpdateErrors    = '[Form] Update Errors',
+  InitForm = '[Form] Init',
+  ResetForm = '[Form] Reset',
+  UpdateForm = '[Form] Update Form',
+  UpdateValue = '[Form] Update Value',
+  UpdateStatus = '[Form] Update Status',
+  UpdateDirty = '[Form] Update Dirty',
+  UpdateErrors = '[Form] Update Errors',
   UpdateSubmitted = '[Form] Update Submitted',
 }
 
-export class InitForm implements Action {
-  readonly type = FormActions.InitForm;
-  constructor(public payload: { path: string; value: any; opts?: any }) {}
-}
+export const InitForm = createAction(
+  FormActions.InitForm,
+  props<{ path: string; value: any; opts?: any; }>()
+);
 
-export class UpdateFormStatus implements Action {
-  readonly type = FormActions.UpdateStatus;
-  constructor(public payload: { path: string; status: string | null }) {}
-}
+export const ResetForm = createAction(
+  FormActions.ResetForm,
+  props<{ path: string; value: any; }>()
+);
 
-export class UpdateFormValue implements Action {
-  readonly type = FormActions.UpdateValue;
-  constructor(public payload: { path: string; value: any }) {}
-}
+export const UpdateForm = createAction(
+  FormActions.UpdateForm,
+  props<{
+    path: string;
+    value: any;
+    errors: { [k: string]: string } | null;
+    dirty: boolean | null;
+    status: string | null;
+  }>()
+);
 
-export class UpdateForm implements Action {
-  readonly type = FormActions.UpdateForm;
-  constructor(
-    public payload: {
-      path: string;
-      value: any;
-      errors: { [k: string]: string } | null;
-      dirty: boolean | null;
-      status: string | null;
-    }
-  ) {}
-}
+export const UpdateValue = createAction(
+  FormActions.UpdateValue,
+  props<{ path: string; value: any; }>()
+);
 
-export class UpdateFormDirty implements Action {
-  readonly type = FormActions.UpdateDirty;
-  constructor(public payload: { path: string; dirty: boolean | null; }) {}
-}
+export const UpdateStatus = createAction(
+  FormActions.UpdateStatus,
+  props<{ path: string; status: string | null; }>()
+);
 
-export class UpdateFormErrors implements Action {
-  readonly type = FormActions.UpdateErrors;
-  constructor(public payload: { path: string; errors: { [k: string]: string } | null }) {}
-}
+export const UpdateDirty = createAction(
+  FormActions.UpdateDirty,
+  props<{ path: string; dirty: boolean | null; }>()
+);
 
-export class ResetForm implements Action {
-  readonly type = FormActions.ResetForm;
-  constructor(public payload: { path: string; value: any }) {}
-}
+export const UpdateErrors = createAction(
+  FormActions.UpdateErrors,
+  props<{ path: string; errors: { [k: string]: string } | null; }>()
+);
 
-export class UpdateSubmitted implements Action {
-  readonly type = FormActions.UpdateSubmitted;
-  constructor(public payload: { path: string, value: boolean }) {}
-}
+export const UpdateSubmitted = createAction(
+  FormActions.UpdateSubmitted,
+  props<{ path: string; value: boolean; }>()
+);

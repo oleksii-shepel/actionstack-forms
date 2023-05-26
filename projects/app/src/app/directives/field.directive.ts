@@ -1,9 +1,12 @@
-import { ChangeDetectorRef, Directive, EventEmitter, Host, Inject, Input, OnDestroy, OnInit, Optional, Output, Provider, Self, forwardRef } from '@angular/core';
+import { EventEmitter, Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Provider, Self, Output, ChangeDetectorRef } from '@angular/core';
 import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
-import { CALL_SET_DISABLED_STATE, SyncDirective, composeAsyncValidators, composeValidators, getSlice, getValue, selectValueAccessor } from 'ngync';
-import { Subject, distinctUntilChanged, map, takeUntil } from 'rxjs';
-import { FieldArrayDirective } from './array.directive';
+import { selectValueAccessor } from 'ngync';
+import { composeAsyncValidators, composeValidators } from 'ngync';
+import { CALL_SET_DISABLED_STATE } from 'ngync';
 import { FieldGroupDirective } from './group.directive';
+import { SyncDirective, getSlice, getValue } from 'ngync';
+import { Subject, takeUntil, distinctUntilChanged, map } from 'rxjs';
+import { FieldArrayDirective } from './array.directive';
 
 const formControlBinding: Provider = {
   provide: NgControl,
