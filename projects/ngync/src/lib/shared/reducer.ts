@@ -86,14 +86,18 @@ export const getSubmitted = (slice: string) => createSelector(getSlice(slice), s
 export function forms(reducer: Function) {
   return function(state: any, action: any) {
     let nextState = reducer(state, action);
-    let path = action?.payload?.path;
+    let path = action?.path;
+
+    if(!path) {
+      return nextState;
+    }
 
     if (action.type === FormActions.InitForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.payload.value));
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.value));
     }
 
     if (action.type === FormActions.ResetForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path)}`, deepClone(action.payload.value));
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path)}`, deepClone(action.value));
     }
 
     if (action.type === FormActions.UpdateForm) {
@@ -102,23 +106,23 @@ export function forms(reducer: Function) {
     }
 
     if (action.type === FormActions.UpdateValue) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.payload.value));
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.value));
     }
 
     if (action.type === FormActions.UpdateStatus) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.status)}`, action.payload.status);
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.status)}`, action.status);
     }
 
     if (action.type === FormActions.UpdateErrors) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.errors)}`, deepClone(action.payload.errors));
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.errors)}`, deepClone(action.errors));
     }
 
     if (action.type === FormActions.UpdateDirty) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.dirty)}`, action.payload.dirty);
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.dirty)}`, action.dirty);
     }
 
     if (action.type === FormActions.UpdateSubmitted) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.submitted)}`, action.payload.value);
+      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.submitted)}`, action.value);
     }
 
     return nextState;

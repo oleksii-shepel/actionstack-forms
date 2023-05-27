@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { NGYNC_CONFIG_TOKEN, SharedModule, TemplateDrivenFormsModule, forms, logger } from 'ngync';
 import { AppComponent } from './components/app/app.component';
@@ -13,7 +14,8 @@ import { FieldGroupDirective } from './directives/group.directive';
 import { reducer } from './reducers';
 
 
-export const NGYNC_CONFIG = { debounce: 75, clearOnDestroy: false, updateOn: 'submit' };
+export const NGYNC_CONFIG = { debounce: 75, clearOnDestroy: false, updateOn: 'blur' };
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -31,6 +33,9 @@ export const NGYNC_CONFIG = { debounce: 75, clearOnDestroy: false, updateOn: 'su
     StoreModule.forRoot(reducer, {
       metaReducers: [forms, logger]
     }),
+
+    EffectsModule.forRoot([]),
+
     SharedModule,
     TemplateDrivenFormsModule
   ],

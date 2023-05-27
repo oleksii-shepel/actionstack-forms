@@ -11,6 +11,6 @@ export const NGYNC_CONFIG_DEFAULT = { debounce: 25, clearOnDestroy: false, updat
 @NgModule({
   imports: [FormsModule, StoreModule, EffectsModule],
   declarations: [SyncDirective],
-  exports: [SyncDirective]
+  exports: [SyncDirective, StoreModule, EffectsModule]
 })
 export class SharedModule {}

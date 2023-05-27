@@ -9,6 +9,8 @@ export enum FormActions {
   UpdateDirty = '[Form] Update Dirty',
   UpdateErrors = '[Form] Update Errors',
   UpdateSubmitted = '[Form] Update Submitted',
+  FormUpdated = '[Form] Updated',
+  FormInitialized = '[Form] Initialized'
 }
 
 export const InitForm = createAction(
@@ -55,4 +57,13 @@ export const UpdateErrors = createAction(
 export const UpdateSubmitted = createAction(
   FormActions.UpdateSubmitted,
   props<{ path: string; value: boolean; }>()
+);
+
+export const FormUpdated = createAction(
+  FormActions.FormUpdated
+);
+
+
+export const FormInitialized = createAction(
+  FormActions.FormInitialized
 );
