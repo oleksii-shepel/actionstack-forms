@@ -34,10 +34,14 @@ export class TemplateProfileEditorComponent implements OnDestroy {
 
   updateProfile() {
     this.store.dispatch(UpdateValue({value: {
-      firstName: 'Nancy',
+      firstName: 'Dr. Julius No',
+      lastName: '',
       address: {
-        street: '123 Drew Street'
-      }
+        street: '',
+        city: '',
+        state: 'Jamaica',
+        zip: ''
+      },
     }, path: "hero"}));
   }
 
