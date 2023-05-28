@@ -14,7 +14,7 @@ import { FieldGroupDirective } from './directives/group.directive';
 import { reducer } from './reducers';
 
 
-export const NGYNC_CONFIG = { debounce: 75, clearOnDestroy: false, updateOn: 'blur' };
+export const NGYNC_CONFIG = { debounce: 75, clearOnDestroy: false, updateOn: 'change' };
 
 @NgModule({
   declarations: [

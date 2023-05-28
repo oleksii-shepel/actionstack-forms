@@ -19,7 +19,7 @@ import {
   map,
   repeat,
   takeWhile,
-  tap,
+  tap
 } from 'rxjs';
 import {
   DomObserver,
@@ -103,8 +103,24 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       this.actions$.pipe(
         ofType(UpdateSubmitted),
         map((state) => !!state),
+        filter(() => this._initialized && !this._updating),
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
         tap((state) => this._submitted$.next(state)),
+        filter((state) => state),
+        tap(() => {
+          this.dir.form.markAsPristine();
+          this.dir.form.updateValueAndValidity();
+          this.cdr.markForCheck();
+
+          this._submittedState = {
+            model: this.formValue,
+            errors: this.dir.errors,
+            dirty: false,
+            status: this.dir.status,
+            submitted: true,
+          };
+          this._submitted$.next(false);
+        }),
         map((state) => SubmittedUpdated())
       )
     ).subscribe();
@@ -112,87 +128,34 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$])
       .pipe(
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        filter(() => this._initialized),
-        tap((values) => {
-          if (!this._updating) {
-            this._updating = true;
-            let formValue = this.formValue;
-            let equal = deepEqual(formValue, this._submittedState?.model);
-            if (
-              this.updateOn === 'change' ||
-              (this.updateOn === 'blur' && values[1] === true) ||
-              (this.updateOn === 'submit' && values[2] === true)
-            ) {
-              this.store.dispatch(
-                UpdateValue({
-                  path: this.slice,
-                  value: formValue,
-                })
-              );
+        filter(() => this._initialized && !this._updating),
+        tap(() => this._updating = true),
+        filter((values) => this.updateOn === 'change' || (this.updateOn === 'blur' && values[1] === true) || (this.updateOn === 'submit' && values[2] === true)),
+        map((values) => {
+          let form = this.formValue;
+          let equal = deepEqual(form, this._submittedState?.model);
 
-              this.store.dispatch(
-                UpdateDirty({
-                  path: this.slice,
-                  dirty: !equal,
-                })
-              );
-
-              this.store.dispatch(
-                UpdateErrors({
-                  path: this.slice,
-                  errors: this.dir.errors,
-                })
-              );
-
-              this.store.dispatch(
-                UpdateStatus({
-                  path: this.slice,
-                  status: this.dir.status,
-                })
-              );
-
-              this.dir.form.updateValueAndValidity();
-              this.cdr.markForCheck();
-            }
-
-            if (
-              this.updateOn === 'change' ||
-              (this.updateOn === 'blur' && values[1] === true)
-            ) {
-              if (equal) {
-                this.dir.form.markAsPristine();
-                this.dir.form.updateValueAndValidity();
-                this.cdr.markForCheck();
-              }
-
-              this.store.dispatch(
-                UpdateSubmitted({
-                  path: this.slice,
-                  value: equal,
-                })
-              );
-            }
-
-            if (values[1] === true) {
-              this._blur$.next(false);
-            }
-
-            if (values[2] === true) {
-              this._submittedState = {
-                model: formValue,
-                errors: this.dir.errors,
-                dirty: !equal,
-                status: this.dir.status,
-                submitted: true,
-              };
-              this._submitted$.next(false);
-            }
-
+          if (equal && (this.updateOn === 'change' || (this.updateOn === 'blur' && values[1] === true))){
+            this.dir.form.markAsPristine();
+            this.dir.form.updateValueAndValidity();
             this.cdr.markForCheck();
-            this._updating = false;
           }
-        })
-      )
+          return {form: form, equal: equal, obs: values}
+        }),
+        tap((obs) => {
+
+          this.store.dispatch(UpdateValue({ path: this.slice, value: obs.form }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !obs.equal }));
+          this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
+          this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
+          if(this.updateOn === 'change' || (this.updateOn === 'blur' && obs.obs[1] === true)) {
+            this.store.dispatch(UpdateSubmitted({ path: this.slice, value: obs.equal }));
+          }
+
+          this.dir.form.updateValueAndValidity();
+          this.cdr.markForCheck();
+          this._updating = false;
+        }))
       .subscribe();
 
     this._subs.c = this.store
@@ -204,20 +167,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         tap((state) => this.dir.form.patchValue(state.model)),
         filter((state) => checkForm(this.dir.form, state.model)),
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        takeWhile(() => !this._initialized)
+        takeWhile(() => !this._initialized && !this._updating),
       )
       .subscribe((state) => {
-        if (!this._updating) {
-          this._updating = true;
-          this._initialized = true;
-          this.dir.form.markAsPristine();
-          this.cdr.markForCheck();
-          this._initialState = state;
-          this._updating = false;
+        this._updating = true;
+        this._initialized = true;
+        this.dir.form.markAsPristine();
+        this.cdr.markForCheck();
+        this._initialState = state;
+        this._updating = false;
 
-          if (this.dir instanceof NgForm) {
-            this.formInitialized();
-          }
+        if (this.dir instanceof NgForm) {
+          this.formInitialized();
         }
       });
   }
