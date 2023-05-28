@@ -40,7 +40,7 @@ import {
   UpdateErrors,
   UpdateStatus,
   UpdateSubmitted,
-  UpdateValue,
+  UpdateValue
 } from './actions';
 
 @Directive({
