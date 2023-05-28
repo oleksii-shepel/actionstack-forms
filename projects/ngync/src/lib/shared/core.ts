@@ -3,10 +3,13 @@ import {
   ChangeDetectorRef,
   Directive,
   ElementRef,
+  Inject,
   Injector,
   Input,
   OnDestroy,
   OnInit,
+  Optional,
+  Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgForm } from '@angular/forms';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
@@ -53,8 +56,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   updateOn!: string;
 
   dir: NgForm | FormGroupDirective;
-  cdr: ChangeDetectorRef;
-  elRef: ElementRef<any>;
 
   _initialState: any;
   _submittedState: any;
@@ -73,16 +74,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   };
 
   constructor(
-    public injector: Injector,
-    public store: Store,
-    public actions$: Actions
+    @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
+    @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef<any>,
+    @Inject(Injector) public injector: Injector,
+    @Inject(Store) public store: Store,
+    @Inject(Actions) public actions$: Actions
   ) {
-    this.dir =
-      injector.get(FormGroupDirective, null) ??
-      (injector.get(NgForm, null) as any);
-    this.cdr = injector.get(ChangeDetectorRef);
-    this.elRef = injector.get(ElementRef<HTMLFormElement>);
 
+    this.dir = injector.get(FormGroupDirective, null) ?? (injector.get(NgForm, null) as any);
     let config = injector.get<any>(NGYNC_CONFIG_TOKEN, NGYNC_CONFIG_DEFAULT);
 
     this.debounce = config.debounce;

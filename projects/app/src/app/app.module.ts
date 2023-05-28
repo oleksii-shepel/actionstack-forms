@@ -30,13 +30,13 @@ export const NGYNC_CONFIG = { debounce: 75, clearOnDestroy: false, updateOn: 'ch
     BrowserModule,
     ReactiveFormsModule,
     FormsModule,
+    SharedModule,
     StoreModule.forRoot(reducer, {
       metaReducers: [forms, logger]
     }),
 
     EffectsModule.forRoot([]),
 
-    SharedModule,
     TemplateDrivenFormsModule
   ],
   providers: [{ provide: NGYNC_CONFIG_TOKEN, useValue: NGYNC_CONFIG }],

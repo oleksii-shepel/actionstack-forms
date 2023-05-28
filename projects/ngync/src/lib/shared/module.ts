@@ -9,8 +9,9 @@ export const NGYNC_CONFIG_TOKEN = new InjectionToken<string>('NGYNC_CONFIG_TOKEN
 export const NGYNC_CONFIG_DEFAULT = { debounce: 25, clearOnDestroy: false, updateOn: 'blur' };
 
 @NgModule({
-  imports: [FormsModule, StoreModule, EffectsModule],
+  imports: [FormsModule, StoreModule, EffectsModule.forFeature([SyncDirective])],
   declarations: [SyncDirective],
-  exports: [SyncDirective, StoreModule, EffectsModule]
+  exports: [SyncDirective],
+  providers: [SyncDirective]
 })
 export class SharedModule {}
