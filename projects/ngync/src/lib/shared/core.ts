@@ -100,19 +100,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       throw new Error('Supported form control directive not found');
     }
 
-    let _previousFormValue: any = null;
     let _sliceSelector = getSubmitted(this.slice);
 
     this._subs.a = this.store.select(_sliceSelector).pipe(
       filter(() => this._initialized),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      filter(() => !this._updating),
-      //filter(() => !_previousFormValue || _previousFormValue && !deepEqual(this.formValue, _previousFormValue)),
       map((state) => !!state),
       tap((state) => { _sliceSelector.release(); this._submitted$.next(state); }),
       ).subscribe();
 
+    let _previousFormValue: any = null;
     let _waitUntilChanged$ = new BehaviorSubject<boolean>(false);
+
     this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, _waitUntilChanged$]).pipe(
       filter(([input, blur, submitted, wait]) => !wait && (input || blur || submitted)),
       filter(() => this._initialized),
