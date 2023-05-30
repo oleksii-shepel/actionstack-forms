@@ -6,7 +6,7 @@ Angular in its turn provides two different approaches to handling user input thr
 
 Now its time to introduce new child to the world!
 
-ngync is a top-notch library to unite both the worlds. You can use all types of the forms and bind them together with the ngrx store with almost no efforts. All you need to do is declare ngync directive on the form and provide it with the path to store slice. Here is the example:
+ngync is a lightweight library to unite both the worlds. You can use all types of the forms and bind them together with the ngrx store with almost no efforts. All you need to do is declare ngync directive on the form and provide it with the path to store slice. Here is the example:
 
 ```angular
 <form #form="ngForm" autocomplete="off" ngync="model">
@@ -17,7 +17,7 @@ Additionally, you have to import meta-reducers from ngync package and initialize
 
 ```angular
   StoreModule.forRoot(reducer, {
-    metaReducers: [forms, logger]
+    metaReducers: [forms(initialState), logger]
   })
    
 ``` 
