@@ -31,7 +31,7 @@ import {
   checkForm,
   deepEqual,
   getSlice,
-  setValue,
+  setValue
 } from '.';
 import {
   ResetForm,
@@ -64,8 +64,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   _blur$ = new BehaviorSubject<boolean>(false);
   _submitted$ = new BehaviorSubject<boolean>(false);
   _input$ = new BehaviorSubject<boolean>(false);
-  _initialized = false;
+
   _updating = false;
+  _initialized = false;
+
   _subs = {} as any;
 
   _blurCallback = () => this._blur$.next(true);
@@ -98,64 +100,95 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       throw new Error('Supported form control directive not found');
     }
 
+    let _previousFormValue: any = null;
+    let _sliceSelector = getSlice(this.slice);
+
     this._subs.a = createEffect(() =>
-      this.actions$.pipe(
-        ofType(UpdateSubmitted),
-        map((state) => !!state),
-        filter(() => this._initialized && !this._updating),
-        takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        tap((state) => this._submitted$.next(state)),
-        filter((state) => state),
-        tap(() => {
+    this.actions$.pipe(
+      ofType(UpdateSubmitted),
+      map((state) => !!state),
+      filter(() => this._initialized),
+      filter(() => !this._updating),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      tap((state) => this._submitted$.next(state)),
+      map(() => SubmittedUpdated())
+    )
+  ).subscribe();
+
+    let _waitUntilChanged$ = new BehaviorSubject<boolean>(false);
+    this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, _waitUntilChanged$]).pipe(
+      filter(([input, blur, submitted, wait]) => !wait && (input || blur || submitted)),
+      filter(() => this._initialized),
+      filter(() => !this._updating),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      tap(() => { this._updating = true; }),
+      tap(([input, blur, submitted]) => {
+        let form = this.formValue;
+        let equal = true;
+
+        if(submitted === true) {
           this.dir.form.markAsPristine();
           this.dir.form.updateValueAndValidity();
           this.cdr.markForCheck();
 
           this._submittedState = {
-            model: this.formValue,
+            model: form,
             errors: this.dir.errors,
-            dirty: false,
+            dirty: !equal,
             status: this.dir.status,
             submitted: true,
           };
-          this._submitted$.next(false);
-        }),
-        map((state) => SubmittedUpdated())
-      )
-    ).subscribe();
+        } else {
+          equal = deepEqual(form, this._submittedState?.model);
 
-    this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$])
-      .pipe(
-        takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        filter(() => this._initialized && !this._updating),
-        tap(() => this._updating = true),
-        filter((values) => this.updateOn === 'change' || (this.updateOn === 'blur' && values[1] === true) || (this.updateOn === 'submit' && values[2] === true)),
-        map((values) => {
-          let form = this.formValue;
-          let equal = deepEqual(form, this._submittedState?.model);
-
-          if (equal && (this.updateOn === 'change' || (this.updateOn === 'blur' && values[1] === true))){
+          if (equal && ((this.updateOn === 'change' && input === true) || (this.updateOn === 'blur' && blur === true))) {
             this.dir.form.markAsPristine();
             this.dir.form.updateValueAndValidity();
             this.cdr.markForCheck();
           }
-          return {form: form, equal: equal, obs: values}
-        }),
-        tap((obs) => {
+        }
 
-          this.store.dispatch(UpdateValue({ path: this.slice, value: obs.form }));
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !obs.equal }));
+        if (submitted === true || (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) && (!_previousFormValue || _previousFormValue && !deepEqual(form, _previousFormValue))) {
+
+          if(submitted === false) {
+            this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
+          }
+
+          this.store.dispatch(UpdateValue({ path: this.slice, value: form }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
           this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
           this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
-          if(this.updateOn === 'change' || (this.updateOn === 'blur' && obs.obs[1] === true)) {
-            this.store.dispatch(UpdateSubmitted({ path: this.slice, value: obs.equal }));
-          }
 
           this.dir.form.updateValueAndValidity();
           this.cdr.markForCheck();
-          this._updating = false;
-        }))
-      .subscribe();
+
+          if(this.updateOn === 'blur' && blur === true || submitted === true) {
+            _previousFormValue = form;
+          }
+        }
+      }),
+      tap(([ input, blur, submitted, _]) => {
+        this._updating = false;
+
+        _waitUntilChanged$.next(true);
+
+        if(input === true) {
+          this._input$.next(false);
+        }
+
+        if(blur === true) {
+          this._blur$.next(false);
+        }
+
+        if(submitted === true) {
+          this._submitted$.next(false);
+        }
+
+        _waitUntilChanged$.next(false);
+
+      })
+    ).subscribe();
+
 
     this._subs.c = this.store
       .select(getSlice(this.slice))
@@ -166,7 +199,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         tap((state) => this.dir.form.patchValue(state.model)),
         filter((state) => checkForm(this.dir.form, state.model)),
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        takeWhile(() => !this._initialized && !this._updating),
+        takeWhile(() => !this._initialized),
+        filter(() => !this._updating),
       )
       .subscribe((state) => {
         this._updating = true;
@@ -174,7 +208,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         this.dir.form.markAsPristine();
         this.cdr.markForCheck();
         this._initialState = state;
-        this._updating = false;
+        this._updating = false ;
 
         if (this.dir instanceof NgForm) {
           this.formInitialized();
