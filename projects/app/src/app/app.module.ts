@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { SharedModule, TemplateDrivenFormsModule, forms, logger } from 'ngync';
 import { AppComponent } from './components/app/app.component';
@@ -31,8 +30,6 @@ import { initialState, reducer } from './reducers';
     StoreModule.forRoot(reducer, {
       metaReducers: [forms(initialState), logger]
     }),
-
-    EffectsModule.forRoot([]),
 
     TemplateDrivenFormsModule
   ],
