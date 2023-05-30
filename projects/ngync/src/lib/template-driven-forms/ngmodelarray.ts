@@ -1,5 +1,5 @@
 import { Directive, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf, forwardRef } from "@angular/core";
-import { AbstractControl, AsyncValidator, AsyncValidatorFn, ControlContainer, Form, FormArray, FormGroupDirective, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
+import { AbstractControl, AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
 import { composeAsyncValidators, composeValidators } from "../shared";
 
 export const formArrayNameProvider: any = {
@@ -7,8 +7,16 @@ export const formArrayNameProvider: any = {
   useExisting: forwardRef(() => NgModelArray)
 };
 
-const resolvedPromise = (() => Promise.resolve())();
 
+export const moduleFactory = () => {
+  return new Promise((resolve) => {
+    Object.assign(NgModel.prototype, {
+      _checkParentType() {}
+    });
+
+    resolve(true);
+  });
+}
 @Directive({selector: '[ngModelArray]', providers: [formArrayNameProvider]})
 export class NgModelArray extends ControlContainer implements OnInit, OnDestroy {
 
@@ -36,10 +44,6 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
     this.form = new FormArray<any>([]);
     this.form.setValidators(this._composedValidator);
     this.form.setAsyncValidators(this._composedAsyncValidator);
-
-    Object.assign(NgModel.prototype, {
-      _checkParentType() {}
-    });
 
     Object.assign(this.form, {
       registerControl: (name: string, control: any): AbstractControl => {

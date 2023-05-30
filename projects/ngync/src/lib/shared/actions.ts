@@ -3,7 +3,6 @@ import { createAction, props } from '@ngrx/store';
 export enum FormActions {
   InitForm = '[Form] Init',
   ResetForm = '[Form] Reset',
-  UpdateForm = '[Form] Update Form',
   UpdateValue = '[Form] Update Value',
   UpdateStatus = '[Form] Update Status',
   UpdateDirty = '[Form] Update Dirty',
@@ -21,17 +20,6 @@ export const InitForm = createAction(
 export const ResetForm = createAction(
   FormActions.ResetForm,
   props<{ path: string; value: any; }>()
-);
-
-export const UpdateForm = createAction(
-  FormActions.UpdateForm,
-  props<{
-    path: string;
-    value: any;
-    errors: { [k: string]: string } | null;
-    dirty: boolean | null;
-    status: string | null;
-  }>()
 );
 
 export const UpdateValue = createAction(

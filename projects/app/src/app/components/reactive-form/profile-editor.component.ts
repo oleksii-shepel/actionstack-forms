@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { InitForm, UpdateSubmitted, UpdateValue, buildForm, getSlice, getValue } from 'ngync';
 import { Observable, take } from 'rxjs';
 import { initialProfile, profileOptions } from '../../models/profile';
-import { ApplicationState } from '../../reducers';
 import { ProfileState } from '../../reducers/profile.reducer';
 
 @Component({
@@ -26,7 +25,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
     return this.profileForm.get('aliases') as FormArray;
   }
 
-  constructor(private fb: FormBuilder, private store: Store<ApplicationState>) {
+  constructor(private fb: FormBuilder, private store: Store<any>) {
 
     this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model = getValue(state, "model") ?? initialProfile;

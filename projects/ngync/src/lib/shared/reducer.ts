@@ -1,4 +1,4 @@
-import { createSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FormActions } from './actions';
 import { deepClone } from './builder';
 
@@ -14,7 +14,7 @@ export interface FormState<T> {
 
 
 
-export function property<T extends object>(expression: (x: { [Property in keyof T]: T[Property] }) => any) {
+export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[prop] }) => any) {
   let prop = eval(expression.toString().replace('x.', 'o.'));
   let str: string = prop.toString().split('=>',).at(1).trim();
   return str.substring(str.indexOf('.') + 1, str.length);
@@ -40,19 +40,21 @@ export const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc,
 
 
 export const setValue = (obj: any, prop: string, val: any) => {
-  obj = {...obj};
   const split = prop.split('.');
-  if(split.length === 0) { obj = val }
+  if(split.length === 0) { obj = val; return obj; }
   else {
-    let item = obj;
+    let root = !Object.isFrozen(obj) ? obj : {...obj};
+    let item = root;
     while(split.length >= 1) {
       const key = split.at(0)!;
-      item[key] = isArray(split) ? item[key] || [] : isObject(split) ? {...item[key]} || {} : val;
+      item[key] = isArray(split) ? item[key] || [] : isObject(split) ? item[key] || {} : val;
+
       item = item[key];
       split.shift()
     }
+
+    return root;
   }
-  return obj;
 };
 
 
@@ -74,7 +76,7 @@ export function findProps(obj: any): string[] {
 
 
 
-export const getSlice = (slice: string) => (state: any) => (getValue(state, slice) as FormState<any>);
+export const getSlice = (slice: string) => createFeatureSelector<FormState<any>>(slice);
 export const getModel = (slice: string) => createSelector(getSlice(slice), state => state.model);
 export const getErrors = (slice: string) => createSelector(getSlice(slice), state => state.errors);
 export const getDirty = (slice: string) => createSelector(getSlice(slice), state => state.dirty);
@@ -83,8 +85,9 @@ export const getSubmitted = (slice: string) => createSelector(getSlice(slice), s
 
 
 
-export function forms(reducer: Function) {
-  return function(state: any, action: any) {
+export const forms = (initialState: any) => (reducer: Function) => {
+  return (state: any, action: any) => {
+    state = state ?? initialState;
     let nextState = reducer(state, action);
     let path = action?.path;
 
@@ -93,36 +96,31 @@ export function forms(reducer: Function) {
     }
 
     if (action.type === FormActions.InitForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.value));
+      nextState = setValue(state, path, {...getValue(nextState, path), model: deepClone(action.value)});
     }
 
     if (action.type === FormActions.ResetForm) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path)}`, deepClone(action.value));
-    }
-
-    if (action.type === FormActions.UpdateForm) {
-      let value = deepClone(action.payload); delete value.path;
-      nextState = setValue(nextState, path, value);
+      nextState = setValue(state, path, {...getValue(nextState, path), model: deepClone(action.value)});
     }
 
     if (action.type === FormActions.UpdateValue) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.model)}`, deepClone(action.value));
+      nextState = setValue(state, path, {...getValue(nextState, path), model: deepClone(action.value)});
     }
 
     if (action.type === FormActions.UpdateStatus) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.status)}`, action.status);
+      nextState = setValue(state, path, {...getValue(state, path), status: action.status});
     }
 
     if (action.type === FormActions.UpdateErrors) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.errors)}`, deepClone(action.errors));
+      nextState = setValue(state, path, {...getValue(state, path), errors: deepClone(action.errors)});
     }
 
     if (action.type === FormActions.UpdateDirty) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.dirty)}`, action.dirty);
+      nextState = setValue(state, path, {...getValue(state, path), dirty: action.dirty});
     }
 
     if (action.type === FormActions.UpdateSubmitted) {
-      nextState = setValue(nextState, `${path}.${property<FormState<any>>(path => path.submitted)}`, action.value);
+      nextState = setValue(state, path, {...getValue(state, path), submitted: action.value});
     }
 
     return nextState;

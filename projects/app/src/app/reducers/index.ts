@@ -35,8 +35,8 @@ import { combineReducers } from '@ngrx/store';
  * the state of the reducer plus any selector functions. The `* as`
  * notation packages up all of the exports into a single object.
  */
-import * as fromProfile from './profile.reducer';
 import * as fromHero from './hero.reducer';
+import * as fromProfile from './profile.reducer';
 import * as fromStandard from './standard.reducer';
 
 
@@ -48,6 +48,12 @@ export interface ApplicationState {
   profile: fromProfile.ProfileState;
   hero: fromHero.HeroState;
   model: fromStandard.ModelState;
+}
+
+export const initialState: ApplicationState = {
+  profile: fromProfile.initialState,
+  hero: fromHero.initialState,
+  model: fromStandard.initialState,
 }
 
 /**
@@ -66,7 +72,7 @@ const reducers = {
 const developmentReducer: ActionReducer<ApplicationState> = compose(storeFreeze, combineReducers)(reducers);
 const productionReducer: ActionReducer<ApplicationState> = combineReducers(reducers);
 
-export function reducer(state: any, action: any) {
+export function reducer(state = initialState, action: any) {
   if (environment.production) {
     // suppress console output
     console.log = function () {};
@@ -74,4 +80,5 @@ export function reducer(state: any, action: any) {
   } else {
     return developmentReducer(state, action);
   }
+
 }
