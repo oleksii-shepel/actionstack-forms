@@ -2,14 +2,18 @@ import { Directive, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, Skip
 import { AbstractControl, AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
 import { composeAsyncValidators, composeValidators } from "../shared";
 
+
+
 export const formArrayNameProvider: any = {
   provide: ControlContainer,
   useExisting: forwardRef(() => NgModelArray)
 };
 
 
+
 export const moduleFactory = () => {
   return new Promise((resolve) => {
+
     Object.assign(NgModel.prototype, {
       _checkParentType() {}
     });
@@ -17,6 +21,9 @@ export const moduleFactory = () => {
     resolve(true);
   });
 }
+
+
+
 @Directive({selector: '[ngModelArray]', providers: [formArrayNameProvider]})
 export class NgModelArray extends ControlContainer implements OnInit, OnDestroy {
 
@@ -28,8 +35,6 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
   form: FormArray<any>;
-
-  _onCollectionChange = () => {};
 
   constructor(
       @Optional() @Host() @SkipSelf() parent: ControlContainer,
@@ -52,34 +57,34 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
 
         control._registerOnCollectionChange((this.control as any)._onCollectionChange);
         return control;
-      }
-    }, {
+      },
+
       registerOnChange: (fn: (_: any) => {}) => {
         this.control.controls.forEach((control: any) => {
           if(control.hasOwnProperty('_onChange')) {
             (control as any)['_onChange'].push(fn);
           }
         });
-      }
-    }, {
+      },
+
       registerOnDisabledChange: (fn: (_: boolean) => {}) => {
         if(this.control.hasOwnProperty('_onDisabledChange')) {
           (this.control as any)['_onDisabledChange'].push(fn);
         }
-      }
-    }, {
+      },
+
       addControl: (name: string, control: any, options: {
         emitEvent?: boolean
       } = {}) => {
         (this.control as any).registerControl(name, control);
         (this.control as FormArray).updateValueAndValidity(options);
         (this.control as any)._onCollectionChange();
-      }
-    }, {
+      },
+
       contains: (name: string) => {
         return this.control!.hasOwnProperty(name) && (this.control as any)[name].enabled;
-      }
-    }, {
+      },
+
       removeControl: (name: string, options: {emitEvent?: boolean} = {}) => {
         if ((this.control as any)[name])
         (this.control as any)[name]._registerOnCollectionChange(() => {});
