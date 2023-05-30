@@ -144,8 +144,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
           }
         }
 
-        console.log([input, blur, submitted]);
-
         if (submitted === true || (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) && (!_previousFormValue || _previousFormValue && !deepEqual(form, _previousFormValue))) {
 
           if(submitted === false) {
