@@ -12,7 +12,7 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgForm } from '@angular/forms';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Actions } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -31,11 +31,11 @@ import {
   checkForm,
   deepEqual,
   getSlice,
+  getSubmitted,
   setValue
 } from '.';
 import {
   ResetForm,
-  SubmittedUpdated,
   UpdateDirty,
   UpdateErrors,
   UpdateStatus,
@@ -101,19 +101,16 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     }
 
     let _previousFormValue: any = null;
-    let _sliceSelector = getSlice(this.slice);
+    let _sliceSelector = getSubmitted(this.slice);
 
-    this._subs.a = createEffect(() =>
-    this.actions$.pipe(
-      ofType(UpdateSubmitted),
-      map((state) => !!state),
+    this._subs.a = this.store.select(_sliceSelector).pipe(
       filter(() => this._initialized),
-      filter(() => !this._updating),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap((state) => this._submitted$.next(state)),
-      map(() => SubmittedUpdated())
-    )
-  ).subscribe();
+      filter(() => !this._updating),
+      //filter(() => !_previousFormValue || _previousFormValue && !deepEqual(this.formValue, _previousFormValue)),
+      map((state) => !!state),
+      tap((state) => { _sliceSelector.release(); this._submitted$.next(state); }),
+      ).subscribe();
 
     let _waitUntilChanged$ = new BehaviorSubject<boolean>(false);
     this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, _waitUntilChanged$]).pipe(
@@ -147,6 +144,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
             this.cdr.markForCheck();
           }
         }
+
+        console.log([input, blur, submitted]);
 
         if (submitted === true || (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) && (!_previousFormValue || _previousFormValue && !deepEqual(form, _previousFormValue))) {
 
