@@ -12,7 +12,6 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgForm } from '@angular/forms';
-import { Actions } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -79,8 +78,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
     @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef<any>,
     @Inject(Injector) public injector: Injector,
-    @Inject(Store) public store: Store,
-    @Inject(Actions) public actions$: Actions
+    @Inject(Store) public store: Store
   ) {
 
     this.dir = injector.get(FormGroupDirective, null) ?? (injector.get(NgForm, null) as any);
