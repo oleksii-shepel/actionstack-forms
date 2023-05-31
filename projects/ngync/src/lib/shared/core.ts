@@ -193,15 +193,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       )
       .subscribe((state) => {
         this._updating = true;
+
         this._initialized = true;
         this.dir.form.markAsPristine();
         this.cdr.markForCheck();
         this._initialState = state;
-        this._updating = false ;
 
         if (this.dir instanceof NgForm) {
           this.formInitialized();
         }
+
+        this._updating = false ;
       });
   }
   ngAfterViewInit() {
