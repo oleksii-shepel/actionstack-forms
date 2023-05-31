@@ -15,8 +15,7 @@ export interface FormState<T> {
 
 
 export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[prop] }) => any) {
-  let prop = eval(expression.toString().replace('x.', 'o.'));
-  let str: string = prop.toString().split('=>',).at(1).trim();
+  let str = expression.toString().split('=>',).at(1)!.trim();
   return str.substring(str.indexOf('.') + 1, str.length);
 }
 
