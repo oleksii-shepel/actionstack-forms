@@ -16,6 +16,8 @@ import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   combineLatest,
+  debounceTime,
+  delayWhen,
   filter,
   first,
   map,
@@ -63,8 +65,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   _blur$ = new BehaviorSubject<boolean>(false);
   _submitted$ = new BehaviorSubject<boolean>(false);
   _input$ = new BehaviorSubject<boolean>(false);
+  _updating$ = new BehaviorSubject<boolean>(false);
 
-  _updating = false;
   _initialized = false;
 
   _subs = {} as any;
@@ -99,22 +101,20 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     }
 
     let _selector = getSubmitted(this.slice);
-
     this._subs.a = this.store.select(_selector).pipe(
       filter(() => this._initialized),
+      delayWhen(() => this._updating$),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       map((state) => !!state),
-      tap((state) => { _selector.release(); this._submitted$.next(state); }),
-      ).subscribe();
+      tap((state) => { _selector.release(); this._submitted$.next(state); })
+    ).subscribe();
 
-    let _waitUntilChanged$ = new BehaviorSubject<boolean>(false);
-
-    this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, _waitUntilChanged$]).pipe(
-      filter(([input, blur, submitted, wait]) => !wait && (input || blur || submitted)),
+    this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
+      debounceTime(this.debounce),
+      filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
-      filter(() => !this._updating),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(() => { this._updating = true; }),
+      tap(() => { this._updating$.next(true) }),
       tap(([input, blur, submitted]) => {
         let form = this.formValue;
         let equal = true;
@@ -157,9 +157,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         }
       }),
       tap(([ input, blur, submitted, _]) => {
-        this._updating = false;
-
-        _waitUntilChanged$.next(true);
 
         if(input === true) {
           this._input$.next(false);
@@ -173,7 +170,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
           this._submitted$.next(false);
         }
 
-        _waitUntilChanged$.next(false);
+        this._updating$.next(false);
 
       })
     ).subscribe();
@@ -189,10 +186,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         filter((state) => checkForm(this.dir.form, state.model)),
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
         takeWhile(() => !this._initialized),
-        filter(() => !this._updating),
+        delayWhen(() => this._updating$)
       )
       .subscribe((state) => {
-        this._updating = true;
+        this._updating$.next(true);
 
         this._initialized = true;
         this.dir.form.markAsPristine();
@@ -203,7 +200,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
           this.formInitialized();
         }
 
-        this._updating = false ;
+        this._updating$.next(false);
       });
   }
   ngAfterViewInit() {

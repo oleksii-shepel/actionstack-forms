@@ -5,7 +5,7 @@ import { StoreModule } from '@ngrx/store';
 import { SyncDirective } from './core';
 
 export const NGYNC_CONFIG_TOKEN = new InjectionToken<string>('NGYNC_CONFIG_TOKEN');
-export const NGYNC_CONFIG_DEFAULT = { debounce: 25, clearOnDestroy: false, updateOn: 'change' };
+export const NGYNC_CONFIG_DEFAULT = { debounce: 100, clearOnDestroy: false, updateOn: 'change' };
 
 @NgModule({
   imports: [FormsModule, StoreModule],

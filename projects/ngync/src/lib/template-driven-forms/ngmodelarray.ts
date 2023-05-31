@@ -1,6 +1,7 @@
 import { Directive, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf, forwardRef } from "@angular/core";
-import { AbstractControl, AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
+import { AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
 import { composeAsyncValidators, composeValidators } from "../shared";
+import { FormGroupMixin } from "./mixin";
 
 
 
@@ -50,49 +51,7 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
     this.form.setValidators(this._composedValidator);
     this.form.setAsyncValidators(this._composedAsyncValidator);
 
-    Object.assign(this.form, {
-      registerControl: (name: string, control: any): AbstractControl => {
-        control.setParent(this.control);
-        (this.control! as FormArray).push(control);
-
-        control._registerOnCollectionChange((this.control as any)._onCollectionChange);
-        return control;
-      },
-
-      registerOnChange: (fn: (_: any) => {}) => {
-        this.control.controls.forEach((control: any) => {
-          if(control.hasOwnProperty('_onChange')) {
-            (control as any)['_onChange'].push(fn);
-          }
-        });
-      },
-
-      registerOnDisabledChange: (fn: (_: boolean) => {}) => {
-        if(this.control.hasOwnProperty('_onDisabledChange')) {
-          (this.control as any)['_onDisabledChange'].push(fn);
-        }
-      },
-
-      addControl: (name: string, control: any, options: {
-        emitEvent?: boolean
-      } = {}) => {
-        (this.control as any).registerControl(name, control);
-        (this.control as FormArray).updateValueAndValidity(options);
-        (this.control as any)._onCollectionChange();
-      },
-
-      contains: (name: string) => {
-        return this.control!.hasOwnProperty(name) && (this.control as any)[name].enabled;
-      },
-
-      removeControl: (name: string, options: {emitEvent?: boolean} = {}) => {
-        if ((this.control as any)[name])
-        (this.control as any)[name]._registerOnCollectionChange(() => {});
-        (this.control as FormArray).removeAt(+name);
-        this.control!.updateValueAndValidity(options);
-        (this.control as any)._onCollectionChange();
-      }
-    })
+    Object.assign(this.form, FormGroupMixin(this.form));
   }
 
   ngOnInit(): void {

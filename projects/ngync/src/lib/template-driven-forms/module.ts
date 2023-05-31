@@ -14,4 +14,4 @@ import { NgModelArray, moduleFactory } from './ngmodelarray';
     multi: true
   }]
 })
-export class TemplateDrivenFormsModule {}
+export class NgFormsModule {}

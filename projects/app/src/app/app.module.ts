@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { StoreModule } from '@ngrx/store';
-import { SharedModule, TemplateDrivenFormsModule, forms, logger } from 'ngync';
+import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
 import { AppComponent } from './components/app/app.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
 import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
@@ -31,7 +31,7 @@ import { initialState, reducer } from './reducers';
       metaReducers: [forms(initialState), logger]
     }),
 
-    TemplateDrivenFormsModule
+    NgFormsModule
   ],
   bootstrap: [AppComponent]
 })
