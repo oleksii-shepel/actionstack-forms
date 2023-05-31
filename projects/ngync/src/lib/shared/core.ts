@@ -175,7 +175,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe();
 
-
     this._subs.c = this.store
       .select(getSlice(this.slice))
       .pipe(
@@ -188,24 +187,29 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         takeWhile(() => !this._initialized),
         delayWhen(() => this._updating$)
       )
-      .subscribe((state) => {
-        this._updating$.next(true);
+    .subscribe((state) => {
+      this._updating$.next(true);
 
-        this._initialized = true;
-        this.dir.form.markAsPristine();
-        this.cdr.markForCheck();
-        this._initialState = state;
+      this._initialized = true;
+      this.dir.form.markAsPristine();
+      this.cdr.markForCheck();
+      this._initialState = state;
 
-        if (this.dir instanceof NgForm) {
-          this.formInitialized();
-        }
+      if (this.dir instanceof NgForm) {
+        this.setEventListeners();
+      }
 
-        this._updating$.next(false);
-      });
+      this._updating$.next(false);
+    });
+
+    this._subs.d = DomObserver.children(this.elRef.nativeElement).subscribe(() => {
+      this.setEventListeners();
+    });
   }
+
   ngAfterViewInit() {
     if (this.dir instanceof FormGroupDirective) {
-      this.formInitialized();
+      this.setEventListeners();
     }
   }
 
@@ -233,10 +237,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
     this._unmounted$.complete();
   }
 
-  formInitialized() {
+  setEventListeners() {
     for (const element of this.nativeElements) {
-      element.addEventListener('blur', this._blurCallback);
       element.addEventListener('input', this._inputCallback);
+      element.addEventListener('blur', this._blurCallback);
     }
   }
 

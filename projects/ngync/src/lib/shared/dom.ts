@@ -5,18 +5,21 @@ import { Observable, Subject } from "rxjs";
   providedIn: 'root'
 })
 export class DomObserver implements OnDestroy {
-  static observers = new Set<MutationObserver>();
-  static elements = new Map();
+  static _unmounted = new Set<MutationObserver>();
+  static _children = new Set<MutationObserver>();
+
+  static _elementsWithChangeDetection = new Map();
+  static _elementsUnderObservation = new Map();
 
   constructor() {}
 
   static unmounted(element: HTMLElement): Observable<boolean> {
-    if(DomObserver.elements.has(element)) {
-      return DomObserver.elements.get(element);
+    if(DomObserver._elementsUnderObservation.has(element)) {
+      return DomObserver._elementsUnderObservation.get(element);
     }
 
     let event = new Subject<boolean>();
-    DomObserver.elements.set(element, event);
+    DomObserver._elementsUnderObservation.set(element, event);
 
     const observer = new MutationObserver(elements => {
       elements.forEach(item => {
@@ -40,7 +43,32 @@ export class DomObserver implements OnDestroy {
       parent = parent.parentNode as HTMLElement;
     }
 
-    DomObserver.observers.add(observer);
+    DomObserver._unmounted.add(observer);
+    return event;
+  }
+
+  static children(element: HTMLElement): Observable<number> {
+    if(DomObserver._elementsWithChangeDetection.has(element)) {
+      return DomObserver._elementsWithChangeDetection.get(element);
+    }
+
+    let event = new Subject<number>();
+    DomObserver._elementsWithChangeDetection.set(element, event);
+
+    const observer = new MutationObserver(elements => {
+      elements.forEach(item => {
+        if(item.addedNodes.length) {
+          event.next(item.addedNodes.length);
+        }
+
+        if(item.removedNodes.length) {
+          event.next(-item.removedNodes.length);
+        }
+      });
+    });
+
+    observer.observe(element, { childList: true, subtree: true });
+    DomObserver._children.add(observer);
     return event;
   }
 
@@ -50,15 +78,23 @@ export class DomObserver implements OnDestroy {
 
   static disconnect(observer: MutationObserver) {
     observer.disconnect();
-    DomObserver.observers.delete(observer);
+    DomObserver._unmounted.delete(observer);
   }
 
   ngOnDestroy() {
-    for (const observer of DomObserver.observers) {
+    for (const observer of DomObserver._unmounted) {
       observer.disconnect();
     }
 
-    for (const [key, value] of DomObserver.elements) {
+    for (const [key, value] of DomObserver._elementsWithChangeDetection) {
+      value.complete();
+    }
+
+    for (const observer of DomObserver._children) {
+      observer.disconnect();
+    }
+
+    for (const [key, value] of DomObserver._elementsUnderObservation) {
       value.complete();
     }
   }
