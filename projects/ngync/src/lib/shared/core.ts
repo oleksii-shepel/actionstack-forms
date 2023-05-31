@@ -98,16 +98,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       throw new Error('Supported form control directive not found');
     }
 
-    let _sliceSelector = getSubmitted(this.slice);
+    let _selector = getSubmitted(this.slice);
 
-    this._subs.a = this.store.select(_sliceSelector).pipe(
+    this._subs.a = this.store.select(_selector).pipe(
       filter(() => this._initialized),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       map((state) => !!state),
-      tap((state) => { _sliceSelector.release(); this._submitted$.next(state); }),
+      tap((state) => { _selector.release(); this._submitted$.next(state); }),
       ).subscribe();
 
-    let _previousFormValue: any = null;
     let _waitUntilChanged$ = new BehaviorSubject<boolean>(false);
 
     this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, _waitUntilChanged$]).pipe(
@@ -142,23 +141,19 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
           }
         }
 
-        if (submitted === true || (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) && (!_previousFormValue || _previousFormValue && !deepEqual(form, _previousFormValue))) {
+        if (submitted === true || (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true)) {
 
           if(submitted === false) {
-            this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
+            this.store.dispatch(UpdateSubmitted({ path: this.slice, value: !input }));
           }
 
           this.store.dispatch(UpdateValue({ path: this.slice, value: form }));
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: input }));
           this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
           this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
 
           this.dir.form.updateValueAndValidity();
           this.cdr.markForCheck();
-
-          if(this.updateOn === 'blur' && blur === true || submitted === true) {
-            _previousFormValue = form;
-          }
         }
       }),
       tap(([ input, blur, submitted, _]) => {

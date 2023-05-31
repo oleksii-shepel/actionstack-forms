@@ -43,11 +43,11 @@ export const setValue = (obj: any, prop: string, val: any) => {
   const split = prop.split('.');
   if(split.length === 0) { obj = val; return obj; }
   else {
-    let root = !Object.isFrozen(obj) ? obj : {...obj};
+    let root = {...obj};
     let item = root;
     while(split.length >= 1) {
       const key = split.at(0)!;
-      item[key] = isArray(split) ? item[key] || [] : isObject(split) ? item[key] || {} : val;
+      item[key] = isArray(split) ? [...iterable(item[key])] || [] : isObject(split) ? {...item[key]} || {} : val;
 
       item = item[key];
       split.shift()
@@ -96,31 +96,31 @@ export const forms = (initialState: any) => (reducer: Function) => {
     }
 
     if (action.type === FormActions.InitForm) {
-      nextState = setValue(state, path, {...getValue(nextState, path), model: deepClone(action.value)});
+      nextState = setValue(state, `${path}.model`, deepClone(action.value));
     }
 
     if (action.type === FormActions.ResetForm) {
-      nextState = setValue(state, path, {...getValue(nextState, path), model: deepClone(action.value)});
+      nextState = setValue(state, `${path}.model`, deepClone(action.value));
     }
 
     if (action.type === FormActions.UpdateValue) {
-      nextState = setValue(state, path, {...getValue(nextState, path), model: deepClone(action.value)});
+      nextState = setValue(state, `${path}.model`, deepClone(action.value));
     }
 
     if (action.type === FormActions.UpdateStatus) {
-      nextState = setValue(state, path, {...getValue(state, path), status: action.status});
+      nextState = setValue(state, `${path}.status`, action.status);
     }
 
     if (action.type === FormActions.UpdateErrors) {
-      nextState = setValue(state, path, {...getValue(state, path), errors: deepClone(action.errors)});
+      nextState = setValue(state, `${path}.errors`, deepClone(action.errors));
     }
 
     if (action.type === FormActions.UpdateDirty) {
-      nextState = setValue(state, path, {...getValue(state, path), dirty: action.dirty});
+      nextState = setValue(state, `${path}.dirty`, action.dirty);
     }
 
     if (action.type === FormActions.UpdateSubmitted) {
-      nextState = setValue(state, path, {...getValue(state, path), submitted: action.value});
+      nextState = setValue(state, `${path}.submitted`, action.value);
     }
 
     return nextState;
