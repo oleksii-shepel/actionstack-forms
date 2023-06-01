@@ -13,3 +13,13 @@ label {
 .ng-invalid:not(.ng-untouched) {
   border-color: red;
 }
+
+.bookmark {
+  display: flex;
+  justify-content: flex-end;
+
+  & .checkbox {
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+}

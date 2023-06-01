@@ -1,4 +1,13 @@
 <form [formGroup]="profileForm" autocomplete="off" [ngync]="this.slice">
+  <h2>Author</h2>
+  <div class="bookmark">
+    <a (click)="addToBookmark(bookmark)">
+      <label for="bookmark" [ngStyle]="{'display': 'none'}">Bookmark</label>
+      <input class="checkbox" id="bookmark" type="checkbox" checked="checked" (click)="addToBookmark($event.target)" formControlName="bookmark" #bookmark>
+      <span>Add to bookmarks</span>
+    </a>
+  </div>
+
   <label for="firstName">First Name: </label>
   <input id="firstName" type="text" formControlName="firstName">
 
@@ -20,12 +29,21 @@
     <label for="zip">Zip Code: </label>
     <input id="zip" type="text" formControlName="zip">
   </div>
+  <div>
+    <label for="quotes">Quotes: </label>
+    <textarea id="quotes" formControlName="quotes"></textarea>
+
+    <label for="books">Books: </label>
+    <select id="books" formControlName="selected" (change)="onSelectChange($event)">
+      <option *ngFor="let book of books; let i=index;" [value]="i">{{book.value}}</option>
+    </select>
+  </div>
 
   <div formArrayName="aliases">
     <h2>Aliases</h2>
     <button type="button" (click)="addAlias()">+ Add another alias</button>
 
-    <div *ngFor="let alias of aliases.controls; let i=index">
+    <div *ngFor="let alias of aliases; let i=index">
       <label for="aliases.{{i}}">Alias:</label>
       <input id="aliases.{{i}}" type="text" formControlName="{{i}}">
     </div>

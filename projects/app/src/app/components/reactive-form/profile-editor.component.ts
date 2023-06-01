@@ -21,8 +21,12 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   a: any;
 
+  get books() {
+    return (this.profileForm.get('books') as FormArray)!.controls;
+  }
+
   get aliases() {
-    return this.profileForm.get('aliases') as FormArray;
+    return (this.profileForm.get('aliases') as FormArray)!.controls;
   }
 
   constructor(private fb: FormBuilder, private store: Store<any>) {
@@ -50,6 +54,22 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   addAlias() {
     this.aliases.push(this.fb.control('', Validators.required));
+  }
+
+  addToBookmark(target: EventTarget | null) {
+    let element = target as HTMLInputElement;
+    element.checked = !element.checked;
+
+    const value = element.checked;
+    this.profileForm.get('bookmark')?.setValue(value);
+
+    const event = new KeyboardEvent('keydown', { key: 'D', ctrlKey: true, bubbles: true });
+    target!.dispatchEvent(event);
+  }
+
+  onSelectChange(event: Event) {
+    const value = +(event.target as HTMLSelectElement).value;
+    this.profileForm.get('selected')?.setValue(value);
   }
 
   onSubmit() {

@@ -1,6 +1,7 @@
 import { ModelOptions } from "ngync";
 
 export interface Profile {
+  bookmark: boolean;
   firstName: string;
   lastName: string;
   address: {
@@ -9,10 +10,14 @@ export interface Profile {
     state: string;
     zip: string;
   };
+  selected: number;
+  books: string[];
+  quotes: string;
   aliases: string[];
 }
 
 export const initialProfile: Profile = {
+  bookmark: false,
   firstName: 'Ian',
   lastName: 'Fleming',
   address: {
@@ -21,10 +26,32 @@ export const initialProfile: Profile = {
     state: 'England',
     zip: 'W1J'
   },
+  selected: 0,
+  books: [
+    'Casino Royale',
+    'Live and Let Die',
+    'Moonraker',
+    'Diamonds Are Forever',
+    'From Russia, with Love',
+    'Dr. No',
+    'Goldfinger',
+    'For Your Eyes Only',
+    'Thunderball',
+    'The Spy Who Loved Me',
+    'On Her Majesty\'s Secret Service',
+    'You Only Live Twice',
+  ],
+  quotes:
+`❝ Never say 'no' to adventures. Always say 'yes,' otherwise, you'll lead a very dull life.
+❝ The distance between insanity and genius is measured only by success.
+❝ A woman can put up with almost anything; anything but indifference.
+❝ I think it's the same with all the relationships between a man and a woman. They can survive anything so long as some kind of basic humanity exists between the two people. When all kindness has gone, when one person obviously and sincerely doesn't care if the other is alive or dead, then it's just no good.
+❝ Everyone has the revolver of resignation in his pocket.`,
   aliases: [''],
 }
 
 export const profileOptions: ModelOptions<Profile> = {
+  bookmark: {},
   firstName: {},
   lastName: {},
   address: {
@@ -33,7 +60,10 @@ export const profileOptions: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: [{}]
+  selected: {},
+  books: [],
+  quotes: {},
+  aliases: []
 }
 
 export interface Hero {
