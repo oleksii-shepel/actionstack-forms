@@ -1,6 +1,7 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   ChangeDetectorRef,
+  ContentChildren,
   Directive,
   ElementRef,
   Inject,
@@ -9,9 +10,10 @@ import {
   OnDestroy,
   OnInit,
   Optional,
+  QueryList,
   Self
 } from '@angular/core';
-import { FormControlStatus, FormGroupDirective, NgForm } from '@angular/forms';
+import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -49,8 +51,9 @@ import {
     'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]',
   exportAs: 'ngync',
 })
-export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
+export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   @Input('ngync') slice!: string;
+  @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   debounce!: number;
   clearOnDestroy!: boolean;
@@ -156,7 +159,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
           this.cdr.markForCheck();
         }
       }),
-      tap(([ input, blur, submitted, _]) => {
+      tap(([input, blur, submitted, _]) => {
 
         if(input === true) {
           this._input$.next(false);
@@ -185,7 +188,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
         filter((state) => checkForm(this.dir.form, state.model)),
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
         takeWhile(() => !this._initialized),
-        delayWhen(() => this._updating$)
       )
     .subscribe((state) => {
       this._updating$.next(true);
@@ -195,32 +197,19 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
       this.cdr.markForCheck();
       this._initialState = state;
 
-      if (this.dir instanceof NgForm) {
-        this.setEventListeners();
-      }
-
       this._updating$.next(false);
-    });
-
-    this._subs.d = DomObserver.children(this.elRef.nativeElement).subscribe(() => {
-      this.setEventListeners();
     });
   }
 
-  ngAfterViewInit() {
-    if (this.dir instanceof FormGroupDirective) {
+  ngAfterContentInit() {
+    this._subs.d = this.controls.changes.subscribe(() => {
       this.setEventListeners();
-    }
+    });
   }
 
   ngOnDestroy() {
     if (this.clearOnDestroy) {
       this.store.dispatch(ResetForm({ value: {}, path: this.slice }));
-    }
-
-    for (const element of this.nativeElements) {
-      element.removeEventListener('blur', this._blurCallback);
-      element.removeEventListener('input', this._inputCallback);
     }
 
     for (const sub of Object.keys(this._subs)) {
@@ -238,41 +227,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterViewInit {
   }
 
   setEventListeners() {
-    for (const element of this.nativeElements) {
-      element.addEventListener('input', this._inputCallback);
-      element.addEventListener('blur', this._blurCallback);
+    for (const control of this.controls.toArray()) {
+      if(control.valueAccessor) {
+        control.valueAccessor.registerOnChange(this._inputCallback);
+        control.valueAccessor.registerOnTouched(this._blurCallback);
+      }
     }
   }
 
-  get nativeElements() {
-    let directives: any =
-      this.dir instanceof FormGroupDirective
-        ? this.dir.directives
-        : (this.dir as any)._directives;
-    return {
-      [Symbol.iterator]: function* () {
-        for (const directive of directives) {
-          let nativeElement =
-            directive.valueAccessor?._elementRef?.nativeElement;
-          if (nativeElement) {
-            yield nativeElement;
-          }
-        }
-      },
-    };
-  }
-
   get formValue(): any {
-    let directives: any =
-      this.dir instanceof FormGroupDirective
-        ? this.dir.directives
-        : (this.dir as any)._directives;
     let value = {} as any;
-    for (const directive of directives) {
-      let native = directive.valueAccessor?._elementRef?.nativeElement;
-      if (native) {
-        value = setValue(value, directive.path.join('.'), native.value);
-      }
+    for (const control of this.controls.toArray()) {
+      value = setValue(value, control.path!.join('.'), control.value);
     }
     return value;
   }
