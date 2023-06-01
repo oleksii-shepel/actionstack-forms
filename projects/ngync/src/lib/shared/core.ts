@@ -74,9 +74,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   _subs = {} as any;
 
-  _blurCallback = () => this._blur$.next(true);
-  _inputCallback = () => {
-    this._input$.next(true);
+  _blurCallback = () => {
+    this._blur$.next(true);
+  };
+
+  _inputCallback = (control: NgControl) => (value : any) => {
+    control.control!.setValue(value);
+    this._input$.next(true)
   };
 
   constructor(
@@ -103,13 +107,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    let _selector = getSubmitted(this.slice);
-    this._subs.a = this.store.select(_selector).pipe(
+    let selector = getSubmitted(this.slice);
+    this._subs.a = this.store.select(selector).pipe(
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       map((state) => !!state),
-      tap((state) => { _selector.release(); this._submitted$.next(state); })
+      tap((state) => { selector.release(); this._submitted$.next(state); })
     ).subscribe();
 
     this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
@@ -119,6 +123,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(() => { this._updating$.next(true) }),
       tap(([input, blur, submitted]) => {
+
         let form = this.formValue;
         let equal = true;
 
@@ -205,6 +210,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._subs.d = this.controls.changes.subscribe(() => {
       this.setEventListeners();
     });
+
+    this.setEventListeners();
   }
 
   ngOnDestroy() {
@@ -229,14 +236,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   setEventListeners() {
     for (const control of this.controls.toArray()) {
       if(control.valueAccessor) {
-        control.valueAccessor.registerOnChange(this._inputCallback);
+        control.valueAccessor.registerOnChange(this._inputCallback(control));
         control.valueAccessor.registerOnTouched(this._blurCallback);
       }
     }
   }
 
   get formValue(): any {
-    let value = {} as any;
+    let value = {};
     for (const control of this.controls.toArray()) {
       value = setValue(value, control.path!.join('.'), control.value);
     }
