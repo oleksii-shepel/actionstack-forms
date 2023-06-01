@@ -21,6 +21,6 @@ label {
   & .checkbox {
     display: inline-block;
     margin-right: 0.5rem;
-    z-index: -1;
+    z-index: 0;
   }
 }
