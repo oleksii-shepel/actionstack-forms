@@ -15,11 +15,6 @@ h2, h3 {
 h3 {
   font-size: 1.3rem;
 }
-body {
-  padding: .5rem;
-  max-width: 1000px;
-  margin: auto;
-}
 @media (min-width: 600px) {
   body {
     padding: 2rem;
@@ -28,6 +23,7 @@ body {
 body, input[text] {
   color: #333;
   font-family: Cambria, Georgia, serif;
+  background-color:  #42545C;
 }
 a {
   cursor: pointer;

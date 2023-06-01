@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
 
@@ -8,6 +8,8 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  @HostBinding('class') class ='author';
+
   editor: EditorType = 'reactive';
 
   get showReactiveProfileEditor() {
@@ -24,5 +26,16 @@ export class AppComponent {
 
   toggleEditor(type: EditorType) {
     this.editor = type;
+    switch(type) {
+      case 'reactive':
+        this.class = 'author';
+        break;
+      case 'template-driven':
+        this.class = 'agent';
+        break;
+      case 'standard':
+        this.class = 'model';
+        break;
+    }
   }
 }
