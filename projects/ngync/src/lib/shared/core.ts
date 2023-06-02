@@ -22,6 +22,7 @@ import {
   delayWhen,
   filter,
   first,
+  fromEvent,
   map,
   repeat,
   takeWhile,
@@ -33,11 +34,14 @@ import {
   NGYNC_CONFIG_TOKEN,
   checkForm,
   deepEqual,
+  getModel,
   getSlice,
   getSubmitted,
   setValue
 } from '.';
 import {
+  AutoSubmit,
+  InitForm,
   ResetForm,
   UpdateDirty,
   UpdateErrors,
@@ -58,6 +62,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   debounce!: number;
   clearOnDestroy!: boolean;
   updateOn!: string;
+  autoSubmit!: boolean;
 
   dir: NgForm | FormGroupDirective;
 
@@ -82,6 +87,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     control.control!.setValue(value);
     this._input$.next(true)
   };
+  submit: any;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -91,24 +97,31 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ) {
 
     this.dir = injector.get(FormGroupDirective, null) ?? (injector.get(NgForm, null) as any);
-    let config = injector.get<any>(NGYNC_CONFIG_TOKEN, NGYNC_CONFIG_DEFAULT);
+    let config = injector.get<any>(NGYNC_CONFIG_TOKEN, {});
 
-    this.debounce = config.debounce;
-    this.clearOnDestroy = config.clearOnDestroy;
-    this.updateOn = config.updateOn;
+    this.debounce = config.debounce ?? NGYNC_CONFIG_DEFAULT.debounce;
+    this.clearOnDestroy = config.clearOnDestroy ?? NGYNC_CONFIG_DEFAULT.clearOnDestroy;
+    this.updateOn = config.updateOn ?? NGYNC_CONFIG_DEFAULT.updateOn;
+    this.autoSubmit = config.autoSubmit ?? NGYNC_CONFIG_DEFAULT.autoSubmit;
   }
 
   ngOnInit() {
     if (!this.slice) {
-      throw new Error('Misuse of this directive');
+      throw new Error('Misuse of sync directive');
     }
 
     if (!this.dir) {
       throw new Error('Supported form control directive not found');
     }
 
+    let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
+    if (!submit) {
+      throw new Error('Form does not contain submit control');
+    }
+
     let selector = getSubmitted(this.slice);
     this._subs.a = this.store.select(selector).pipe(
+      debounceTime(this.debounce),
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
@@ -116,7 +129,19 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((state) => { selector.release(); this._submitted$.next(state); })
     ).subscribe();
 
-    this._subs.b = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
+    if(this.autoSubmit) {
+      this._subs.b = fromEvent(submit, 'click').pipe(
+        debounceTime(this.debounce),
+        filter(() => this._initialized),
+        delayWhen(() => this._updating$),
+        takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+        filter(() => this.dir.form.valid),
+        tap(() => this.store.dispatch(AutoSubmit({ path: this.slice }))),
+        tap(() => this._submitted$.next(true))
+      ).subscribe();
+    }
+
+    this._subs.c = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
       debounceTime(this.debounce),
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
@@ -183,30 +208,53 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       })
     ).subscribe();
 
-    this._subs.c = this.store
-      .select(getSlice(this.slice))
-      .pipe(
+    this._subs.e = this.store
+      .select(getSlice(this.slice)).pipe(
+        debounceTime(this.debounce),
         first(),
-        filter((state) => state?.model),
-        repeat({ count: 10, delay: 0 }),
+        repeat({ count: 10 }),
         tap((state) => this.dir.form.patchValue(state.model)),
         filter((state) => checkForm(this.dir.form, state.model)),
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        takeWhile(() => !this._initialized),
-      )
-    .subscribe((state) => {
+        filter(() => !this._initialized)
+    ).subscribe((state) => {
+        if(state?.model || this.initialized) {
+          this._updating$.next(true);
+
+          this._initialized = true;
+
+          this.dir.form.markAsPristine();
+          this.cdr.markForCheck();
+
+          let formValue = state?.model ?? this.formValue;
+          if(!state?.model) {
+            this.store.dispatch(InitForm({path: this.slice, value: formValue}));
+          }
+
+          this._initialState = formValue;
+
+          this._updating$.next(false);
+        }
+    });
+
+    this._subs.f = this.store.select(getModel(this.slice)).pipe(
+      debounceTime(this.debounce),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      filter(() => this._initialized),
+      delayWhen(() => this._updating$),
+    ).subscribe((state) => {
       this._updating$.next(true);
 
-      this._initialized = true;
-      this.dir.form.markAsPristine();
+      this.dir.form.patchValue(state);
+      this.dir.form.updateValueAndValidity();
       this.cdr.markForCheck();
-      this._initialState = state;
 
       this._updating$.next(false);
     });
   }
 
   ngAfterContentInit() {
+
     this._subs.d = this.controls.changes.subscribe(() => {
       this.setEventListeners();
     });
@@ -242,7 +290,22 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
   }
 
+  get initialized(): boolean {
+    if(!this.controls) { return false; }
+
+    let value = true;
+    for (const control of this.controls.toArray()) {
+      if(typeof control.value === 'undefined' || control.value === null) {
+        value = false;
+        break;
+      }
+    }
+    return value;
+  }
+
   get formValue(): any {
+    if(!this.controls) { return {}; }
+
     let value = {};
     for (const control of this.controls.toArray()) {
       value = setValue(value, control.path!.join('.'), control.value);

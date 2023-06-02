@@ -4,12 +4,14 @@ export enum FormActions {
   InitForm = '[Form] Init',
   ResetForm = '[Form] Reset',
   UpdateValue = '[Form] Update Value',
+  UpdateSubmitted = '[Form] Update Submitted',
+}
+
+export enum FormActionsInternal {
   UpdateStatus = '[Form] Update Status',
   UpdateDirty = '[Form] Update Dirty',
   UpdateErrors = '[Form] Update Errors',
-  UpdateSubmitted = '[Form] Update Submitted',
-  SubmittedUpdated = '[Form] Submitted Updated',
-  FormInitialized = '[Form] Initialized'
+  AutoSubmit = '[Form] Auto Submit',
 }
 
 export const InitForm = createAction(
@@ -28,17 +30,17 @@ export const UpdateValue = createAction(
 );
 
 export const UpdateStatus = createAction(
-  FormActions.UpdateStatus,
+  FormActionsInternal.UpdateStatus,
   props<{ path: string; status: string | null; }>()
 );
 
 export const UpdateDirty = createAction(
-  FormActions.UpdateDirty,
+  FormActionsInternal.UpdateDirty,
   props<{ path: string; dirty: boolean | null; }>()
 );
 
 export const UpdateErrors = createAction(
-  FormActions.UpdateErrors,
+  FormActionsInternal.UpdateErrors,
   props<{ path: string; errors: { [k: string]: string } | null; }>()
 );
 
@@ -47,11 +49,8 @@ export const UpdateSubmitted = createAction(
   props<{ path: string; value: boolean; }>()
 );
 
-export const SubmittedUpdated = createAction(
-  FormActions.SubmittedUpdated
+export const AutoSubmit = createAction(
+  FormActionsInternal.AutoSubmit,
+  props<{ path: string; }>()
 );
 
-
-export const FormInitialized = createAction(
-  FormActions.FormInitialized
-);

@@ -1,5 +1,5 @@
 <form #modelForm="ngForm" autocomplete="off" [ngync]="this.slice">
-  <h2>Partner</h2>
+  <h2>{{caption}}</h2>
   <label for="firstName">First Name: </label>
   <input id="firstName" type="text" [(ngModel)]="model.firstName" name="firstName">
 
@@ -35,10 +35,9 @@
 
   <p>Complete the form to enable button.</p>
   <button type="submit" [disabled]="!modelForm.form.valid" (click)="onSubmit()">Submit</button>
+  <button type="button" (click)="updateProfile()">👇 Update Profile</button>
 </form>
 
 <hr>
 
 <p>Form State: {{ profile$ | async | json }}</p>
-
-<button type="button" (click)="updateProfile()">Update Profile</button>

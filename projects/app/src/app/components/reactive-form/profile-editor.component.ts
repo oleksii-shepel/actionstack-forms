@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { InitForm, UpdateSubmitted, UpdateValue, buildForm, getSlice, getValue } from 'ngync';
+import { UpdateValue, buildForm, getSlice, getValue } from 'ngync';
 import { Observable, take } from 'rxjs';
 import { initialProfile, profileOptions } from '../../models/profile';
 import { ProfileState } from '../../reducers/profile.reducer';
@@ -18,6 +18,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
   profile$: Observable<ProfileState>;
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
   form = this.profileForm;
+  hacked = false;
 
   a: any;
 
@@ -32,8 +33,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
   constructor(private fb: FormBuilder, private store: Store<any>) {
 
     this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
-      let model = getValue(state, "model") ?? initialProfile;
-      this.store.dispatch(InitForm({ path: this.slice, value: model}));
+      let model: any = getValue(state, "model") ?? initialProfile;
     });
 
     this.profile$ = this.store.select(getSlice(this.slice));
@@ -41,15 +41,26 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   updateProfile() {
     this.store.dispatch(UpdateValue({value: {
+      bookmark: true,
       firstName: 'Dr. Julius No',
-      lastName: '',
+      lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       address: {
-        street: '',
-        city: '',
+        street: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+        city: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
         state: 'Jamaica',
-        zip: ''
-      }
+        zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+      },
+      books: ['Bible'],
+      selected: 0,
+      quotes: `Unfortunately I misjudged you. You are just a stupid policeman whose luck has run out.`,
+      aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
     }, path: "profile"}));
+
+    this.hacked = true;
+  }
+
+  get caption() {
+    return !this.hacked ? 'Author' : 'Villain' ;
   }
 
   addAlias() {
@@ -62,9 +73,6 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
     const value = element.checked;
     this.profileForm.get('bookmark')?.setValue(value);
-
-    const event = new KeyboardEvent('keydown', { key: 'D', ctrlKey: true, bubbles: true });
-    target!.dispatchEvent(event);
   }
 
   onSelectChange(event: Event) {
@@ -74,7 +82,6 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   onSubmit() {
     if(this.form?.valid) {
-      this.store.dispatch(UpdateSubmitted({path: "profile", value: true}));
       alert("Form submitted successfully");
     }
   }

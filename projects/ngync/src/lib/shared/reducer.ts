@@ -1,5 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { FormActions } from './actions';
+import { FormActions, FormActionsInternal } from './actions';
 import { deepClone } from './builder';
 
 
@@ -62,9 +62,11 @@ export function findProps(obj: any): string[] {
   var result: string[] = [];
   const findKeys = (obj: any, prefix: string = '') => {
     for (let prop in obj) {
-      result.push(`${prefix}${prop}`)
       let sub = obj[prop]
-      if (typeof(sub) == "object") {
+      if(typeof(sub) !== 'object') {
+        result.push(`${prefix}${prop}`)
+      }
+      else {
         findKeys(sub, `${prop}.`);
       }
     }
@@ -106,20 +108,24 @@ export const forms = (initialState: any) => (reducer: Function) => {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.model)}`, deepClone(action.value));
     }
 
-    if (action.type === FormActions.UpdateStatus) {
+    if (action.type === FormActions.UpdateSubmitted) {
+      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.submitted)}`, action.value);
+    }
+
+    if (action.type === FormActionsInternal.UpdateStatus) {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.status)}`, action.status);
     }
 
-    if (action.type === FormActions.UpdateErrors) {
+    if (action.type === FormActionsInternal.UpdateErrors) {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.errors)}`, deepClone(action.errors));
     }
 
-    if (action.type === FormActions.UpdateDirty) {
+    if (action.type === FormActionsInternal.UpdateDirty) {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.dirty)}`, action.dirty);
     }
 
-    if (action.type === FormActions.UpdateSubmitted) {
-      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.submitted)}`, action.value);
+    if (action.type === FormActionsInternal.AutoSubmit) {
+      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.submitted)}`, true);
     }
 
     return nextState;

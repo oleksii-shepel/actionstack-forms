@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { InitForm, UpdateSubmitted, UpdateValue, deepClone, getSlice, getValue } from 'ngync';
+import { UpdateValue, deepClone, getSlice, getValue } from 'ngync';
 import { Observable, take } from 'rxjs';
 import { initialHero } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
@@ -19,13 +19,14 @@ export class TemplateProfileEditorComponent implements OnDestroy {
   slice = "hero";
   profile$!: Observable<HeroState>;
   model = initialHero;
+  hacked = false;
+
   a: any;
 
   constructor(private store: Store<ApplicationState>) {
 
     this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
-      let model = getValue(state, "model") ?? initialHero;
-      this.store.dispatch(InitForm({ path: this.slice, value: model}));
+      let model: any = getValue(state, "model") ?? initialHero;
       this.model = deepClone(model);
     });
 
@@ -35,14 +36,21 @@ export class TemplateProfileEditorComponent implements OnDestroy {
   updateProfile() {
     this.store.dispatch(UpdateValue({value: {
       firstName: 'Dr. Julius No',
-      lastName: '',
+      lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       address: {
-        street: '',
-        city: '',
+        street: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+        city: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
         state: 'Jamaica',
-        zip: ''
+        zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
       },
+      aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
     }, path: "hero"}));
+
+    this.hacked = true;
+  }
+
+  get caption() {
+    return this.hacked ? 'Agent' : 'Villain';
   }
 
   addAlias() {
@@ -56,7 +64,6 @@ export class TemplateProfileEditorComponent implements OnDestroy {
 
   onSubmit() {
     if(this.form?.valid) {
-      this.store.dispatch(UpdateSubmitted({path: "hero", value: true}));
       alert("Form submitted successfully");
     }
   }

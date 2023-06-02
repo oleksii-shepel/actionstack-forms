@@ -1,5 +1,5 @@
 <form [formGroup]="profileForm" autocomplete="off" [ngync]="this.slice">
-  <h2>Author</h2>
+  <h2>{{caption}}</h2>
   <div class="bookmark">
     <a (click)="addToBookmark(bookmark)">
       <label for="bookmark" [ngStyle]="{'display': 'none'}">Bookmark</label>
@@ -52,10 +52,10 @@
 
   <p>Complete the form to enable button.</p>
   <button type="submit" [disabled]="!profileForm.valid" (click)="onSubmit()">Submit</button>
+  <button type="button" (click)="updateProfile()">👇 Update Profile</button>
 </form>
 
 <hr>
 
 <p>Form State: {{ profile$ | async | json }}</p>
 
-<button type="button" (click)="updateProfile()">Update Profile</button>
