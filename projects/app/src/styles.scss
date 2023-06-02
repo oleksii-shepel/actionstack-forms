@@ -15,15 +15,23 @@ h2, h3 {
 h3 {
   font-size: 1.3rem;
 }
-@media (min-width: 600px) {
-  body {
-    padding: 2rem;
-  }
-}
-body, input[text] {
+body {
   color: #333;
   font-family: Cambria, Georgia, serif;
-  background-color:  #42545C;
+  animation-name: animation;
+  animation-duration: 10s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+  background: radial-gradient(#e03a3a, #42545C);
+  background-size: 100% 100%;
+  background-position: center;
+}
+@keyframes animation {
+  0%   { background-size:100% 100%; }
+  25%  { background-size:100% 100%; }
+  75%  { background-size:400% 400%; }
+  100% { background-size:100% 100%; }
 }
 a {
   cursor: pointer;
