@@ -3,7 +3,7 @@
   "version": "1.0.7",
   "description": "Angular Forms synced with NgRx store",
   "license": "MIT",
-  "keywords": [ "ngrx", "angular", "forms", "reactive", "template-driven", "sync"],
+  "keywords": [ "ngrx", "angular", "forms", "reactive", "template-driven", "sync", "ngync", "store"],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
