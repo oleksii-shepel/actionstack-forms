@@ -1,14 +1,27 @@
 {
   "name": "ngync",
   "version": "1.0.7",
+  "description": "Angular Forms Synced with NgRx store",
+  "license": "MIT",
+  "keywords": [ "ngrx", "angular", "forms", "reactive", "template-driven", "sync", "ngync", "store"],
   "peerDependencies": {
     "@angular/core": "^16.0.0",
     "@angular/forms": "^16.0.0",
     "@ngrx/store": "^16.0.0",
     "rxjs": "~7.8.0"
   },
-  "dependencies": {
-    "tslib": "^2.3.0"
+  "devDependencies": {
+    "tslib": "^2.5.2"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "main": "public-api.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oleksii-shepel/angular-ngrx-forms.git"
+  },
+  "author": "Oleksii Shepel",
+  "bugs": {
+    "url": "https://github.com/oleksii-shepel/angular-ngrx-forms/issues"
+  },
+  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme"
 }
