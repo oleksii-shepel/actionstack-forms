@@ -31,7 +31,7 @@ export class AppComponent implements OnDestroy {
   constructor(public modalService: ModalService) {
     this.message = this.hacked$.pipe(
       filter(value => value),
-      switchMap(() => {let str = '', index = Math.ceil((this.text.length - 1) * Math.random()); return interval(80).pipe(
+      switchMap(() => {let str = '', index = Math.floor((this.text.length - 1) * Math.random()); return interval(80).pipe(
         map((i) => {
           if(i < this.text[index].length) {
             str += this.text[index].charAt(i);

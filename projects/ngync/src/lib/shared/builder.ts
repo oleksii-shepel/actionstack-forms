@@ -50,33 +50,3 @@ export function checkForm<T>(form: any, model: T): boolean {
 
   return ready;
 }
-
-
-
-export function deepCloneJSON(objectToClone: any) {
-  if (!objectToClone) return objectToClone;
-  return JSON.parse(JSON.stringify(objectToClone));
-}
-
-
-
-export function deepClone(objectToClone: any) {
-  if (!objectToClone) return objectToClone;
-
-  let obj = Array.isArray(objectToClone) ? [] : typeof objectToClone === 'object' ? {} : objectToClone;
-
-  for (const key in objectToClone) {
-    let value = objectToClone[key];
-    (obj as any)[key] = (typeof value === "object") ? deepClone(value) : value;
-  }
-
-  return obj;
-}
-
-
-
-export function deepEqual(x: any, y: any): boolean {
-  return (x && y && typeof x === 'object' && typeof y === 'object') ?
-    (Object.keys(x).length === Object.keys(y).length) &&
-      Object.keys(x).reduce((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true) : (x === y);
-}

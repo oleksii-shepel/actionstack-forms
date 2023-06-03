@@ -1,10 +1,12 @@
+export * from './accessors';
 export * from './actions';
-export * from './reducer';
-export * from './validators';
+export * from './builder';
 export * from './controls';
 export * from './core';
-export * from './accessors';
-export * from './builder'
-export * from './module';
 export * from './dom';
+export * from './module';
+export * from './reducer';
 export * from './types';
+export * from './utils';
+export * from './validators';
+

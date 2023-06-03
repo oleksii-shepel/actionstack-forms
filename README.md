@@ -4,36 +4,59 @@ NgRx is a state management library for Angular applications. It provides a way t
 
 Angular in its turn provides two different approaches to handling user input through forms: reactive and template-driven. Both capture user input events from the view, validate the user input, create a form model and data model to update, and provide a way to track changes.
 
-Now its time to introduce new child to the world!
+How can we unite both the worlds? The answer is simple: With help of ngync library. So, what is it and how it differs from other available solutions? Let me introduce it to you. 
 
-ngync is a lightweight library to unite both the worlds. You can use all types of the forms and bind them together with the ngrx store with almost no efforts. All you need to do is declare ngync directive on the form and provide it with the path to store slice. Here is the example:
+ngync is a lightweight javascript library that helps get Angular forms and NgRx store seamlessly integrated. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a new approach. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
+
+If you know how to work with NgRx, you will also be comfortable using ngync. All you need to do is declare ngync directive on the form and provide it with the store path. It is an appropriate place where form data will be reliably reside during application execution. Here is an example of common form definition:
 
 ```angular
 <form #form="ngForm" autocomplete="off" ngync="model">
   ...
 </form>
 ```
-Additionally, you have to import meta-reducers from ngync package and initialize store module with them. They are responsible for boilerplate functionality that is not needed to implement time after time. The code snippet of main NgModule shows how to import them properly:
+
+ngync directive expects from user a string that consists of a sequence of property names separated by dots. The first property name is the name of the root property in the store. The last property name is the name of the property that will contain form data. All intermediate property names are the names of the properties that will be created in the store if they do not exist.
+
+Additionally, you have to import basic parts of ngync to your application. I'm talking about prepared meta-reducers, foundation functions that orchestrate all main functionality of the library. Вefore benefiting from their use, they have to be registered by NgRx store module. Nothing special, just another pint-sized prerequisites. All they do is handling of Redux action set. It is boilerplate functionality that is not more needed to be implemented time after time.
+
+The code snippet of main NgModule shows how the import looks like:
 
 ```angular
   StoreModule.forRoot(reducer, {
     metaReducers: [forms(initialState), logger]
   })
-   
-``` 
-That's it, you are completely redeemed from tedious chores of Redux pattern. In all other cases NgRx usage does not differ from ones described in its documentation. This is foreign parish and we have to deal with it with all our passion and devotion.
+```
 
-Currently there are no other docs of the library except this readme. But you probably do not need them at all. The code is concise and self describing. The library goes along with sample application which will help you take the first steps. 
+Here we are putting into work two meta-reducers: one for form state syncing and one for logging. How could you guess, the first one is mandatory if you want to save state within the store, but the second is optional. It will come in handy by taking first steps. You can use it in a similar way to the Redux DevTools panel.
 
-The work on the project is almost done and “alpha” version of software is ready for download. It is free. You are allowed to use, copy and modify the codebase. I kindly recommend to join the project development in this repo. You are welcome!
+That's it, all settings are done and your form have to be synchronized with the store, now you can deep into exploration of internal processes.
 
-There are some technical topics under consideration that will be taken into an account in common future. This is about store syncing strategies: onblur and onchange. Now due to ease of realisation the library utilizes only onchange one. But I hope both of them will be supported soon or later.
+By default, ngync will generate tracing actions every time user enters the data in the form. They have to be displayed in console of your browser. This behavior can be changed by passing on a special updateOn attribute to the directive. It can take one of three values: 'change', 'blur' or 'submit'. The tracing actions will be generated respectively every time user enters the data, when user leaves one of the form fields or when entire form is submitted or to be submitted.
 
-Of course, there are also bonuses. ngync has extended template-driven approach with missing feature of ngModelArray.
+If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. But if you definitely want to do it by yourself, you can do it without hesitation. There are four actions supported by ngync right out of the box. I think, the names speak for themselves and the parameter list for each of them can be found in the source code of the library. Here is the list of actions:
 
-ngModelArray is a directive in Angular that can be used to group ngModel directives together. It creates and binds a FormArray instance to a DOM element.
+```angular
+export enum FormActions {
+  InitForm = '[Form] Init',
+  ResetForm = '[Form] Reset',
+  UpdateValue = '[Form] Update Value',
+  UpdateSubmitted = '[Form] Update Submitted',
+}
+```
 
-Here is an example of how to use ngModelArray in Angular:
+As you can see you are completely redeemed from the tedium of implementation of constituent parts of the Redux pattern. In all the cases NgRx has detailed documentation that you may need in your work. This is foreign parish and we have to deal with it with all our passion and devotion.
+
+I have to admit that there are no other docs of ngync except this readme. It is probably a matter of time and interest. I stand for the idea that the best documentation is the code itself. Hopefully, it is concise and self describing. The library goes along with sample application which will help you orient in the theme. The link to the source repo of the project is [angular-ngrx-forms](https://github.com/oleksii-shepel/angular-ngrx-forms.git). 
+If you have any questions or suggestions, I will respond as soon as possible.
+
+The active phase of the project is passed by and the first version of software is packaged. The project is well-tested manually, but it lacks on comprehensive test coverage. Don't risk in production. It is free. You are allowed to use, copy and modify the codebase. I kindly recommend to join the project development in this repo. You are welcome!
+
+Of course, there is a bonus stored up together with the library. ngync has extended template-driven approach with missing feature of ngModelArray.
+
+ngModelArray is a directive that can be used to group ngModel directives together into an array. It is designed to be used as a child of the ngForm directive. It also requires a name attribute so that the control can be registered with the parent ngForm directive under that name.
+
+Here is an example of how to organically combine it with ngModels:
 
 ```angular
 <form #form="ngForm">
@@ -44,4 +67,7 @@ Here is an example of how to use ngModelArray in Angular:
   </div>
 </form>
 ```
-In this example, the ngModelArray directive is used to arrange inputs together in an array within the aliases control.
+
+For more information about ngModelArray, see the [Angular documentation](https://angular.io/api/forms/NgModelArray). Just a jest!
+
+I hope you will enjoy using ngync and it will help you to create more robust and maintainable applications. And remember that the best is yet to come and state management can be easy. Stay tuned!
