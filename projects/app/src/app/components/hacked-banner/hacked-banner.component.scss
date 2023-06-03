@@ -1,0 +1,37 @@
+/* MODAL STYLES
+-------------------------------*/
+hacked-modal {
+  display: none;
+
+  .modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    border-radius: 3px;
+  }
+
+  .modal-body {
+    padding: 20px;
+    background: #e03a3a;
+    color: #fff;
+    border-radius: 3px;
+    text-align: justify;
+    width: 600px;
+
+    p {
+      display: inline-flex;
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 0.8;
+      margin: 0;
+    }
+
+    img {
+      display: inline;
+      width: 100px;
+      height: 100px;
+      margin-right: 20px;
+    }
+  }
+}

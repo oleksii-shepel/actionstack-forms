@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { UpdateValue, buildForm, getSlice, getValue } from 'ngync';
@@ -13,12 +13,13 @@ import { ProfileState } from '../../reducers/profile.reducer';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReactiveProfileEditorComponent implements OnDestroy {
+  @Input() caption = '';
+  @Output() hacked = new EventEmitter<boolean>();
 
   slice = "profile";
   profile$: Observable<ProfileState>;
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
   form = this.profileForm;
-  hacked = false;
 
   a: any;
 
@@ -50,17 +51,13 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
         state: 'Jamaica',
         zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
       },
-      books: ['Bible'],
+      books: ['Reading is prohibited, burn all the books...'],
       selected: 0,
       quotes: `Unfortunately I misjudged you. You are just a stupid policeman whose luck has run out.`,
       aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
     }, path: "profile"}));
 
-    this.hacked = true;
-  }
-
-  get caption() {
-    return !this.hacked ? 'Author' : 'Villain' ;
+    this.hacked.emit(true);
   }
 
   addAlias() {

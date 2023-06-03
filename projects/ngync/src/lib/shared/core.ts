@@ -14,7 +14,7 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { Store } from '@ngrx/store';
+import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   combineLatest,
@@ -26,7 +26,8 @@ import {
   map,
   repeat,
   takeWhile,
-  tap
+  tap,
+  withLatestFrom
 } from 'rxjs';
 import {
   DomObserver,
@@ -40,8 +41,9 @@ import {
   setValue
 } from '.';
 import {
+  AutoInit,
   AutoSubmit,
-  InitForm,
+  FormActions,
   ResetForm,
   UpdateDirty,
   UpdateErrors,
@@ -76,6 +78,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   _updating$ = new BehaviorSubject<boolean>(false);
 
   _initialized = false;
+  _initDispatched = false;
 
   _subs = {} as any;
 
@@ -93,7 +96,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
     @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef<any>,
     @Inject(Injector) public injector: Injector,
-    @Inject(Store) public store: Store
+    @Inject(Store) public store: Store,
+    public actionsSubject: ActionsSubject
   ) {
 
     this.dir = injector.get(FormGroupDirective, null) ?? (injector.get(NgForm, null) as any);
@@ -119,8 +123,30 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Form does not contain submit control');
     }
 
+    this._subs.a = this.store.select(getModel(this.slice)).pipe(
+      withLatestFrom(this.actionsSubject),
+      tap(([, action]) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
+      filter(([ , action]) => action.type === FormActions.InitForm || action.type === FormActions.ResetForm || action.type === FormActions.UpdateValue),
+      debounceTime(this.debounce),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      delayWhen(() => this._updating$),
+      ).subscribe(([state, action]) => {
+      this._updating$.next(true);
+
+      if(action.type === FormActions.InitForm) {
+        this._initialState = state;
+        this._initialized = true;
+      }
+
+      this.dir.form.patchValue(state);
+      this.dir.form.updateValueAndValidity();
+      this.cdr.markForCheck();
+
+      this._updating$.next(false);
+    });
+
     let selector = getSubmitted(this.slice);
-    this._subs.a = this.store.select(selector).pipe(
+    this._subs.b = this.store.select(selector).pipe(
       debounceTime(this.debounce),
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
@@ -130,7 +156,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     ).subscribe();
 
     if(this.autoSubmit) {
-      this._subs.b = fromEvent(submit, 'click').pipe(
+      this._subs.c = fromEvent(submit, 'click').pipe(
         debounceTime(this.debounce),
         filter(() => this._initialized),
         delayWhen(() => this._updating$),
@@ -141,7 +167,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       ).subscribe();
     }
 
-    this._subs.c = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
+    this._subs.d = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
       debounceTime(this.debounce),
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
@@ -213,42 +239,23 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         debounceTime(this.debounce),
         first(),
         repeat({ count: 10 }),
-        tap((state) => this.dir.form.patchValue(state.model)),
-        filter((state) => checkForm(this.dir.form, state.model)),
+        tap((state) => { if(state?.model) { this.dir.form.patchValue(state.model); }}),
+        filter((state) => {return (state?.model) ? checkForm(this.dir.form, state.model): true;}),
         takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        filter(() => !this._initialized)
-    ).subscribe((state) => {
-        if(state?.model || this.initialized) {
-          this._updating$.next(true);
-
-          this._initialized = true;
-
-          this.dir.form.markAsPristine();
-          this.cdr.markForCheck();
-
-          let formValue = state?.model ?? this.formValue;
-          if(!state?.model) {
-            this.store.dispatch(InitForm({path: this.slice, value: formValue}));
-          }
-
-          this._initialState = formValue;
-
-          this._updating$.next(false);
-        }
-    });
-
-    this._subs.f = this.store.select(getModel(this.slice)).pipe(
-      debounceTime(this.debounce),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      filter(() => this._initialized),
-      delayWhen(() => this._updating$),
+        filter(() => !this._initDispatched && !this._initialized)
     ).subscribe((state) => {
       this._updating$.next(true);
+      if(state?.model || this.initialized) {
+        this._initialized = true;
 
-      this.dir.form.patchValue(state);
-      this.dir.form.updateValueAndValidity();
-      this.cdr.markForCheck();
+        this.dir.form.markAsPristine();
+        this.cdr.markForCheck();
 
+        let formValue = state?.model ?? this.formValue;
+        this.store.dispatch(AutoInit({path: this.slice, value: formValue}));
+
+        this._initialState = formValue;
+      }
       this._updating$.next(false);
     });
   }

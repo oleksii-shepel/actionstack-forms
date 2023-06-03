@@ -11,6 +11,7 @@ export enum FormActionsInternal {
   UpdateStatus = '[Form] Update Status',
   UpdateDirty = '[Form] Update Dirty',
   UpdateErrors = '[Form] Update Errors',
+  AutoInit = '[Form] Auto Init',
   AutoSubmit = '[Form] Auto Submit',
 }
 
@@ -47,6 +48,11 @@ export const UpdateErrors = createAction(
 export const UpdateSubmitted = createAction(
   FormActions.UpdateSubmitted,
   props<{ path: string; value: boolean; }>()
+);
+
+export const AutoInit = createAction(
+  FormActionsInternal.AutoInit,
+  props<{ path: string; value: any; }>()
 );
 
 export const AutoSubmit = createAction(

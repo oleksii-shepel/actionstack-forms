@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { UpdateValue, deepClone, getSlice, getValue } from 'ngync';
@@ -16,10 +16,12 @@ import { HeroState } from '../../reducers/hero.reducer';
 export class TemplateProfileEditorComponent implements OnDestroy {
   @ViewChild('heroForm') form: NgForm | null = null;
 
+  @Input() caption = '';
+  @Output() hacked = new EventEmitter<boolean>();
+
   slice = "hero";
   profile$!: Observable<HeroState>;
   model = initialHero;
-  hacked = false;
 
   a: any;
 
@@ -46,11 +48,7 @@ export class TemplateProfileEditorComponent implements OnDestroy {
       aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
     }, path: "hero"}));
 
-    this.hacked = true;
-  }
-
-  get caption() {
-    return this.hacked ? 'Agent' : 'Villain';
+    this.hacked.emit(true);
   }
 
   addAlias() {
