@@ -1,7 +1,7 @@
 {
   "name": "ngync",
-  "version": "0.0.1",
-  "description": "Project aimed at binding of Angular forms with NgRx",
+  "version": "1.0.7",
+  "description": "Angular Forms synced with NgRx store",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -39,5 +39,15 @@
     "ts-node": "~10.9.0",
     "tslib": "^2.5.2",
     "typescript": "~4.9.3"
-  }
+  },
+  "main": "main.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oleksii-shepel/angular-ngrx-forms.git"
+  },
+  "author": "Oleksii Shepel",
+  "bugs": {
+    "url": "https://github.com/oleksii-shepel/angular-ngrx-forms/issues"
+  },
+  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme"
 }
