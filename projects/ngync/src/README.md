@@ -11,7 +11,7 @@ How can we unite both the worlds? The answer is simple: With help of **ngync** l
 If you know how to work with NgRx, you will also be comfortable using ngync. All you need to do is declare ngync directive on the form and provide it with the store path. It is an appropriate place where form data will be reliably reside during application execution. Here is an example of common form definition:
 
 ```angular
-<form #form="ngForm" autocomplete="off" **ngync**="model">
+<form #form="ngForm" autocomplete="off" ngync="model">
   ...
 </form>
 ```
@@ -23,9 +23,26 @@ Additionally, you have to import basic parts of ngync to your application. I'm t
 The code snippet of main NgModule shows how the import looks like:
 
 ```angular
-  StoreModule.forRoot(reducer, {
-    metaReducers: [forms(initialState), logger]
-  })
+import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    ReactiveFormsModule,
+    FormsModule,
+    SharedModule,
+    StoreModule.forRoot(reducer, {
+      metaReducers: [forms(initialState), logger]
+    }),
+
+    NgFormsModule
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
 ```
 
 Here we are putting into work two meta-reducers: one for form state syncing and one for logging. How could you guess, the first one is mandatory if you want to save state within the store, but the second is optional. It will come in handy by taking first steps. You can use it in a similar way to the Redux DevTools panel.
