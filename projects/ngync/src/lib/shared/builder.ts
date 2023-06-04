@@ -8,15 +8,15 @@ export const fb = new FormBuilder();
 
 
 export function buildForm<T>(model: T, options: ModelOptions<T> = {}): AbstractControl {
-  if (!model) return fb.control(name, (options || {}) as AbstractControlOptions);
+  if (!model) return fb.control('', (options || {}) as AbstractControlOptions);
 
-  let obj = Array.isArray(model) ? fb.array([], options as AbstractControlOptions) :
+  let obj = Array.isArray(model) ? fb.array([], (options["__group"] || options) as AbstractControlOptions) :
     typeof model === 'object' ? fb.group({}, (options["__group"] || options) as AbstractControlOptions) :
-    fb.control(name, (options || {}) as AbstractControlOptions);
+    fb.control(model, (options || {}) as AbstractControlOptions);
 
   for (const key in model) {
     let value = model[key];
-    let control = Array.isArray(value) ? buildForm(value, (options as any)[`__array_${key}`] || {}) :
+    let control = Array.isArray(value) ? buildForm(value, (options as any)[key] || {}) :
     typeof value === 'object' ? buildForm(value, (options as any)[key] || {}) :
     fb.control(value, (options[key] || {}) as AbstractControlOptions);
 
