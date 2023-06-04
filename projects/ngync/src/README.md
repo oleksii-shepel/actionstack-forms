@@ -1,6 +1,6 @@
 # ngync
 
-**ngync** is a lightweight javascript library that helps get Angular forms and NgRx store seamlessly integrated. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a new approach. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
+**ngync** is a lightweight javascript library that helps to integrate Angular forms into NgRx store easily. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a new approach. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
 
 [NgRx](https://ngrx.io/) is a state management library for Angular applications. It provides a way to manage the state of your application in a predictable way. Also it helps you write applications that behave consistently, run in different environments (client, server, and native), and are easy to test.
 
@@ -39,7 +39,6 @@ If you may probably noticed, you do not must to dispatch any actions to the stor
 ```angular
 export enum FormActions {
   InitForm = '[Form] Init',
-  ResetForm = '[Form] Reset',
   UpdateValue = '[Form] Update Value',
   UpdateSubmitted = '[Form] Update Submitted',
 }

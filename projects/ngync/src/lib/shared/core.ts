@@ -52,6 +52,15 @@ import {
   UpdateValue
 } from './actions';
 
+
+export interface NgyncConfig {
+  debounce: number;
+  resetOnDestroy: 'no-changes' | 'initial' | 'submitted' | 'empty';
+  updateOn: 'change' | 'blur' | 'submit';
+  autoSubmit: boolean;
+}
+
+
 @Directive({
   selector:
     'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]',
@@ -62,7 +71,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   debounce!: number;
-  clearOnDestroy!: boolean;
+  resetOnDestroy!: string;
   updateOn!: string;
   autoSubmit!: boolean;
 
@@ -73,8 +82,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   _unmounted$ = new BehaviorSubject<boolean>(false);
   _blur$ = new BehaviorSubject<boolean>(false);
-  _submitted$ = new BehaviorSubject<boolean>(false);
   _input$ = new BehaviorSubject<boolean>(false);
+  _submitted$ = new BehaviorSubject<boolean>(false);
   _updating$ = new BehaviorSubject<boolean>(false);
 
   _initialized = false;
@@ -104,7 +113,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     let config = injector.get<any>(NGYNC_CONFIG_TOKEN, {});
 
     this.debounce = config.debounce ?? NGYNC_CONFIG_DEFAULT.debounce;
-    this.clearOnDestroy = config.clearOnDestroy ?? NGYNC_CONFIG_DEFAULT.clearOnDestroy;
+    this.resetOnDestroy = config.resetOnDestroy ?? NGYNC_CONFIG_DEFAULT.resetOnDestroy;
     this.updateOn = config.updateOn ?? NGYNC_CONFIG_DEFAULT.updateOn;
     this.autoSubmit = config.autoSubmit ?? NGYNC_CONFIG_DEFAULT.autoSubmit;
   }
@@ -126,7 +135,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._subs.a = this.store.select(getModel(this.slice)).pipe(
       withLatestFrom(this.actionsSubject),
       tap(([, action]) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
-      filter(([ , action]) => action.type === FormActions.InitForm || action.type === FormActions.ResetForm || action.type === FormActions.UpdateValue),
+      filter(([ , action]) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
       debounceTime(this.debounce),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       delayWhen(() => this._updating$),
@@ -138,7 +147,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this._initialized = true;
       }
 
-      this.dir.form.patchValue(state);
+      let formValue = this.formValue;
+      Object.assign(formValue, state);
+
+      this.dir.form.patchValue(formValue);
       this.dir.form.updateValueAndValidity();
       this.cdr.markForCheck();
 
@@ -270,17 +282,29 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
-    if (this.clearOnDestroy) {
-      this.store.dispatch(ResetForm({ value: {}, path: this.slice }));
+    if (this.resetOnDestroy !== 'no-changes') {
+      switch(this.resetOnDestroy) {
+        case 'initial':
+          this.store.dispatch(ResetForm({ path: this.slice, value: this._initialState || {} }));
+          break;
+        case 'submitted':
+          this.store.dispatch(ResetForm({ path: this.slice, value: this._submittedState || {} }));
+          break;
+        case 'empty':
+          this.store.dispatch(ResetForm({ path: this.slice, value: {} }));
+          break;
+      }
     }
 
     for (const sub of Object.keys(this._subs)) {
       this._subs[sub].unsubscribe();
     }
 
+    this._unmounted$.complete();
     this._blur$.complete();
     this._input$.complete();
     this._submitted$.complete();
+    this._updating$.complete();
   }
 
   ngOnComponentUnmounted() {

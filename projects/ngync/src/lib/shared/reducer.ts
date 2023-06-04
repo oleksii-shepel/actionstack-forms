@@ -37,16 +37,16 @@ export const forms = (initialState: any) => (reducer: Function) => {
       nextState = setValue(state, path, { model: deepClone(action.value) } as FormState<any>);
     }
 
-    if (action.type === FormActions.ResetForm) {
-      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState<any>);
-    }
-
     if (action.type === FormActions.UpdateValue) {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.model)}`, deepClone(action.value));
     }
 
     if (action.type === FormActions.UpdateSubmitted) {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.submitted)}`, action.value);
+    }
+
+    if (action.type === FormActionsInternal.ResetForm) {
+      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState<any>);
     }
 
     if (action.type === FormActionsInternal.UpdateStatus) {
