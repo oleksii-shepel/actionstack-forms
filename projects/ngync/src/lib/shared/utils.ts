@@ -31,7 +31,8 @@ export const setValue = (obj: any, prop: string, val: any) => {
 
 export const iterable = (obj: any) => {
   return { [Symbol.iterator]: function* () {
-    for(let element of Object.keys(obj).sort()) { yield obj[element]; }
+    if(Array.isArray(obj)) { for(let element of obj) { yield element; } }
+    else { for(let element of Object.keys(obj).sort()) { yield obj[element]; } }
   }}
 }
 

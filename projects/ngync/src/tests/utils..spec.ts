@@ -26,10 +26,10 @@ describe('utils', () => {
 
   it('should iterate', () => {
     let obj = { a: 1, b: 2, c: 3 };
-    let arr = [1, 2, 3];
+    let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
     expect([...iterable(obj)]).toEqual([1, 2, 3]);
-    expect([...iterable(arr)]).toEqual([1, 2, 3]);
+    expect([...iterable(arr)]).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
   });
 
   it('should get prop', () => {
