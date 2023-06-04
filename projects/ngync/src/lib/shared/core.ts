@@ -54,10 +54,10 @@ import {
 
 
 export interface NgyncConfig {
-  debounce: number;
-  resetOnDestroy: 'no-changes' | 'initial' | 'submitted' | 'empty';
-  updateOn: 'change' | 'blur' | 'submit';
-  autoSubmit: boolean;
+  debounce?: number;
+  resetOnDestroy?: 'no-changes' | 'initial' | 'submitted' | 'empty';
+  updateOn?: 'change' | 'blur' | 'submit';
+  autoSubmit?: boolean;
 }
 
 
