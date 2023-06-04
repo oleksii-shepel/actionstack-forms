@@ -3,7 +3,16 @@
   "version": "1.0.7",
   "description": "Angular Forms synced with NgRx store",
   "license": "MIT",
-  "keywords": [ "ngrx", "angular", "forms", "reactive", "template-driven", "sync", "ngync", "store"],
+  "keywords": [
+    "ngrx",
+    "angular",
+    "forms",
+    "reactive",
+    "template-driven",
+    "sync",
+    "ngync",
+    "store"
+  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -35,7 +44,7 @@
     "copyfiles": "^2.4.1",
     "jest": "^29.5.0",
     "jest-preset-angular": "^13.1.1",
-    "ng-packagr": "^16.0.0",
+    "ng-packagr": "^16.0.1",
     "ngrx-store-freeze": "^0.2.4",
     "ts-node": "~10.9.0",
     "tslib": "^2.5.2",
