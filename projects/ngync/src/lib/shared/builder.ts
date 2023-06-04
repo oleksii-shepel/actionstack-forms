@@ -1,5 +1,5 @@
 import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ArrayToObject, ModelOptions } from '.';
+import { ModelOptions } from '.';
 
 
 
@@ -7,21 +7,18 @@ export const fb = new FormBuilder();
 
 
 
-export function buildForm<T extends any[]>(model: T, options?: ArrayToObject<ModelOptions<T[number]>[]>) : AbstractControl;
-export function buildForm<T extends Record<keyof T, any>>(model: T, options?:  ModelOptions<T>): AbstractControl;
-export function buildForm<T>(model: T, options: any = {} ): AbstractControl {
-  if(!options) options = {};
+export function buildForm<T>(model: T, options: ModelOptions<T> = {} as any): AbstractControl {
   if (!model) return fb.control('', options as AbstractControlOptions);
 
-  let obj = Array.isArray(model) ? fb.array([], (options["__group"] || options) as AbstractControlOptions) :
-    typeof model === 'object' ? fb.group({}, (options["__group"] || options) as AbstractControlOptions) :
+  let obj = Array.isArray(model) ? fb.array([], ((options as any)["__group"] || {}) as AbstractControlOptions) :
+    typeof model === 'object' ? fb.group({}, ((options as any)["__group"] || {}) as AbstractControlOptions) :
     fb.control(model, options as AbstractControlOptions);
 
   for (const key in model) {
     let value = model[key];
-    let control = Array.isArray(value) ? buildForm({model: value, options: (options as any)[key] || {}}) :
-    typeof value === 'object' ? buildForm({model: value, options: (options as any)[key] || {}}) :
-    fb.control(value, (options[key] || {}) as AbstractControlOptions);
+    let control = Array.isArray(value) ? buildForm(value, (options as any)[key] || {}) :
+    typeof value === 'object' ? buildForm(value, (options as any)[key] || {}) :
+    fb.control(value, ((options as any)[key] || {}) as AbstractControlOptions);
 
     if(obj instanceof FormGroup){
       (obj as FormGroup).addControl(key, control);

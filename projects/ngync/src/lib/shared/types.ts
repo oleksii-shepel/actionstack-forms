@@ -1,7 +1,6 @@
 import { AbstractControlOptions } from "@angular/forms";
 
 
-
 export type Subset<K> = {
   [attr in keyof K]?: K[attr] extends object
       ? Subset<K[attr]>
@@ -19,14 +18,23 @@ export type ArrayToObject<T extends any[]> = {
 }
 
 
-
 export type Extract<T, V> = { [key in keyof T]: T[key] extends V ? key : never }[keyof T]
-export type SubType<Base, Condition> = Pick<Base, Extract<Base, Condition>>;
+export type Select<Base, Condition> = Pick<Base, Extract<Base, Condition>>;
 
 
 
-export type ModelOptions<T> = {
-  [key in keyof Partial<T>]? : T[key] extends Array<any> ? ArrayToObject<ModelOptions<T[key][number]>[]> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
-} & {
+export type KeyCount<Obj, Cache extends any[] = []> = keyof Obj extends never ? Cache['length'] : {
+  [Prop in keyof Obj]: KeyCount<Omit<Obj, Prop>, [...Cache, Prop]>
+}[keyof Obj]
+
+
+
+export type ModelOptions<T> =
+T extends Array<infer U> ? ArrayToObject<ModelOptions<U>[]> & {
   ["__group"]?: T extends object ? AbstractControlOptions : never;
-};
+} : T extends object ? {
+  [key in keyof Partial<T>]? : ModelOptions<T[key]>;
+} & {
+  ["__group"]?: AbstractControlOptions;
+} : AbstractControlOptions;
+

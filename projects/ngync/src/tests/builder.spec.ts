@@ -1,5 +1,6 @@
 import { Validators } from '@angular/forms';
 import { buildForm, checkForm } from '../lib/shared/builder';
+import { ModelOptions } from '../lib/shared/types';
 
 describe('builder', () => {
   it('should build form', () => {
@@ -46,23 +47,25 @@ describe('builder', () => {
   });
   it('should build form array with options', () => {
     let model = [1, 2, 3];
-    let form = buildForm(model, { __group: {}, '0': {validators: Validators.required}, '1': {validators: Validators.email}, '2': {validators: Validators.maxLength(10)} });
+
+    let modelOptions: ModelOptions<number> = {};
+
+    let form = buildForm(model, modelOptions as any);
 
     expect(form.value).toEqual(model);
   });
   it('should build form group with options', () => {
     let model = { a: { b: { c: 1 } } };
-    let form = buildForm(model, { __group: {}, a: { __group: {}, b: { __group: {}, c: {validators: Validators.required} } } });
+    let form = buildForm(model, { a: { b: { c: { validators: Validators.required } } } });
 
     expect(form.value).toEqual(model);
   });
 
   it('should build form array group with options', () => {
     let model = { a: { b: [{ c: 1 }] } };
-    let modelOptions = { a: { __group: {}, b: { __group: {}, '0': { __group: {}, c: {validators: Validators.required} } } } };
+    let modelOptions = { a: { b: { '0': { c: {validators: Validators.required} } } } };
 
     let form = buildForm(model, modelOptions);
-
     expect(form.value).toEqual(model);
   });
   it('should check form', () => {
