@@ -1,10 +1,11 @@
 import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ArrayToObject } from 'ngync';
-import { ModelOptions } from '.';
+import { ArrayToObject, ModelOptions } from '.';
 
 
 
 export const fb = new FormBuilder();
+
+
 
 export function buildForm<T extends any[]>(model: T, options?: ModelOptions<ArrayToObject<T>>) : AbstractControl;
 export function buildForm<T extends Record<keyof T, any>>(model: T, options?:  ModelOptions<T>): AbstractControl;
@@ -32,6 +33,8 @@ export function buildForm<T>(model: T, options: any = {} ): AbstractControl {
 
   return obj;
 }
+
+
 
 export function checkForm<T>(form: any, model: T): boolean {
   if (!form || !form.controls) return false;
