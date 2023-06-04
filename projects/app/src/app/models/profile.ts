@@ -61,9 +61,9 @@ export const profileOptions: ModelOptions<Profile> = {
     zip: {},
   },
   selected: {},
-  books: [],
+  books: {},
   quotes: {},
-  aliases: []
+  aliases: {}
 }
 
 export interface Hero {
@@ -99,7 +99,7 @@ export const heroOptions: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: [{}, {}, {}]
+  aliases: {}
 }
 
 export interface Model {
@@ -135,6 +135,6 @@ export const modelOptions: ModelOptions<Model> = {
     state: {},
     zip: {},
   },
-  aliases: [{}]
+  aliases: {}
 }
 
