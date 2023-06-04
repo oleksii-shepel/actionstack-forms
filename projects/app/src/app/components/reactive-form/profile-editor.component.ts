@@ -18,7 +18,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   slice = "profile";
   profile$: Observable<ProfileState>;
-  profileForm = buildForm({model: initialProfile, options: profileOptions}) as FormGroup;
+  profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
   form = this.profileForm;
 
   a: any;

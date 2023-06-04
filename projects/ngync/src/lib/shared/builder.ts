@@ -6,11 +6,9 @@ import { ModelOptions } from '.';
 
 export const fb = new FormBuilder();
 
-export function buildForm<T extends any[]>(params: { model: T, options?: ModelOptions<ArrayToObject<T>>}) : AbstractControl;
-export function buildForm<T extends Record<keyof T, any>>(params: { model: T, options?:  ModelOptions<T>}): AbstractControl;
-
-export function buildForm<T>(params: { model: T, options?: any }): AbstractControl {
-  let { model, options } = params;
+export function buildForm<T extends any[]>(model: T, options?: ModelOptions<ArrayToObject<T>>) : AbstractControl;
+export function buildForm<T extends Record<keyof T, any>>(model: T, options?:  ModelOptions<T>): AbstractControl;
+export function buildForm<T>(model: T, options: any = {} ): AbstractControl {
   if(!options) options = {};
   if (!model) return fb.control('', options as AbstractControlOptions);
 
