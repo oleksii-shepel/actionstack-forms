@@ -7,7 +7,7 @@ export const fb = new FormBuilder();
 
 
 
-export function buildForm<T extends any[]>(model: T, options?: ModelOptions<ArrayToObject<T>>) : AbstractControl;
+export function buildForm<T extends any[]>(model: T, options?: ArrayToObject<ModelOptions<T[number]>[]>) : AbstractControl;
 export function buildForm<T extends Record<keyof T, any>>(model: T, options?:  ModelOptions<T>): AbstractControl;
 export function buildForm<T>(model: T, options: any = {} ): AbstractControl {
   if(!options) options = {};
@@ -35,7 +35,6 @@ export function buildForm<T>(model: T, options: any = {} ): AbstractControl {
 }
 
 
-
 export function checkForm<T>(form: any, model: T): boolean {
   if (!form || !form.controls) return false;
 
@@ -53,3 +52,4 @@ export function checkForm<T>(form: any, model: T): boolean {
 
   return ready;
 }
+

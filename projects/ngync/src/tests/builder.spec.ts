@@ -50,6 +50,21 @@ describe('builder', () => {
 
     expect(form.value).toEqual(model);
   });
+  it('should build form group with options', () => {
+    let model = { a: { b: { c: 1 } } };
+    let form = buildForm(model, { __group: {}, a: { __group: {}, b: { __group: {}, c: {validators: Validators.required} } } });
+
+    expect(form.value).toEqual(model);
+  });
+
+  it('should build form array group with options', () => {
+    let model = { a: { b: [{ c: 1 }] } };
+    let modelOptions = { a: { __group: {}, b: { __group: {}, '0': { __group: {}, c: {validators: Validators.required} } } } };
+
+    let form = buildForm(model, modelOptions);
+
+    expect(form.value).toEqual(model);
+  });
   it('should check form', () => {
     let model = { a: 1, b: 2, c: 3 };
     let form = buildForm(model);
