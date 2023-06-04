@@ -13,7 +13,7 @@ export const setValue = (obj: any, prop: string, val: any) => {
 
   if(split.length === 0) { obj = val; return obj; }
   else {
-    let root = {...obj};
+    let root = Array.isArray(obj)? [...obj]: {...obj};
     let item = root;
     while(split.length >= 1) {
       const key = split.at(0)!;
@@ -31,7 +31,7 @@ export const setValue = (obj: any, prop: string, val: any) => {
 
 export const iterable = (obj: any) => {
   return { [Symbol.iterator]: function* () {
-    for(let element in obj) { yield element; }
+    for(let element of Object.keys(obj).sort()) { yield obj[element]; }
   }}
 }
 
@@ -39,7 +39,7 @@ export const iterable = (obj: any) => {
 
 export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[prop] }) => any) {
   let str = expression.toString().split('=>',).at(1)!.trim();
-  return str.substring(str.indexOf('.') + 1, str.length);
+  return str.substring(str.indexOf('.') + 1, str.length).replace(/\]/g, '').replace(/\[/g, '.');
 }
 
 
@@ -53,7 +53,7 @@ export function findProps(obj: any): string[] {
         result.push(`${prefix}${prop}`)
       }
       else {
-        findKeys(sub, `${prop}.`);
+        findKeys(sub, `${prefix}${prop}.`);
       }
     }
   }
