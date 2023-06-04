@@ -15,7 +15,7 @@ export type Subset<K> = {
 
 
 export type ArrayToObject<T extends any[]> = {
-  [key in keyof T as string]: T[key];
+  [key in keyof T as string]?: T[key];
 }
 
 
