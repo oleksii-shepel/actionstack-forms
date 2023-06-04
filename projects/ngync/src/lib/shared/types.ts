@@ -26,7 +26,7 @@ export type SubType<Base, Condition> = Pick<Base, Extract<Base, Condition>>;
 
 
 export type ModelOptions<T> = {
-  [key in keyof Partial<T>]? : T[key] extends Array<any> ? ModelOptions<ArrayToObject<T[key]>> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
+  [key in keyof Partial<T>]? : T[key] extends Array<any> ? ArrayToObject<ModelOptions<T[key][number]>[]> : T[key] extends object ? ModelOptions<T[key]> : AbstractControlOptions;
 } & {
   ["__group"]?: T extends object ? AbstractControlOptions : never;
 };
