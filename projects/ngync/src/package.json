@@ -1,9 +1,9 @@
 {
   "name": "ngync",
   "version": "1.0.7",
-  "description": "Angular Forms Synced with NgRx store",
+  "description": "Angular Forms Integrated into NgRx store",
   "license": "MIT",
-  "keywords": [ "ngrx", "angular", "forms", "reactive", "template-driven", "sync", "ngync", "store"],
+  "keywords": [ "NgRx", "Angular", "forms", "reactive", "template-driven", "sync", "ngync", "store", "ngModelArray"],
   "peerDependencies": {
     "@angular/core": "^16.0.0",
     "@angular/forms": "^16.0.0",

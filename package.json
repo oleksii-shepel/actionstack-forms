@@ -1,7 +1,7 @@
 {
   "name": "ngync",
   "version": "1.0.7",
-  "description": "Angular Forms synced with NgRx store",
+  "description": "Angular Forms integrated into NgRx store",
   "license": "MIT",
   "keywords": [
     "ngrx",
@@ -11,7 +11,8 @@
     "template-driven",
     "sync",
     "ngync",
-    "store"
+    "store",
+    "ngModelArray"
   ],
   "scripts": {
     "ng": "ng",
