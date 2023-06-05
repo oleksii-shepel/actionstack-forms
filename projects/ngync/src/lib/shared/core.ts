@@ -163,8 +163,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      map((state) => !!state),
-      tap((state) => { selector.release(); this._submitted$.next(state); })
+      map((state: any) => !!state),
+      tap((state: boolean) => { selector.release(); this._submitted$.next(state); })
     ).subscribe();
 
     if(this.autoSubmit) {

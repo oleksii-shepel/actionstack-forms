@@ -6,6 +6,7 @@
 
 :host(.author) {
   display: block;
+  background-color: #eee;
   background-image: url('../../../assets/james_bond_poster.png');
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -46,6 +47,7 @@
 
 :host(.agent) {
   display: block;
+  background-color: #eee;
   background-image: url('../../../assets/james_bond.png');
   background-repeat: no-repeat;
   background-attachment: fixed;

@@ -23,7 +23,7 @@ export const getSubmitted = (slice: string) => createSelector(getSlice(slice), s
 
 
 
-export const forms = (initialState: any) => (reducer: Function) => {
+export const forms = (initialState: any = {}) => (reducer: Function) => {
   return (state: any, action: any) => {
     state = state ?? initialState;
     let nextState = reducer(state, action);
@@ -61,6 +61,10 @@ export const forms = (initialState: any) => (reducer: Function) => {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.dirty)}`, action.dirty);
     }
 
+    if (action.type === FormActionsInternal.AutoInit) {
+      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState<any>);
+    }
+
     if (action.type === FormActionsInternal.AutoSubmit) {
       nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.submitted)}`, true);
     }
@@ -71,8 +75,8 @@ export const forms = (initialState: any) => (reducer: Function) => {
 
 
 
-export function logger(reducer: Function) {
-  return (state: any, action: any): any => {
+export const logger = (settings: any = {}) => (reducer: Function) => {
+  return (state: any, action: any) => {
     const result = reducer(state, action);
     console.groupCollapsed(action.type);
     console.log('state before', state);

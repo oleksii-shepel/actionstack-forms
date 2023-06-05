@@ -31,7 +31,7 @@ import { initialState, reducer } from './reducers';
     FormsModule,
     SharedModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [forms(initialState), logger]
+      metaReducers: [forms(initialState), logger()]
     }),
 
     NgFormsModule

@@ -10,7 +10,7 @@ How can we unite both the worlds? The answer is simple: With help of **ngync** l
 
 If you know how to work with NgRx, you will also be comfortable using ngync. All you need to do is declare ngync directive on the form and provide it with the store path. It is an appropriate place where form data will be reliably reside during application execution. Here is an example of common form definition:
 
-```angular
+```typescript
 <form #form="ngForm" autocomplete="off" ngync="model">
   ...
 </form>
@@ -22,7 +22,7 @@ Additionally, you have to import basic parts of ngync to your application. I'm t
 
 The code snippet of main NgModule shows how the import looks like:
 
-```angular
+```typescript
 import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
 
 @NgModule({
@@ -35,7 +35,7 @@ import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
     FormsModule,
     SharedModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [forms(initialState), logger]
+      metaReducers: [forms(initialState), logger()]
     }),
 
     NgFormsModule
@@ -53,7 +53,7 @@ By default, ngync will generate tracing actions every time user enters the data 
 
 If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. But if you definitely want to do it by yourself, you can do it without hesitation. There are four actions supported byngync right out of the box. I think, the names speak for themselves and the parameter list for each of them can be found in the source code of the library. Here is the list of actions:
 
-```angular
+```typescript
 export enum FormActions {
   InitForm = '[Form] Init',
   UpdateValue = '[Form] Update Value',
@@ -74,7 +74,7 @@ ngModelArray is a directive that can be used to group ngModel directives togethe
 
 Here is an example of how to organically combine it with ngModels:
 
-```angular
+```typescript
 <form #form="ngForm">
   <div ngModelArray="aliases">
     <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
