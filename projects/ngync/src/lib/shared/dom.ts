@@ -5,21 +5,21 @@ import { Observable, Subject } from "rxjs";
   providedIn: 'root'
 })
 export class DomObserver implements OnDestroy {
-  static _observers = new Set<MutationObserver>();
-  static _elementsUnderObservation = new Map();
+  _observers = new Set<MutationObserver>();
+  _elementsUnderObservation = new Map();
 
   constructor() {}
 
-  static unmounted(element: HTMLElement): Observable<boolean> {
-    let record = DomObserver._elementsUnderObservation.get(element);
+  unmounted(element: HTMLElement): Observable<boolean> {
+    let record = this._elementsUnderObservation.get(element);
 
     if(record?.unmounted) {
       return record?.unmounted;
     }
 
     let event = new Subject<boolean>();
-    record.unmounted = event;
-    DomObserver._elementsUnderObservation.set(element, record);
+    record = {...record, unmounted: event};
+    this._elementsUnderObservation.set(element, record);
 
     const observer = new MutationObserver(elements => {
       elements.forEach(item => {
@@ -29,7 +29,7 @@ export class DomObserver implements OnDestroy {
             treeItem = treeItem.parentNode as HTMLElement;
           }
           if(node === treeItem) {
-            DomObserver.disconnect(observer);
+            this.disconnect(observer);
             event.next(true);
             event.complete();
           }
@@ -43,12 +43,12 @@ export class DomObserver implements OnDestroy {
       parent = parent.parentNode as HTMLElement;
     }
 
-    DomObserver._observers.add(observer);
+    this._observers.add(observer);
     return event;
   }
 
-  static children(element: HTMLElement): Observable<number> {
-    let record = DomObserver._elementsUnderObservation.get(element);
+  children(element: HTMLElement): Observable<number> {
+    let record = this._elementsUnderObservation.get(element);
 
     if(record?.children) {
       return record?.children;
@@ -56,8 +56,8 @@ export class DomObserver implements OnDestroy {
 
     let event = new Subject<number>();
 
-    record.children = event;
-    DomObserver._elementsUnderObservation.set(element, record);
+    record = {...record, children: event};
+    this._elementsUnderObservation.set(element, record);
 
     const observer = new MutationObserver(elements => {
       elements.forEach(item => {
@@ -72,7 +72,7 @@ export class DomObserver implements OnDestroy {
     });
 
     observer.observe(element, { childList: true, subtree: true });
-    DomObserver._observers.add(observer);
+    this._observers.add(observer);
     return event;
   }
 
@@ -80,17 +80,17 @@ export class DomObserver implements OnDestroy {
     return document.contains(element);
   }
 
-  static disconnect(observer: MutationObserver) {
+  disconnect(observer: MutationObserver) {
     observer.disconnect();
-    DomObserver._observers.delete(observer);
+    this._observers.delete(observer);
   }
 
   ngOnDestroy() {
-    for (const observer of DomObserver._observers) {
+    for (const observer of this._observers) {
       observer.disconnect();
     }
 
-    for (const [key, value] of DomObserver._elementsUnderObservation) {
+    for (const [key, value] of this._elementsUnderObservation) {
       value.children?.complete();
       value.unmounted?.complete();
     }
