@@ -14,17 +14,18 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { ActionsSubject, Store } from '@ngrx/store';
+import { Action, ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
+  Observable,
   combineLatest,
   debounceTime,
   delayWhen,
   filter,
-  first,
   fromEvent,
   map,
   repeat,
+  take,
   takeWhile,
   tap,
   withLatestFrom
@@ -99,7 +100,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     control.control!.setValue(value);
     this._input$.next(true)
   };
-  submit: any;
+
+  onInitOrUpdate$!: Observable<any>;
+  onSubmit$!: Observable<any>;
+  onAutoSubmit$!: Observable<any>;
+  onChange$!: Observable<any>;
+  onAutoInit$!: Observable<any>;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -132,54 +138,52 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Form does not contain submit control');
     }
 
-    this._subs.a = this.store.select(getModel(this.slice)).pipe(
-      withLatestFrom(this.actionsSubject),
-      tap(([, action]) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
-      filter(([ , action]) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
+    this.onInitOrUpdate$ = this.actionsSubject.pipe(
+      withLatestFrom(this.store.select(getModel(this.slice))),
+      tap(([action, ]) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
+      filter(([action, ]) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
       debounceTime(this.debounce),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       delayWhen(() => this._updating$),
-      ).subscribe(([state, action]) => {
-      this._updating$.next(true);
+      tap(([action, state]: [Action, any]) => {
+        this._updating$.next(true);
 
-      if(action.type === FormActions.InitForm) {
-        this._initialState = state;
-        this._initialized = true;
-      }
+        if(action.type === FormActions.InitForm) {
+          this._initialState = state;
+          this._initialized = true;
+        }
 
-      let formValue = this.formValue;
-      Object.assign(formValue, state);
+        let formValue = this.formValue;
+        Object.assign(formValue, state);
 
-      this.dir.form.patchValue(formValue);
-      this.dir.form.updateValueAndValidity();
-      this.cdr.markForCheck();
+        this.dir.form.patchValue(formValue);
+        this.dir.form.updateValueAndValidity();
+        this.cdr.markForCheck();
 
-      this._updating$.next(false);
-    });
+        this._updating$.next(false);
+      })
+    );
 
-    let selector = getSubmitted(this.slice);
-    this._subs.b = this.store.select(selector).pipe(
+    this.onSubmit$ = this.store.select(getSubmitted(this.slice)).pipe(
       debounceTime(this.debounce),
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       map((state: any) => !!state),
-      tap((state: boolean) => { selector.release(); this._submitted$.next(state); })
-    ).subscribe();
+      tap((state: boolean) => { getSubmitted(this.slice).release(); this._submitted$.next(state); })
+    );
 
-    if(this.autoSubmit) {
-      this._subs.c = fromEvent(submit, 'click').pipe(
-        debounceTime(this.debounce),
-        filter(() => this._initialized),
-        delayWhen(() => this._updating$),
-        takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        filter(() => this.dir.form.valid),
-        tap(() => this.store.dispatch(AutoSubmit({ path: this.slice }))),
-        tap(() => this._submitted$.next(true))
-      ).subscribe();
-    }
+    this.onAutoSubmit$ = fromEvent(submit, 'click').pipe(
+      debounceTime(this.debounce),
+      filter(() => this._initialized),
+      delayWhen(() => this._updating$),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      filter(() => this.dir.form.valid),
+      tap(() => this.store.dispatch(AutoSubmit({ path: this.slice }))),
+      tap(() => this._submitted$.next(true))
+    );
 
-    this._subs.d = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
+    this.onChange$ = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
       debounceTime(this.debounce),
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
@@ -244,32 +248,46 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this._updating$.next(false);
 
       })
-    ).subscribe();
+    );
 
-    this._subs.e = this.store
-      .select(getSlice(this.slice)).pipe(
-        debounceTime(this.debounce),
-        first(),
-        repeat({ count: 10 }),
-        tap((state) => { if(state?.model) { this.dir.form.patchValue(state.model); }}),
-        filter((state) => {return (state?.model) ? checkForm(this.dir.form, state.model): true;}),
-        takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-        filter(() => !this._initDispatched && !this._initialized)
-    ).subscribe((state) => {
-      this._updating$.next(true);
-      if(state?.model || this.initialized) {
-        this._initialized = true;
+    this.onAutoInit$ = this.store.select(getSlice(this.slice)).pipe(
+      debounceTime(this.debounce),
+      take(1),
+      repeat({ count: 10 }),
+      tap((state) => { if(state?.model) { this.dir.form.patchValue(state.model); }}),
+      filter((state) => {return (state?.model) ? checkForm(this.dir.form, state.model): true;}),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      filter(() => !this._initDispatched && !this._initialized),
+      tap((state) => {
+        this._updating$.next(true);
+        if(state?.model || this.initialized) {
+          this._initialized = true;
 
-        this.dir.form.markAsPristine();
-        this.cdr.markForCheck();
+          this.dir.form.markAsPristine();
+          this.cdr.markForCheck();
 
-        let formValue = state?.model ?? this.formValue;
-        this.store.dispatch(AutoInit({path: this.slice, value: formValue}));
+          let formValue = state?.model ?? this.formValue;
+          this.store.dispatch(AutoInit({path: this.slice, value: formValue}));
 
-        this._initialState = formValue;
+          this._initialState = formValue;
+        }
+        this._updating$.next(false);
+      })
+    );
+
+    let timeout = setTimeout(() => {
+      this._subs.a = this.onInitOrUpdate$.subscribe();
+      this._subs.b = this.onSubmit$.subscribe();
+
+      if(this.autoSubmit) {
+        this._subs.c = this.onAutoSubmit$.subscribe();
       }
-      this._updating$.next(false);
-    });
+
+      this._subs.d = this.onChange$.subscribe();
+      this._subs.e = this.onAutoInit$.subscribe();
+
+      clearTimeout(timeout);
+    }, 0);
   }
 
   ngAfterContentInit() {
