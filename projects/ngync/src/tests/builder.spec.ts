@@ -4,74 +4,111 @@ import { ModelOptions } from '../lib/shared/types';
 
 describe('builder', () => {
   it('should build form', () => {
-    let model = { a: 1, b: 2, c: 3 };
-    let form = buildForm(model);
+    let model = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@contoso.com',
+      address: {
+        street: '123 Main St.',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '',
+      },
+      aliases: ['Johny', 'Johnny'],
+    };
 
-    expect(form.value).toEqual(model);
-  });
-  it('should build form array', () => {
-    let model = [1, 2, 3];
-    let form = buildForm(model);
-
-    expect(form.value).toEqual(model);
-  });
-  it('should build form group', () => {
-    let model = { a: { b: { c: 1 } } };
-    let form = buildForm(model);
-
-    expect(form.value).toEqual(model);
-  });
-  it('should build form array group', () => {
-    let model = { a: { b: [{ c: 1 }] } };
-    let form = buildForm(model);
-
-    expect(form.value).toEqual(model);
-  });
-  it('should build form group array', () => {
-    let model = { a: [{ b: { c: 1 } }] };
-    let form = buildForm(model);
-
-    expect(form.value).toEqual(model);
-  });
-  it('should build form array array', () => {
-    let model = [{ b: { c: 1 } }];
-    let form = buildForm(model);
-
-    expect(form.value).toEqual(model);
-  });
-  it('should build form with options', () => {
-    let model = { a: 1, b: 2, c: 3 };
-    let form = buildForm(model, {__group: {}, a: {validators: Validators.required}, b: {validators: Validators.email}, c: {validators: Validators.maxLength(10)} });
-
-    expect(form.value).toEqual(model);
-  });
-  it('should build form array with options', () => {
-    let model = [1, 2, 3];
-
-    let modelOptions: ModelOptions<number> = {};
-
-    let form = buildForm(model, modelOptions as any);
-
-    expect(form.value).toEqual(model);
-  });
-  it('should build form group with options', () => {
-    let model = { a: { b: { c: 1 } } };
-    let form = buildForm(model, { a: { b: { c: { validators: Validators.required } } } });
-
-    expect(form.value).toEqual(model);
-  });
-
-  it('should build form array group with options', () => {
-    let model = { a: { b: [{ c: 1 }] } };
-    let modelOptions = { a: { b: { '0': { c: {validators: Validators.required} } } } };
+    let modelOptions: ModelOptions<typeof model> = {
+      __group: {},
+      firstName: {validators: Validators.required},
+      lastName: {validators: Validators.required},
+      email: {validators: Validators.email},
+      address: {
+        __group: {},
+        street: {validators: Validators.required},
+        city: {validators: Validators.required},
+        state: {validators: Validators.required},
+        zip: {validators: Validators.required},
+      },
+      aliases: {
+        __group: {},
+        '0': {validators: Validators.required},
+        '1': {validators: Validators.required},
+      },
+    };
 
     let form = buildForm(model, modelOptions);
-    expect(form.value).toEqual(model);
-  });
-  it('should check form', () => {
-    let model = { a: 1, b: 2, c: 3 };
-    let form = buildForm(model);
 
+    expect(form.value).toEqual(model);
+    expect(checkForm(form, model)).toEqual(true);
+  });
+  it('should build form array', () => {
+    let model = [{
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@contoso.com',
+      address: {
+        street: '123 Main St.',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '',
+      },
+      aliases: ['Johny', 'Johnny'],
+    }, {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane.doe@contoso.com',
+      address: {
+        street: '123 Main St.',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '',
+      },
+      aliases: ['Janey', 'Janie'],
+    }];
+
+    let modelOptions: ModelOptions<typeof model> = {
+      __group: {},
+      '0': {
+        __group: {},
+        firstName: {validators: Validators.required},
+        lastName: {validators: Validators.required},
+        email: {validators: Validators.email},
+        address: {
+          __group: {},
+          street: {validators: Validators.required},
+          city: {validators: Validators.required},
+          state: {validators: Validators.required},
+          zip: {validators: Validators.required},
+        },
+        aliases: {
+          __group: {},
+          '0': {validators: Validators.required},
+          '1': {validators: Validators.required},
+        },
+      },
+      '1': {
+        __group: {},
+        firstName: {validators: Validators.required},
+        lastName: {validators: Validators.required},
+        email: {validators: Validators.email},
+        address: {
+          __group: {},
+          street: {validators: Validators.required},
+          city: {validators: Validators.required},
+          state: {validators: Validators.required},
+          zip: {validators: Validators.required},
+        },
+        aliases: {
+          __group: {},
+          '0': {validators: Validators.required},
+          '1': {validators: Validators.required},
+        },
+      }
+    };
+
+    let form = buildForm(model, modelOptions);
+
+    expect(form.value).toEqual(model);
     expect(checkForm(form, model)).toEqual(true);
   });
 });
