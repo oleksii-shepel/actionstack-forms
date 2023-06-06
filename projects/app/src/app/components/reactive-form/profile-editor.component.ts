@@ -31,7 +31,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
     return (this.profileForm.get('aliases') as FormArray)!.controls;
   }
 
-  constructor(private fb: FormBuilder, private store: Store<any>) {
+  constructor(private fb: FormBuilder, private store: Store) {
 
     this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model: any = getValue(state, "model") ?? initialProfile;

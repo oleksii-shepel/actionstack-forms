@@ -103,7 +103,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
-    @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef<any>,
+    @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef,
     @Inject(Injector) public injector: Injector,
     @Inject(Store) public store: Store,
     public actionsSubject: ActionsSubject

@@ -35,7 +35,7 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   _rawAsyncValidators!: (AsyncValidatorFn | AsyncValidator)[];
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
-  form: FormArray<any>;
+  form: FormArray;
 
   constructor(
       @Optional() @Host() @SkipSelf() parent: ControlContainer,

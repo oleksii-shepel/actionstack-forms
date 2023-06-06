@@ -4,8 +4,8 @@ import { deepClone, prop, setValue } from './utils';
 
 
 
-export interface FormState<T> {
-  model: T;
+export interface FormState {
+  model: any;
   errors?: { [k: string]: string };
   dirty?: boolean;
   status?: string;
@@ -14,12 +14,12 @@ export interface FormState<T> {
 
 
 
-export const getSlice = (slice: string) => createFeatureSelector<FormState<any>>(slice);
-export const getModel = (slice: string) => createSelector(getSlice(slice), state => state.model);
-export const getErrors = (slice: string) => createSelector(getSlice(slice), state => state.errors);
-export const getDirty = (slice: string) => createSelector(getSlice(slice), state => state.dirty);
-export const getStatus = (slice: string) => createSelector(getSlice(slice), state => state.status);
-export const getSubmitted = (slice: string) => createSelector(getSlice(slice), state => state.submitted);
+export const getSlice = (slice: string) => createFeatureSelector<FormState>(slice);
+export const getModel = (slice: string) => createSelector(getSlice(slice), state => state?.model);
+export const getErrors = (slice: string) => createSelector(getSlice(slice), state => state?.errors);
+export const getDirty = (slice: string) => createSelector(getSlice(slice), state => state?.dirty);
+export const getStatus = (slice: string) => createSelector(getSlice(slice), state => state?.status);
+export const getSubmitted = (slice: string) => createSelector(getSlice(slice), state => state?.submitted);
 
 
 
@@ -34,39 +34,39 @@ export const forms = (initialState: any = {}) => (reducer: Function) => {
     }
 
     if (action.type === FormActions.InitForm) {
-      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState<any>);
+      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState);
     }
 
     if (action.type === FormActions.UpdateValue) {
-      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.model)}`, deepClone(action.value));
+      nextState = setValue(state, `${path}.${prop<FormState>(x => x.model)}`, deepClone(action.value));
     }
 
     if (action.type === FormActions.UpdateSubmitted) {
-      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.submitted)}`, action.value);
+      nextState = setValue(state, `${path}.${prop<FormState>(x => x.submitted)}`, action.value);
     }
 
     if (action.type === FormActionsInternal.ResetForm) {
-      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState<any>);
+      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState);
     }
 
     if (action.type === FormActionsInternal.UpdateStatus) {
-      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.status)}`, action.status);
+      nextState = setValue(state, `${path}.${prop<FormState>(x => x.status)}`, action.status);
     }
 
     if (action.type === FormActionsInternal.UpdateErrors) {
-      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.errors)}`, deepClone(action.errors));
+      nextState = setValue(state, `${path}.${prop<FormState>(x => x.errors)}`, deepClone(action.errors));
     }
 
     if (action.type === FormActionsInternal.UpdateDirty) {
-      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.dirty)}`, action.dirty);
+      nextState = setValue(state, `${path}.${prop<FormState>(x => x.dirty)}`, action.dirty);
     }
 
     if (action.type === FormActionsInternal.AutoInit) {
-      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState<any>);
+      nextState = setValue(state, path, { model: deepClone(action.value) } as FormState);
     }
 
     if (action.type === FormActionsInternal.AutoSubmit) {
-      nextState = setValue(state, `${path}.${prop<FormState<any>>(x => x.submitted)}`, true);
+      nextState = setValue(state, `${path}.${prop<FormState>(x => x.submitted)}`, true);
     }
 
     return nextState;

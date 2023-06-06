@@ -1,5 +1,5 @@
-import {Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf} from '@angular/core';
-import { AbstractFormGroupDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, FormGroup, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from '@angular/forms';
+import { Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf } from '@angular/core';
+import { AbstractFormGroupDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, FormGroup, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from '@angular/forms';
 import { composeAsyncValidators, composeValidators } from 'ngync';
 
 export const modelGroupProvider: any = {
@@ -16,7 +16,7 @@ export class FieldGroupDirective extends AbstractFormGroupDirective implements O
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
   _parent: ControlContainer;
-  form: FormGroup<any>;
+  form: FormGroup;
 
   constructor(
       @Host() @SkipSelf() parent: ControlContainer,
