@@ -17,7 +17,7 @@ export enum FormActionsInternal {
 
 export const InitForm = createAction(
   FormActions.InitForm,
-  props<{ path: string; value: any; opts?: any; }>()
+  props<{ path: string; value: any; }>()
 );
 
 export const UpdateValue = createAction(
