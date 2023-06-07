@@ -47,7 +47,7 @@
 
 :host(.agent) {
   display: block;
-  background-color: #eee;
+  background-color: #c0c0c0;
   background-image: url('../../../assets/james_bond.png');
   background-repeat: no-repeat;
   background-attachment: fixed;
