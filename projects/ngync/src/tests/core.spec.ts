@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { InitForm, SyncDirective, forms, logger } from "../public-api";
+import { InitForm, SyncDirective, UpdateSubmitted, UpdateValue, forms, logger } from "../public-api";
 
 @Component({
   selector: 'test-component',
@@ -71,18 +71,81 @@ describe('core', () => {
     expect(directive.dir.form.value).toEqual({ firstName: 'John' });
   });
 
+  it('should dispatch AutoSubmit action', async() => {
+    let stub = jest.fn();
+
+    directive.cdr.detectChanges();
+    directive.onAutoSubmit$.subscribe(stub);
+
+    await fixture.whenStable();
+    await new Promise((r) => setTimeout(r, 1000));
+
+    let button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    await fixture.whenStable();
+    await new Promise((r) => setTimeout(r, 1000));
+
+    expect(stub).toHaveBeenCalled();
+  });
+
   it('should call subscription when InitForm action dispatched', async() => {
     let stub = jest.fn();
 
     directive.cdr.detectChanges();
 
     directive.onInitOrUpdate$.subscribe(stub);
-    directive.store.dispatch(InitForm({path:'slice', value: { firstName: 'Jane' }}));
+    directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
     await fixture.whenStable();
     await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();
     expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+  });
+
+  it('should call subscription when UpdateValue action dispatched', async() => {
+    let stub = jest.fn();
+
+    directive.cdr.detectChanges();
+
+    directive.onInitOrUpdate$.subscribe(stub);
+    directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
+
+    await fixture.whenStable();
+    await new Promise((r) => setTimeout(r, 1000));
+
+    expect(stub).toHaveBeenCalled();
+    expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+  });
+
+  it('should call subscription when UpdateSubmitted action dispatched', async() => {
+    let stub = jest.fn();
+
+    directive.cdr.detectChanges();
+
+    directive.onSubmit$.subscribe(stub);
+    directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
+
+    await fixture.whenStable();
+    await new Promise((r) => setTimeout(r, 1000));
+
+    expect(stub).toHaveBeenCalled();
+  });
+
+  it('should call subscription when changes in control group happens', async() => {
+    let stub = jest.fn();
+
+    directive.cdr.detectChanges();
+
+    directive.onControlsChanges$.subscribe(stub);
+    directive.dir.form.addControl('lastName', new FormControl('Doe'));
+
+    directive.cdr.detectChanges();
+    await fixture.whenStable();
+
+    await new Promise((r) => setTimeout(r, 1000));
+
+    expect(stub).toHaveBeenCalled();
   });
 });
