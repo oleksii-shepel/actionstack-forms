@@ -71,7 +71,7 @@ describe('core', () => {
     expect(directive.dir.form.value).toEqual({ firstName: 'John' });
   });
 
-  it('should call observable when InitForm action dispatched', async() => {
+  it('should call subscription when InitForm action dispatched', async() => {
     let stub = jest.fn();
 
     directive.cdr.detectChanges();
@@ -80,7 +80,6 @@ describe('core', () => {
     directive.store.dispatch(InitForm({path:'slice', value: { firstName: 'Jane' }}));
 
     await fixture.whenStable();
-
     await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();

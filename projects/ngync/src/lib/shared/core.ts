@@ -25,6 +25,7 @@ import {
   fromEvent,
   map,
   repeat,
+  startWith,
   take,
   takeWhile,
   tap,
@@ -106,6 +107,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   onAutoSubmit$!: Observable<any>;
   onChange$!: Observable<any>;
   onAutoInit$!: Observable<any>;
+  onControlsChanges$!: Observable<any>;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -274,29 +276,25 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this._updating$.next(false);
       })
     );
-
-    let timeout = setTimeout(() => {
-      this._subs.a = this.onInitOrUpdate$.subscribe();
-      this._subs.b = this.onSubmit$.subscribe();
-
-      if(this.autoSubmit) {
-        this._subs.c = this.onAutoSubmit$.subscribe();
-      }
-
-      this._subs.d = this.onChange$.subscribe();
-      this._subs.e = this.onAutoInit$.subscribe();
-
-      clearTimeout(timeout);
-    }, 0);
   }
 
   ngAfterContentInit() {
+    this.onControlsChanges$ = this.controls.changes.pipe(
+      startWith(this.controls),
+      tap(() => {
+        for (const control of this.controls.toArray()) {
+          if(control.valueAccessor) {
+            control.valueAccessor.registerOnChange(this._inputCallback(control));
+            control.valueAccessor.registerOnTouched(this._blurCallback);
+          }
+        }
+      })
+    );
 
-    this._subs.d = this.controls.changes.subscribe(() => {
-      this.setEventListeners();
-    });
-
-    this.setEventListeners();
+    let timeout = setTimeout(() => {
+      this.subscribe();
+      clearTimeout(timeout);
+    }, 0);
   }
 
   ngOnDestroy() {
@@ -330,13 +328,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._unmounted$.complete();
   }
 
-  setEventListeners() {
-    for (const control of this.controls.toArray()) {
-      if(control.valueAccessor) {
-        control.valueAccessor.registerOnChange(this._inputCallback(control));
-        control.valueAccessor.registerOnTouched(this._blurCallback);
-      }
+  subscribe() {
+    this._subs.a = this.onInitOrUpdate$.subscribe();
+    this._subs.b = this.onSubmit$.subscribe();
+
+    if(this.autoSubmit) {
+      this._subs.c = this.onAutoSubmit$.subscribe();
     }
+
+    this._subs.d = this.onChange$.subscribe();
+    this._subs.e = this.onAutoInit$.subscribe();
+
+    this._subs.f = this.onControlsChanges$.subscribe();
   }
 
   get initialized(): boolean {
