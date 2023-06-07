@@ -65,12 +65,13 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   }
 
   onChange(value: any) {
+    (this.valueAccessor as DefaultValueAccessor)?.onChange(value);
     this.control.setValue(value);
-    this.control.updateValueAndValidity();
     this.viewToModelUpdate(value);
   }
 
   onTouched() {
+    (this.valueAccessor as DefaultValueAccessor)?.onTouched();
     this.control.markAsTouched();
   }
 

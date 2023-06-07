@@ -93,7 +93,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   _subs = {} as any;
 
-  _blurCallback = () => {
+  _blurCallback = (control: NgControl) => (value : any) => {
     this._blur$.next(true);
   };
 
@@ -135,11 +135,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
-    if (!submit) {
-      throw new Error('Form does not contain submit control');
-    }
-
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
       withLatestFrom(this.store.select(getModel(this.slice))),
       tap(([action, ]) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
@@ -148,6 +143,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       delayWhen(() => this._updating$),
       tap(([action, state]: [Action, any]) => {
+
         this._updating$.next(true);
 
         if(action.type === FormActions.InitForm) {
@@ -175,6 +171,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((state: boolean) => { getSubmitted(this.slice).release(); this._submitted$.next(state); })
     );
 
+    let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
     this.onAutoSubmit$ = fromEvent(submit, 'click').pipe(
       debounceTime(this.debounce),
       filter(() => this._initialized),
@@ -186,11 +183,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onChange$ = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
-      debounceTime(this.debounce),
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(() => { this._updating$.next(true) }),
+      filter(() => !this._updating$.getValue()),
+      tap(() => this._updating$.next(true)),
       tap(([input, blur, submitted]) => {
 
         let form = this.formValue;
@@ -281,13 +278,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ngAfterContentInit() {
     this.onControlsChanges$ = this.controls.changes.pipe(
       startWith(this.controls),
-      tap(() => {
-        for (const control of this.controls.toArray()) {
+      tap((controls) => {
+        controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
             control.valueAccessor.registerOnChange(this._inputCallback(control));
-            control.valueAccessor.registerOnTouched(this._blurCallback);
+            control.valueAccessor.registerOnTouched(this._blurCallback(control));
           }
-        }
+        });
       })
     );
 
