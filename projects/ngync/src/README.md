@@ -1,10 +1,7 @@
-<meta name="msvalidate.01" content="746448BECF636696648D538712C076A5" />
-<meta name="google-site-verification" content="gUYAvvRwZBDCzZKzVQFSQuT1EcB388v1awWJ8PICJKk" />
-
 # ngync
 
 <p align="center">
-  <img src="maskot.svg" alt="ngync" width="200"/>
+  <img src="https://github.com/oleksii-shepel/angular-ngrx-forms/blob/master/projects/ngync/src/maskot.svg" alt="ngync" width="200"/>
 </p>
 
   [![npm version](https://badge.fury.io/js/ngync.svg)](https://badge.fury.io/js/ngync)
@@ -112,3 +109,5 @@ Here is an example of how to organically combine it with ngModels:
 For more information about ngModelArray, see the [Angular documentation](https://angular.io/api/forms/NgModelArray). Just a jest!
 
 I hope you will enjoy using **ngync** and it will help you to create more robust and maintainable applications. And remember that the best is yet to come and state management can be easy. Stay tuned!
+
+
