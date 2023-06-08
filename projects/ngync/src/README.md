@@ -1,5 +1,13 @@
 # ngync
 
+<title>ngync</title>
+<meta name="msvalidate.01" content="746448BECF636696648D538712C076A5" />
+<meta name="google-site-verification" content="gUYAvvRwZBDCzZKzVQFSQuT1EcB388v1awWJ8PICJKk" />
+
+<p align="center">
+  <img src="maskot.svg" alt="ngync" width="200"/>
+</p>
+
 **ngync** is a lightweight javascript library that helps to integrate Angular forms into NgRx store easily. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a new approach. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
 
 [NgRx](https://ngrx.io/) is a state management library for Angular applications. It provides a way to manage the state of your application in a predictable way. Also it helps you write applications that behave consistently, run in different environments (client, server, and native), and are easy to test.
