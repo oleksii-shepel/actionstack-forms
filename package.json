@@ -1,6 +1,6 @@
 {
   "name": "ngync",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Forms Module for NgRx store",
   "license": "MIT",
   "keywords": [
@@ -38,8 +38,10 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.0.0",
+    "@angular-devkit/schematics": "^16.0.0",
     "@angular/cli": "^16.0.0",
     "@angular/compiler-cli": "^16.0.0",
+    "@schematics/angular": "^16.0.0",
     "@types/jest": "^29.5.1",
     "@types/node": "20.1.2",
     "copyfiles": "^2.4.1",

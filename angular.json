@@ -101,6 +101,9 @@
           "options": {
             "browserTarget": "app:build"
           }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy"
         }
       }
     }

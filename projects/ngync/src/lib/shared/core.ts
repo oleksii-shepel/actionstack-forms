@@ -79,7 +79,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   updateOn!: string;
   autoSubmit!: boolean;
 
-  dir: NgForm | FormGroupDirective;
+  dir!: NgForm | FormGroupDirective;
 
   _initialState: any;
   _submittedState: any;
@@ -118,10 +118,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Inject(Store) public store: Store,
     public actionsSubject: ActionsSubject
   ) {
+  }
 
-    this.dir = injector.get(FormGroupDirective, null) ?? (injector.get(NgForm, null) as any);
+  ngOnInit() {
+    this.dir = this.injector.get(FormGroupDirective, null) ?? (this.injector.get(NgForm, null) as any);
 
-    let config = injector.get<any>(NGYNC_CONFIG_TOKEN, {});
+    let config = this.injector.get<any>(NGYNC_CONFIG_TOKEN, {});
     config = Object.assign(NGYNC_CONFIG_DEFAULT, config);
 
     if(typeof this.config === 'string') {
@@ -135,9 +137,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.resetOnDestroy = config.resetOnDestroy;
     this.updateOn = config.updateOn;
     this.autoSubmit = config.autoSubmit;
-  }
 
-  ngOnInit() {
     if (!this.slice) {
       throw new Error('Misuse of sync directive');
     }
