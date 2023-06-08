@@ -3,5 +3,8 @@
   "dest": "../../../dist/ngync",
   "lib": {
     "entryFile": "public-api.ts"
-  }
+  },
+  "assets": [
+    "maskot.svg"
+  ]
 }
