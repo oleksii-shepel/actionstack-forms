@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { InitForm, SyncDirective, UpdateSubmitted, UpdateValue, forms, logger } from "../public-api";
+import { InitForm, SyncDirective, UpdateSubmitted, UpdateValue, forms } from "../public-api";
 
 @Component({
   selector: 'test-component',
@@ -24,7 +24,7 @@ describe('core', () => {
     TestBed.configureTestingModule({
       declarations: [TestComponent],
       imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-        metaReducers: [forms({'slice': {}}), logger()]
+        metaReducers: [forms({'slice': {}})]
       }), SharedModule],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     });
