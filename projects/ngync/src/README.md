@@ -1,12 +1,17 @@
-# ngync
-
-<title>ngync</title>
 <meta name="msvalidate.01" content="746448BECF636696648D538712C076A5" />
 <meta name="google-site-verification" content="gUYAvvRwZBDCzZKzVQFSQuT1EcB388v1awWJ8PICJKk" />
+
+# ngync
 
 <p align="center">
   <img src="maskot.svg" alt="ngync" width="200"/>
 </p>
+
+  [![npm version](https://badge.fury.io/js/ngync.svg)](https://badge.fury.io/js/ngync)
+  [![Build Status](https://travis-ci.org/oleksii-shepel/angular-ngrx-forms.svg?branch=master)](https://travis-ci.org/oleksii-shepel/angular-ngrx-forms)
+  [![Coverage Status](https://coveralls.io/repos/github/oleksii-shepel/angular-ngrx-forms/badge.svg?branch=master)](https://coveralls.io/github/oleksii-shepel/angular-ngrx-forms?branch=master)
+  [![npm](https://img.shields.io/npm/dt/ngync.svg)](https://www.npmjs.com/package/ngync)
+  [![npm](https://img.shields.io/npm/l/ngync.svg)](https://www.npmjs.com/package/ngync)
 
 **ngync** is a lightweight javascript library that helps to integrate Angular forms into NgRx store easily. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a new approach. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
 
@@ -25,6 +30,18 @@ If you know how to work with NgRx, you will also be comfortable using ngync. All
 ```
 
 ngync directive expects from user a string that consists of a sequence of property names separated by dots. The first property name is the name of the root property in the store. The last property name is the name of the property that will contain form data. All intermediate property names are the names of the properties that will be created in the store if they do not exist.
+
+*In more sophisticated scenarios you may probably need to parametrize each separate ngync directive with additional parameters. You can do it by setting up the global config token NGYNC_CONFIG_TOKEN or by passing on a config object to the directive directly. There are following config options available for you:*
+
+```typescript
+export interface NgyncConfig {
+  slice: string;
+  debounce?: number;
+  resetOnDestroy?: 'no-changes' | 'initial' | 'submitted' | 'empty';
+  updateOn?: 'change' | 'blur' | 'submit';
+  autoSubmit?: boolean;
+}
+```
 
 Additionally, you have to import basic parts of ngync to your application. I'm talking about prepared meta-reducers, foundation functions that orchestrate all main functionality of the library. Вefore benefiting from their use, they have to be registered by NgRx store module. Nothing special, just another pint-sized prerequisites. All they do is handling of Redux action set. It is boilerplate functionality that is not more needed to be implemented time after time.
 
@@ -71,7 +88,7 @@ export enum FormActions {
 
 As you can see you are completely redeemed from the tedium of implementation of constituent parts of the Redux pattern. In all the cases NgRx has detailed documentation that you may need in your work. This is foreign parish and we have to deal with it with all our passion and devotion.
 
-I have to admit that there are no other docs ofngync except this readme. It is probably a matter of time and interest. I stand for the idea that the best documentation is the code itself. Hopefully, it is concise and self describing. The library goes along with sample application which will help you orient in the theme. The link to the source repo of the project is [angular-ngrx-forms](https://github.com/oleksii-shepel/angular-ngrx-forms.git). 
+I have to admit that there are no other docs of ngync except for this readme. It is probably a matter of time and interest. I stand for the idea that the best documentation is the code itself. Hopefully, it is concise and self describing. The library goes along with sample application which will help you orient in the theme. The link to the source repo of the project is [angular-ngrx-forms](https://github.com/oleksii-shepel/angular-ngrx-forms.git). 
 If you have any questions or suggestions, I will respond as soon as possible.
 
 The active phase of the project is passed by and the first version of software is packaged. The project is well-tested manually, but it lacks on comprehensive test coverage. Don't risk in production. It is free. You are allowed to use, copy and modify the codebase. I kindly recommend to join the project development in this repo. You are welcome!
