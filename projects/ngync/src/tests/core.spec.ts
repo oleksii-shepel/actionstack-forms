@@ -47,7 +47,7 @@ describe('core', () => {
     TestBed.resetTestingModule();
   });
   it('should create directive', async() => {
-    await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(directive.slice).toBe('slice');
     expect(directive.dir instanceof FormGroupDirective).toBeTruthy();
