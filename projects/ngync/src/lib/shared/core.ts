@@ -56,6 +56,7 @@ import {
 
 
 export interface NgyncConfig {
+  slice: string;
   debounce?: number;
   resetOnDestroy?: 'no-changes' | 'initial' | 'submitted' | 'empty';
   updateOn?: 'change' | 'blur' | 'submit';
@@ -69,9 +70,10 @@ export interface NgyncConfig {
   exportAs: 'ngync',
 })
 export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
-  @Input('ngync') slice!: string;
+  @Input('ngync') config!: string | NgyncConfig;
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
+  slice!: string;
   debounce!: number;
   resetOnDestroy!: string;
   updateOn!: string;
@@ -118,12 +120,21 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ) {
 
     this.dir = injector.get(FormGroupDirective, null) ?? (injector.get(NgForm, null) as any);
-    let config = injector.get<any>(NGYNC_CONFIG_TOKEN, {});
 
-    this.debounce = config.debounce ?? NGYNC_CONFIG_DEFAULT.debounce;
-    this.resetOnDestroy = config.resetOnDestroy ?? NGYNC_CONFIG_DEFAULT.resetOnDestroy;
-    this.updateOn = config.updateOn ?? NGYNC_CONFIG_DEFAULT.updateOn;
-    this.autoSubmit = config.autoSubmit ?? NGYNC_CONFIG_DEFAULT.autoSubmit;
+    let config = injector.get<any>(NGYNC_CONFIG_TOKEN, {});
+    config = Object.assign(NGYNC_CONFIG_DEFAULT, config);
+
+    if(typeof this.config === 'string') {
+      this.slice = this.config;
+    } else {
+      config = Object.assign(config, this.config);
+      this.slice = config.slice;
+    }
+
+    this.debounce = config.debounce;
+    this.resetOnDestroy = config.resetOnDestroy;
+    this.updateOn = config.updateOn;
+    this.autoSubmit = config.autoSubmit;
   }
 
   ngOnInit() {
