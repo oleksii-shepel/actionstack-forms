@@ -19,12 +19,12 @@ import {
   BehaviorSubject,
   Observable,
   combineLatest,
-  debounceTime,
   delayWhen,
   filter,
   fromEvent,
   map,
   repeat,
+  sampleTime,
   startWith,
   take,
   takeWhile,
@@ -139,7 +139,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       withLatestFrom(this.store.select(getModel(this.slice))),
       tap(([action, ]) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
       filter(([action, ]) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
-      debounceTime(this.debounce),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       delayWhen(() => this._updating$),
       tap(([action, state]: [Action, any]) => {
@@ -163,7 +162,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onSubmit$ = this.store.select(getSubmitted(this.slice)).pipe(
-      debounceTime(this.debounce),
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
@@ -173,7 +171,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
     this.onAutoSubmit$ = fromEvent(submit, 'click').pipe(
-      debounceTime(this.debounce),
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
@@ -186,7 +183,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      filter(() => !this._updating$.getValue()),
+      delayWhen(() => this._updating$),
+      sampleTime(this.debounce),
       tap(() => this._updating$.next(true)),
       tap(([input, blur, submitted]) => {
 
@@ -250,13 +248,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onAutoInit$ = this.store.select(getSlice(this.slice)).pipe(
-      debounceTime(this.debounce),
       take(1),
       repeat({ count: 10 }),
       tap((state) => { if(state?.model) { this.dir.form.patchValue(state.model); }}),
       filter((state) => {return (state?.model) ? checkForm(this.dir.form, state.model): true;}),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       filter(() => !this._initDispatched && !this._initialized),
+      delayWhen(() => this._updating$),
       tap((state) => {
         this._updating$.next(true);
         if(state?.model || this.initialized) {
@@ -278,6 +276,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ngAfterContentInit() {
     this.onControlsChanges$ = this.controls.changes.pipe(
       startWith(this.controls),
+      sampleTime(this.debounce),
       tap((controls) => {
         controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
