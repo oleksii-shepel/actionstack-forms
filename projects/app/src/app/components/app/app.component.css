@@ -2,6 +2,35 @@
   margin: 2rem;
   position: relative;
   z-index: 0;
+
+  & nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 20px;
+
+    & div {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      & h1 {
+        display: inline-block;
+        text-align: right;
+        font-weight: 800;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-right: 30px;
+
+        & a {
+          background-color: transparent;
+          padding: 0;
+          margin: 0;
+        }
+      }
+    }
+  }
 }
 
 :host(.author) {

@@ -27,6 +27,7 @@ body {
   background: radial-gradient(#e03a3a, #42545C);
   background-size: 100% 100%;
   background-position: center;
+  background-repeat: no-repeat;
 }
 .modal-open {
   overflow: inherit;
@@ -100,4 +101,8 @@ select {
   box-sizing: border-box;
   width: 100%;
   padding: .5rem;
+}
+footer {
+  margin-top: 3rem;
+  text-align: center;
 }

@@ -1,13 +1,25 @@
 
 <main>
   <nav>
-    <button type="button" (click)="toggleEditor('reactive')">Reactive Profile Editor</button>
-    <button type="button" (click)="toggleEditor('template-driven')">Template Driven Hero Editor</button>
-    <button type="button" (click)="toggleEditor('standard')">Model Driven Hero Editor</button>
+    <div>
+      <button type="button" (click)="toggleEditor('reactive')">Reactive Profile Editor</button>
+      <button type="button" (click)="toggleEditor('template-driven')">Template Driven Hero Editor</button>
+      <button type="button" (click)="toggleEditor('standard')">Model Driven Hero Editor</button>
+    </div>
+    <div>
+      <h1>Angular forms powered by<a href="https://www.npmjs.com/package/ngync">ngync library</a></h1>
+      <img src="../../../assets/maskot.svg" alt="ngync" width="100"/>
+    </div>
   </nav>
   <reactive-profile-editor *ngIf="showReactiveProfileEditor" (hacked)="showModal('reactive')" [caption]="getCaption('reactive')"></reactive-profile-editor>
   <template-profile-editor *ngIf="showTemplateProfileEditor" (hacked)="showModal('template-driven')" [caption]="getCaption('template-driven')"></template-profile-editor>
   <standard-profile-editor *ngIf="showStandardProfileEditor" (hacked)="showModal('standard')" [caption]="getCaption('standard')"></standard-profile-editor>
+  <footer>
+    <hr>
+    <p>© 2023 James Bond. All rights reserved.</p>
+    <p>Disclaimer: This project is not affiliated with the James Bond franchise. All rights belong to their respective owners.</p>
+    <p>The project is not commercial. All information provided is found on the Internet on public servers. Created by <a href="https://www.linkedin.com/in/oleksii-shepel-5b6968250/">Oleksii Shepel</a> in 2023.</p>
+  </footer>
 </main>
 
 <hacked-modal id="modal">
