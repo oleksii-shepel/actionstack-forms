@@ -1,40 +1,39 @@
-on: ["push", "pull_request"]
+on: push
 
-name: Test Coveralls Parallel
+name: Coveralls
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        test_number:
-          - 1
-          - 2
     steps:
-    - uses: actions/checkout@3
+
+    - uses: actions/checkout@v3
+
     - name: Use Node.js 16.x
-      uses: actions/setup-node@3
+      uses: actions/setup-node@v3
       with:
         node-version: 16.x
 
-    - name: npm install
-      run: npm install
+    - name: npm install, make test-coverage
+      run: |
+        npm install
+        npm run test
 
-    - name: Test ${{ matrix.test_number }}
-      run: make test-coverage-${{ matrix.test_number }}
-    - name: Coveralls Parallel
-      uses: coverallsapp/github-action@v2
-      with:
-        flag-name: run-${{ join(matrix.*, '-') }}
-        parallel: true
+    - name: Report Coveralls (Linux)
+      if: startsWith(runner.os, 'Linux')
+      run: curl -sL https://coveralls.io/coveralls-linux.tar.gz | tar -xz && ./coveralls
+      env:
+        COVERALLS_REPO_TOKEN: g1faNfUCNuCaT4csE4AGKZAFOoiOtHlRB
 
-  finish:
-    needs: test
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@v2
-      with:
-        parallel-finished: true
-        carryforward: "run-1,run-2"
+    - name: Report Coveralls (Windows)
+      if: startsWith(runner.os, 'Windows')
+      run: curl -sL https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-windows.zip | zcat > ./coveralls.exe && ./coveralls.exe
+      env:
+        COVERALLS_REPO_TOKEN: g1faNfUCNuCaT4csE4AGKZAFOoiOtHlRB
+
+    - name: Report Coveralls (macOS)
+      if: startsWith(runner.os, 'macOS')
+      run: |
+        brew tap coverallsapp/coveralls --quiet
+        brew install coveralls --quiet
+        coveralls
