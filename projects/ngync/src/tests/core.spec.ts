@@ -41,14 +41,17 @@ describe('core', () => {
 
     directive = fixture.debugElement.children[0].injector.get(SyncDirective);
     directive.slice = 'slice';
+
+    jest.useFakeTimers();
+    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
     TestBed.resetTestingModule();
+    jest.clearAllTimers();
   });
   it('should create directive', async() => {
-    fixture.detectChanges();
-
     expect(directive.slice).toBe('slice');
     expect(directive.dir instanceof FormGroupDirective).toBeTruthy();
     expect(directive.debounce).toBe(NGYNC_CONFIG_DEFAULT.debounce);
@@ -60,45 +63,37 @@ describe('core', () => {
   it('should dispatch AutoInit action', async() => {
     let stub = jest.fn();
 
-    fixture.detectChanges();
     directive.onAutoInit$.subscribe(stub);
-
     await fixture.whenStable();
-    await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();
-    fixture.detectChanges();
     expect(directive.dir.form.value).toEqual({ firstName: 'John' });
   });
 
   it('should dispatch AutoSubmit action', async() => {
     let stub = jest.fn();
 
-    fixture.detectChanges();
-    directive.onAutoSubmit$.subscribe(stub);
-
+    directive.onAutoInit$.subscribe(stub);
     await fixture.whenStable();
-    await new Promise((r) => setTimeout(r, 1000));
+
+    expect(stub).toHaveBeenCalled();
+
+    directive.onAutoSubmit$.subscribe(stub);
 
     let button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
     button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     await fixture.whenStable();
-    await new Promise((r) => setTimeout(r, 1000));
-
     expect(stub).toHaveBeenCalled();
   });
 
   it('should call subscription when InitForm action dispatched', async() => {
     let stub = jest.fn();
 
-    fixture.detectChanges();
-
     directive.onInitOrUpdate$.subscribe(stub);
     directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
     await fixture.whenStable();
-    await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();
     expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
@@ -107,13 +102,15 @@ describe('core', () => {
   it('should call subscription when UpdateValue action dispatched', async() => {
     let stub = jest.fn();
 
-    fixture.detectChanges();
+    directive.onAutoInit$.subscribe(stub);
+    await fixture.whenStable();
+
+    expect(stub).toHaveBeenCalled();
 
     directive.onInitOrUpdate$.subscribe(stub);
     directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
 
     await fixture.whenStable();
-    await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();
     expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
@@ -122,13 +119,15 @@ describe('core', () => {
   it('should call subscription when UpdateSubmitted action dispatched', async() => {
     let stub = jest.fn();
 
-    fixture.detectChanges();
+    directive.onAutoInit$.subscribe(stub);
+    await fixture.whenStable();
+
+    expect(stub).toHaveBeenCalled();
 
     directive.onSubmit$.subscribe(stub);
     directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
 
     await fixture.whenStable();
-    await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();
   });
@@ -136,15 +135,11 @@ describe('core', () => {
   it('should call subscription when changes in control group happens', async() => {
     let stub = jest.fn();
 
-    fixture.detectChanges();
-
     directive.onControlsChanges$.subscribe(stub);
     directive.dir.form.addControl('lastName', new FormControl('Doe'));
 
     fixture.detectChanges();
     await fixture.whenStable();
-
-    await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();
   });
