@@ -1,6 +1,6 @@
 on: push
 
-name: Coveralls
+name: retrieve-coverage
 
 jobs:
   test:

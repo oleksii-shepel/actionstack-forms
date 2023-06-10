@@ -60,21 +60,21 @@ describe('core', () => {
   it('should dispatch AutoInit action', async() => {
     let stub = jest.fn();
 
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
     directive.onAutoInit$.subscribe(stub);
 
     await fixture.whenStable();
     await new Promise((r) => setTimeout(r, 1000));
 
     expect(stub).toHaveBeenCalled();
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
     expect(directive.dir.form.value).toEqual({ firstName: 'John' });
   });
 
   it('should dispatch AutoSubmit action', async() => {
     let stub = jest.fn();
 
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
     directive.onAutoSubmit$.subscribe(stub);
 
     await fixture.whenStable();
@@ -92,7 +92,7 @@ describe('core', () => {
   it('should call subscription when InitForm action dispatched', async() => {
     let stub = jest.fn();
 
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
 
     directive.onInitOrUpdate$.subscribe(stub);
     directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
@@ -107,7 +107,7 @@ describe('core', () => {
   it('should call subscription when UpdateValue action dispatched', async() => {
     let stub = jest.fn();
 
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
 
     directive.onInitOrUpdate$.subscribe(stub);
     directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
@@ -122,7 +122,7 @@ describe('core', () => {
   it('should call subscription when UpdateSubmitted action dispatched', async() => {
     let stub = jest.fn();
 
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
 
     directive.onSubmit$.subscribe(stub);
     directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
@@ -136,12 +136,12 @@ describe('core', () => {
   it('should call subscription when changes in control group happens', async() => {
     let stub = jest.fn();
 
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
 
     directive.onControlsChanges$.subscribe(stub);
     directive.dir.form.addControl('lastName', new FormControl('Doe'));
 
-    directive.cdr.detectChanges();
+    fixture.detectChanges();
     await fixture.whenStable();
 
     await new Promise((r) => setTimeout(r, 1000));

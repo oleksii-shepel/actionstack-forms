@@ -25,7 +25,6 @@ import {
   mergeMap,
   repeat,
   sampleTime,
-  skip,
   startWith,
   take,
   takeWhile,
@@ -286,6 +285,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
+    let firstTime = true;
     this.onControlsChanges$ = this.controls.changes.pipe(
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       startWith(this.controls),
@@ -297,8 +297,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         });
       }),
-      skip(1),
-      tap(() => this._input$.next(true))
+      tap(() => { if(!firstTime) { this._input$.next(true); } firstTime = false; }),
     );
 
     let timeout = setTimeout(() => {
