@@ -1,5 +1,5 @@
 import { AbstractControl, AsyncValidator, AsyncValidatorFn, ValidationErrors, Validator, ValidatorFn } from "@angular/forms";
-import { Observable, forkJoin, map, from, isObservable } from "rxjs";
+import { Observable, forkJoin, from, isObservable, map } from "rxjs";
 /**
  * Accepts a list of validators of different possible shapes (`Validator` and `ValidatorFn`),
  * normalizes the list (converts everything to `ValidatorFn`) and merges them into a single
@@ -41,7 +41,7 @@ export function isValidatorFn<V>(
  * Merges synchronous validators into a single validator function.
  * See `Validators.compose` for additional information.
  */
-export function compose(
+function compose(
   validators: (ValidatorFn | null | undefined)[] | null
 ): ValidatorFn | null {
   if (!validators) return null;
@@ -55,7 +55,7 @@ export function compose(
   };
 }
 
-export function isPresent(o: any): boolean {
+function isPresent(o: any): boolean {
   return o != null;
 }
 
@@ -96,7 +96,7 @@ export function composeAsyncValidators(
  * Merges asynchronous validators into a single validator function.
  * See `Validators.composeAsync` for additional information.
  */
-export function composeAsync(
+function composeAsync(
   validators: (AsyncValidatorFn | null)[]
 ): AsyncValidatorFn | null {
   if (!validators) return null;

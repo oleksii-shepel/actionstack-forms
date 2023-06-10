@@ -1,18 +1,17 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import {
-  AbstractControl,
-  AsyncValidator,
+  AbstractControl, AsyncValidator,
   AsyncValidatorFn,
   FormArray,
   FormControl,
   ValidationErrors,
   ValidatorFn,
-  Validators,
+  Validators
 } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { normalizeValidators } from '../lib/shared/validators';
+import { GenericValidatorFn, composeAsyncValidators, composeValidators, executeValidators, isPromise, isValidatorFn, mergeErrors, mergeValidators, normalizeValidators, toObservable } from '../lib/shared/validators';
 
 function validator(key: string, error: any): ValidatorFn {
   return (c: AbstractControl) => {
@@ -621,6 +620,99 @@ describe('Validators', () => {
 
         expect(errorMap!).toEqual({ one: true });
       });
+    });
+  });
+  describe('composeValidators', () => {
+    it('should compose functions', () => {
+      const dummy1 = () => ({'dummy1': true});
+      const dummy2 = () => ({'dummy2': true});
+      const v = composeValidators([dummy1, dummy2])!;
+      expect(v(new FormControl(''))).toEqual({'dummy1': true, 'dummy2': true});
+    });
+    it('should compose functions and validators', () => {
+      const dummy1 = () => ({'dummy1': true});
+      const v = composeValidators([dummy1, Validators.required])!;
+      expect(v(new FormControl(''))).toEqual({'dummy1': true, 'required': true});
+    });
+  });
+  describe('composeAsyncValidators', () => {
+    it('should compose functions', fakeAsync(() => {
+      const dummy1 = () => Promise.resolve({'dummy1': true});
+      const dummy2 = () => Promise.resolve({'dummy2': true});
+      const v = composeAsyncValidators([dummy1, dummy2])!;
+      let errorMap: ValidationErrors|null = null;
+      (v(new FormControl('')) as Observable<ValidationErrors|null>)
+          .pipe(first())
+          .subscribe((errors: ValidationErrors|null) => errorMap = errors);
+      tick();
+      expect(errorMap).toEqual({'dummy1': true, 'dummy2': true});
+    }));
+    it('should compose functions and validators', fakeAsync(() => {
+      const dummy1 = () => Promise.resolve({'dummy1': true});
+      const v = composeAsyncValidators([dummy1])!;
+      let errorMap: ValidationErrors|null = null;
+      (v(new FormControl('')) as Observable<ValidationErrors|null>)
+          .pipe(first())
+          .subscribe((errors: ValidationErrors|null) => errorMap = errors);
+      tick();
+      expect(errorMap).toEqual({'dummy1': true});
+    }));
+  });
+  describe('isValidatorFn', () => {
+    it('should return true for a validator function', () => {
+      const dummy1 = {validate: () => {}};
+      expect(isValidatorFn(dummy1)).toBe(false);
+    });
+  });
+  describe('executeValidators', () => {
+    it('should execute a validator function', () => {
+      const dummy1: GenericValidatorFn = (control: AbstractControl) => ({'dummy1': true});
+      expect(executeValidators(new FormControl(''), [dummy1])).toEqual([{'dummy1': true}]);
+    });
+    it('should execute a validator', () => {
+      expect(executeValidators(new FormControl(''), [Validators.required])).toEqual([{'required': true}]);
+    });
+  });
+  describe('mergeErrors', () => {
+    it('should merge errors', () => {
+      expect(mergeErrors([{'dummy1': true}, {'dummy2': true}])).toEqual({'dummy1': true, 'dummy2': true});
+    });
+  });
+  describe('toObservable', () => {
+    it('should convert a promise to an observable', fakeAsync(() => {
+      const promise = Promise.resolve({'dummy1': true});
+      let errorMap: ValidationErrors|null = null;
+      toObservable(promise).subscribe((errors: ValidationErrors|null) => errorMap = errors);
+      tick();
+      expect(errorMap).toEqual({'dummy1': true});
+    }));
+    it('should interpret observable as observable', fakeAsync(() => {
+      let errorMap: ValidationErrors|null = null;
+      toObservable(of({'dummy1': true})).subscribe((errors: ValidationErrors|null) => errorMap = errors);
+      tick();
+      expect(errorMap).toEqual({'dummy1': true});
+    }));
+  });
+  describe('isPromise', () => {
+    it('should return true for a promise', () => {
+      expect(isPromise(Promise.resolve())).toBe(true);
+    });
+    it('should return false for a non-promise', () => {
+      expect(isPromise({'dummy1': true})).toBe(false);
+    });
+  });
+  describe('mergeValidators', () => {
+    it('should merge validators', () => {
+      const dummy1 = () => ({'dummy1': true});
+      const dummy2 = () => ({'dummy2': true});
+      const v = mergeValidators([dummy1, dummy2], Validators.required)!;
+      expect(executeValidators(new FormControl(''), v).reduce((prev, curr) => prev = Object.assign(prev as any, curr), {})).toEqual({'dummy1': true, 'dummy2': true, required: true});
+    });
+    it('should merge validators and validator', () => {
+      const dummy1 = () => ({'dummy1': true});
+      const dummy2 = () => ({'dummy2': true});
+      const v = mergeValidators([dummy1, Validators.required], dummy2)!;
+      expect(executeValidators(new FormControl(''), v).reduce((prev, curr) => prev = Object.assign(prev as any, curr), {})).toEqual({'dummy1': true, 'required': true, 'dummy2': true});
     });
   });
 });
