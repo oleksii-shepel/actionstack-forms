@@ -25,7 +25,6 @@ import {
   mergeMap,
   repeat,
   sampleTime,
-  startWith,
   take,
   takeWhile,
   tap,
@@ -286,8 +285,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   ngAfterContentInit() {
     this.onControlsChanges$ = this.controls.changes.pipe(
-      startWith(this.controls),
-      sampleTime(this.debounce),
       tap((controls) => {
         controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
@@ -295,6 +292,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
             control.valueAccessor.registerOnTouched(this._blurCallback(control));
           }
         });
+
+        this._input$.next(true);
       })
     );
 

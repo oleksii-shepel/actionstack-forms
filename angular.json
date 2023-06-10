@@ -49,8 +49,7 @@
             "tsConfig": "projects/app/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "projects/app/src/favicon.ico",
-              "projects/app/src/assets"
+              "projects/app/src/favicon.ico"
             ],
             "styles": [
               "projects/app/src/styles.scss"

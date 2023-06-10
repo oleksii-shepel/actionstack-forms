@@ -1,3 +1,4 @@
+export * from './accessors';
 export * from './actions';
 export * from './builder';
 export * from './controls';

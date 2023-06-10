@@ -137,6 +137,6 @@ Here is an example of how to combine it with ngModels instances seamlessly:
 For more information about ngModelArray, see the <a href="https://angular.io/api/forms/NgModelArray">documentation</a>. Just a jest!
 </p>
 <p align="justify">
-I hope you will enjoy using **ngync** and it will help you to create more robust and maintainable applications. And remember that the best is yet to come and state management can be easy. Stay tuned!
+I hope you will enjoy using <b>ngync</b> and it will help you to create more robust and maintainable applications. And remember that the best is yet to come and state management can be easy. Stay tuned!
 </p>
 
