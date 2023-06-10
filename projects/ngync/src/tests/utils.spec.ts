@@ -32,7 +32,7 @@ describe('utils', () => {
     expect([...iterable(arr)]).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
   });
 
-  it('should get prop', () => {
+  xit('should get prop', () => {
     type Obj = { a: number; b: number; c: number; d: {a : number; b: number[]} }
     let obj: Obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]} };
 

@@ -9,7 +9,7 @@ export const FormGroupMixin = (self: FormArray) => ({
     return control;
   },
 
-  registerOnChange: (fn: (_: any) => {}) => {
+  registerOnChange: (fn: (_: any) => void) => {
     self.controls.forEach((control: any) => {
       if(control.hasOwnProperty('_onChange')) {
         (control as any)['_onChange'].push(fn);
@@ -17,7 +17,7 @@ export const FormGroupMixin = (self: FormArray) => ({
     });
   },
 
-  registerOnDisabledChange: (fn: (_: boolean) => {}) => {
+  registerOnDisabledChange: (fn: (_: boolean) => void) => {
     if(self.hasOwnProperty('_onDisabledChange')) {
       (self as any)['_onDisabledChange'].push(fn);
     }
@@ -32,7 +32,7 @@ export const FormGroupMixin = (self: FormArray) => ({
   },
 
   contains: (name: string) => {
-    return self!.hasOwnProperty(name) && (self as any)[name].enabled;
+    return self!.controls.hasOwnProperty(name) && (self!.controls as any)[name].enabled;
   },
 
   removeControl: (name: string, options: {emitEvent?: boolean} = {}) => {

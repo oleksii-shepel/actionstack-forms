@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FormActions, FormActionsInternal } from './actions';
-import { deepClone, prop, setValue } from './utils';
+import { deepClone, setValue } from './utils';
 
 
 
@@ -38,28 +38,28 @@ export const forms = (initialState: any = {}) => (reducer: Function) => {
         return setValue(state, path, { model: deepClone(action.value) } as FormState);
 
       case FormActions.UpdateValue:
-        return setValue(state, `${path}.${prop<FormState>(x => x.model)}`, deepClone(action.value));
+        return setValue(state, `${path}.model`, deepClone(action.value));
 
       case FormActions.UpdateSubmitted:
-        return setValue(state, `${path}.${prop<FormState>(x => x.submitted)}`, action.value);
+        return setValue(state, `${path}.submitted`, action.value);
 
       case FormActionsInternal.ResetForm:
         return setValue(state, path, { model: deepClone(action.value) } as FormState);
 
       case FormActionsInternal.UpdateStatus:
-        return setValue(state, `${path}.${prop<FormState>(x => x.status)}`, action.status);
+        return setValue(state, `${path}.status`, action.status);
 
       case FormActionsInternal.UpdateErrors:
-        return setValue(state, `${path}.${prop<FormState>(x => x.errors)}`, deepClone(action.errors));
+        return setValue(state, `${path}.errors`, deepClone(action.errors));
 
       case FormActionsInternal.UpdateDirty:
-        return setValue(state, `${path}.${prop<FormState>(x => x.dirty)}`, action.dirty);
+        return setValue(state, `${path}.dirty`, action.dirty);
 
       case FormActionsInternal.AutoInit:
         return setValue(state, path, { model: deepClone(action.value) } as FormState);
 
       case FormActionsInternal.AutoSubmit:
-        return setValue(state, `${path}.${prop<FormState>(x => x.submitted)}`, true);
+        return setValue(state, `${path}.submitted`, true);
 
       default:
         return nextState;
