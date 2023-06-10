@@ -63,8 +63,5 @@
   "bugs": {
     "url": "https://github.com/oleksii-shepel/angular-ngrx-forms/issues"
   },
-  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme",
-  "jest": {
-    "testTimeout": 15000
-  }
+  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme"
 }

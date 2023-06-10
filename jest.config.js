@@ -2,4 +2,5 @@
 module.exports = {
   preset: 'jest-preset-angular',
   setupFilesAfterEnv: ['./projects/ngync/src/lib/setup-jest.ts'],
+  testTimeout: 30000,
 };
