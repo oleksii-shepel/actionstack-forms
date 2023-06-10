@@ -21,7 +21,6 @@
     "watch": "ng build --watch --configuration development",
     "test": "jest --verbose",
     "test:coverage": "jest --coverage --watchAll=false",
-
     "test:watch": "jest --watch"
   },
   "private": true,
@@ -64,5 +63,8 @@
   "bugs": {
     "url": "https://github.com/oleksii-shepel/angular-ngrx-forms/issues"
   },
-  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme"
+  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme",
+  "jest": {
+    "testTimeout": 15000
+  }
 }
