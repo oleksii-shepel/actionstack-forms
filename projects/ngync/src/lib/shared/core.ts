@@ -25,6 +25,8 @@ import {
   mergeMap,
   repeat,
   sampleTime,
+  skip,
+  startWith,
   take,
   takeWhile,
   tap,
@@ -173,9 +175,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onSubmit$ = this.store.select(getSubmitted(this.slice)).pipe(
       filter(() => this._initialized),
-      mergeMap((value) => this._updating$.pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       map((state: any) => !!state),
+      mergeMap((value) => this._updating$.pipe(filter((value)=> !value), take(1), map(() => value))),
       tap((state: boolean) => { getSubmitted(this.slice).release(); this._submitted$.next(state); })
     );
 
@@ -230,7 +232,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
 
           this.store.dispatch(UpdateValue({ path: this.slice, value: form }));
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: input }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
           this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
           this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
 
@@ -285,6 +287,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   ngAfterContentInit() {
     this.onControlsChanges$ = this.controls.changes.pipe(
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      startWith(this.controls),
       tap((controls) => {
         controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
@@ -292,9 +296,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
             control.valueAccessor.registerOnTouched(this._blurCallback(control));
           }
         });
-
-        this._input$.next(true);
-      })
+      }),
+      skip(1),
+      tap(() => this._input$.next(true))
     );
 
     let timeout = setTimeout(() => {
