@@ -5,7 +5,7 @@
 </p>
 
   ![npm version](https://badge.fury.io/js/ngync.svg)
-  ![Build Status](https://travis-ci.org/oleksii-shepel/angular-ngrx-forms.svg?branch=master)
+  ![Build Status](https://github.com/oleksii-shepel/angular-ngrx-forms/workflows/build/badge.svg)
   ![Coverage Status](https://coveralls.io/repos/github/oleksii-shepel/angular-ngrx-forms/badge.svg?branch=master)
   ![npm](https://img.shields.io/npm/dt/ngync.svg)
   ![npm](https://img.shields.io/npm/l/ngync.svg)

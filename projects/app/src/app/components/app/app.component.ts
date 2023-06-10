@@ -1,5 +1,5 @@
 import { Component, HostBinding, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, filter, interval, map, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, filter, map, switchMap, timer } from 'rxjs';
 import { ModalService } from '../../services/modal.service';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
@@ -31,7 +31,7 @@ export class AppComponent implements OnDestroy {
   constructor(public modalService: ModalService) {
     this.message = this.hacked$.pipe(
       filter(value => value),
-      switchMap(() => {let str = '', index = Math.floor(this.text.length * Math.random()); return interval(80).pipe(
+      switchMap(() => {let str = '', index = Math.floor(this.text.length * Math.random()); return timer(0, 80).pipe(
         map((i) => {
           if(i < this.text[index].length) {
             str += this.text[index].charAt(i);
