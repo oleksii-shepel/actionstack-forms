@@ -1,11 +1,51 @@
-import { CheckboxControlValueAccessor, ControlValueAccessor, DefaultValueAccessor, NgControl, SelectControlValueAccessor, SelectMultipleControlValueAccessor } from "@angular/forms";
-import { selectValueAccessor } from "../lib/shared/accessors";
+import { CommonModule } from '@angular/common';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, Renderer2 } from "@angular/core";
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CheckboxControlValueAccessor, ControlValueAccessor, DefaultValueAccessor, FormsModule, NgControl, ReactiveFormsModule, SelectControlValueAccessor, SelectMultipleControlValueAccessor } from "@angular/forms";
+import { BuiltInControlValueAccessor, isBuiltInAccessor, selectValueAccessor } from "../lib/shared/accessors";
 
-describe('DefaultValueAccessor', () => {
+class ValueAccessor extends BuiltInControlValueAccessor implements ControlValueAccessor {
+  constructor() {
+    super(null!, null!);
+  }
+  writeValue(obj: any): void {
+    throw new Error("Method not implemented.");
+  }
+}
+
+@Component({
+  selector: 'test-component',
+  template: ``
+})
+export class TestComponent {
+}
+
+describe('value acccessor', () => {
   let defaultAccessor: DefaultValueAccessor;
+  let fixture: ComponentFixture<TestComponent>;
 
   beforeEach(() => {
-    defaultAccessor = new DefaultValueAccessor(null!, null!, null!);
+
+    fixture = TestBed.configureTestingModule({
+      imports: [CommonModule, ReactiveFormsModule, FormsModule],
+      schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
+    }).createComponent(TestComponent);
+
+    defaultAccessor = new DefaultValueAccessor(fixture.componentRef.injector.get(Renderer2), fixture.elementRef, false);
+  });
+
+  it('should call onChange with the new value', () => {
+    const spy = jest.fn();
+    defaultAccessor.registerOnChange(spy);
+    defaultAccessor.onChange('foo');
+    expect(spy).toHaveBeenCalledWith('foo');
+  });
+
+  it('should call onTouched when the control is blurred', () => {
+    const spy = jest.fn();
+    defaultAccessor.registerOnTouched(spy);
+    defaultAccessor.onTouched();
+    expect(spy).toHaveBeenCalled();
   });
 
   describe('shared', () => {
@@ -67,6 +107,17 @@ describe('DefaultValueAccessor', () => {
         const customAccessor: ControlValueAccessor = {} as any;
         expect(() => selectValueAccessor(dir, [customAccessor, customAccessor])).toThrowError();
       });
+    });
+  });
+  describe('isBuiltInAccessor', () => {
+    it('should return true when the value accessor is a built-in', () => {
+      const valueAccessor = new ValueAccessor();
+      expect(isBuiltInAccessor(valueAccessor)).toBe(true);
+    });
+
+    it('should return false when the value accessor is not a built-in', () => {
+      const customAccessor: ControlValueAccessor = {} as any;
+      expect(isBuiltInAccessor(customAccessor)).toBe(false);
     });
   });
 });

@@ -48,7 +48,7 @@ export class BaseControlValueAccessor {
    * Registers a function called when the control value changes.
    * @nodoc
    */
-  registerOnChange(fn: (_: any) => {}): void {
+  registerOnChange(fn: (_: any) => void): void {
     this.onChange = fn;
   }
 
