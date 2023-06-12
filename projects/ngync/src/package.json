@@ -15,6 +15,7 @@
   },
   "sideEffects": false,
   "main": "public-api.ts",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oleksii-shepel/angular-ngrx-forms.git"
