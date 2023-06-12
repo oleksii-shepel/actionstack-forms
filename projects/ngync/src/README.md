@@ -21,8 +21,7 @@
 <a href="https://angular.io/">Angular</a> in its turn provides two different approaches of handling user input through <a href="https://angular.io/guide/forms-overview">forms</a>: reactive and template-driven. Both capture user input events from the view, validate the user input, create a form model and data model to update, and provide a way to track changes.
 </p>
 <p align="justify">
-How can we unite both the worlds? The answer is simple: With help of <b>ngync</b> library. So, what is it and how it differs from other available solutions? Let me introduce it to you. 
-</p>
+How can we unite both the worlds? The answer is simple: With help of <b>ngync</b> library. So, what is it and how it differs from other available solutions? Let me introduce it to you. Application example is available on <a href="https://oleksii-shepel.github.io/angular-ngrx-forms/">Github Pages</a>.</p>
 <h2>Usage</h2>
 <p align="justify">
 If you know how to work with NgRx, you will also be comfortable using ngync. All you need to do is declare ngync directive on the form and provide it with the store path. It is an appropriate place where form data will be reliably reside during application execution. Here is an example of common form definition:
@@ -117,7 +116,7 @@ The active phase of the project is passed by and the first version of software i
 Of course, there is a bonus stored up together with the library. ngync has extended template-driven approach with missing feature of <b>ngModelArray</b>.
 </p>
 <p align="justify">
-ngModelArray is a directive that can be used to group ngModel directives together into an array. It is designed to be used as a child of the ngForm directive. It also requires a name attribute so that the control can be registered with the parent ngForm directive under that name. The directive itself resides in NgFormsModule.
+ngModelArray is a directive that can be used to group ngModel directives together into an array. It is designed to be used as a child of the ngForm directive. It also requires a name attribute so that the control can be registered with the parent ngForm directive under that name. The directive itself resides in <b>NgFormsModule</b>.
 </p>
 <p align="justify">
 Here is an example of how to combine it with ngModels instances seamlessly:

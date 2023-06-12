@@ -176,8 +176,6 @@ describe('core', () => {
 
       subs.a = directive.onAutoInit$.subscribe(auto);
 
-      subs.a.unsubscribe();
-
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
@@ -213,7 +211,18 @@ describe('core', () => {
       expect(stub).not.toHaveBeenCalled();
     });
 
-    it('onChanges', async () => {
+    it('dispatch InitForm before AutoInit action triggered', async () => {
+      let auto = jest.fn();
+
+      subs.a = directive.onAutoInit$.subscribe(auto);
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      expect(auto).not.toHaveBeenCalled();
+    });
+    it('onInitOrUpdate', async () => {
       let auto = jest.fn();
 
       subs.a = directive.onAutoInit$.subscribe(auto);
@@ -223,39 +232,171 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.dir.form.setValue({ firstName: 'Jane' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
+      let stub = jest.fn();
+
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.dirty).toBe(true);
+      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+      expect(stub).toHaveBeenCalledTimes(3);
 
-      directive.dir.form.setValue({ firstName: 'Helen' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
-      directive._blur$.next(true);
+      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Helen' });
-      expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-      expect(directive.dir.form.dirty).toBe(true);
-
-      directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
-      expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-      expect(directive.dir.form.dirty).toBe(false);
+      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+      expect(stub).toHaveBeenCalledTimes(6);
     });
+    describe('onChanges', () => {
+      it('change', async () => {
+        let auto = jest.fn();
 
+        subs.a = directive.onAutoInit$.subscribe(auto);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        expect(auto).toHaveBeenCalled();
+
+        directive.dir.form.setValue({ firstName: 'Jane' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Jane' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.dir.form.setValue({ firstName: 'Helen' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(false);
+      });
+      it('blur', async () => {
+        directive.updateOn = 'blur';
+
+        let auto = jest.fn();
+        subs.a = directive.onAutoInit$.subscribe(auto);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        expect(auto).toHaveBeenCalled();
+
+        directive.dir.form.setValue({ firstName: 'Jane' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Jane' });
+
+        directive.dir.form.setValue({ firstName: 'Helen' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(false);
+      });
+      it('submitted', async () => {
+        directive.updateOn = 'submitted';
+
+        let auto = jest.fn();
+        subs.a = directive.onAutoInit$.subscribe(auto);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        expect(auto).toHaveBeenCalled();
+
+        directive.dir.form.setValue({ firstName: 'Jane' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+
+        directive.dir.form.setValue({ firstName: 'Helen' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(false);
+
+      });
+    });
     it('ngOnDestroy', async () => {
       let auto = jest.fn();
 
@@ -503,8 +644,6 @@ describe('core', () => {
 
       subs.a = directive.onAutoInit$.subscribe(auto);
 
-      subs.a.unsubscribe();
-
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
@@ -540,7 +679,18 @@ describe('core', () => {
       expect(stub).not.toHaveBeenCalled();
     });
 
-    it('onChanges', async () => {
+    it('dispatch InitForm before AutoInit action triggered', async () => {
+      let auto = jest.fn();
+
+      subs.a = directive.onAutoInit$.subscribe(auto);
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      expect(auto).not.toHaveBeenCalled();
+    });
+    it('onInitOrUpdate', async () => {
       let auto = jest.fn();
 
       subs.a = directive.onAutoInit$.subscribe(auto);
@@ -550,39 +700,171 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.dir.form.setValue({ firstName: 'Jane' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
+      let stub = jest.fn();
+
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.dirty).toBe(true);
+      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+      expect(stub).toHaveBeenCalledTimes(3);
 
-      directive.dir.form.setValue({ firstName: 'Helen' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
-      directive._blur$.next(true);
+      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Helen' });
-      expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-      expect(directive.dir.form.dirty).toBe(true);
-
-      directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
-      expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-      expect(directive.dir.form.dirty).toBe(false);
+      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+      expect(stub).toHaveBeenCalledTimes(6);
     });
+    describe('onChanges', () => {
+      it('change', async () => {
+        let auto = jest.fn();
 
+        subs.a = directive.onAutoInit$.subscribe(auto);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        expect(auto).toHaveBeenCalled();
+
+        directive.dir.form.setValue({ firstName: 'Jane' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Jane' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.dir.form.setValue({ firstName: 'Helen' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(false);
+      });
+      it('blur', async () => {
+        directive.updateOn = 'blur';
+
+        let auto = jest.fn();
+        subs.a = directive.onAutoInit$.subscribe(auto);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        expect(auto).toHaveBeenCalled();
+
+        directive.dir.form.setValue({ firstName: 'Jane' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Jane' });
+
+        directive.dir.form.setValue({ firstName: 'Helen' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(false);
+      });
+      it('submitted', async () => {
+        directive.updateOn = 'submitted';
+
+        let auto = jest.fn();
+        subs.a = directive.onAutoInit$.subscribe(auto);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        expect(auto).toHaveBeenCalled();
+
+        directive.dir.form.setValue({ firstName: 'Jane' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+
+        directive.dir.form.setValue({ firstName: 'Helen' });
+        directive.dir.form.markAsDirty();
+        directive._input$.next(true);
+        directive._blur$.next(true);
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(true);
+
+        directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
+
+        jest.advanceTimersByTime(3000);
+        await fixture.whenStable();
+
+        await expect(firstValueFrom(directive.store.select(getSubmitted('slice')))).resolves.toBe(true);
+        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
+        expect(directive.dir.form.dirty).toBe(false);
+
+      });
+    });
     it('ngOnDestroy', async () => {
       let auto = jest.fn();
 
