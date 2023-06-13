@@ -51,8 +51,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
         state: 'Jamaica',
         zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
       },
-      books: ['Reading is prohibited, burn all the books...'],
-      selected: 0,
+      selected: 5,
       quotes: `Unfortunately I misjudged you. You are just a stupid policeman whose luck has run out.`,
       aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
     }, path: "profile"}));

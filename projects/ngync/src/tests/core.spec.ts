@@ -940,5 +940,176 @@ describe('core', () => {
       await expect(directive.formValue).toEqual({ firstName: 'Jane' });
     });
   });
+
+  describe('shared', () => {
+    it("should init directive with Ngync instance", (async () => {
+      @Component({
+        selector: 'test-component',
+        template: ``
+      })
+      class TestComponent {
+        form = new FormGroup({
+          firstName: new FormControl('John')
+        });
+      }
+
+      let fixture: ComponentFixture<TestComponent>;
+      let directive: SyncDirective;
+      let subs = {} as any;
+
+      TestBed.configureTestingModule({
+        declarations: [TestComponent],
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+          metaReducers: [forms({'slice': {}})]
+        }), SharedModule]
+      });
+
+      fixture = TestBed.overrideComponent(TestComponent, {
+        set: {
+          template: `
+          <form [formGroup]="form" [ngync]="{slice: 'model', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
+            <input type="text" formControlName="firstName"/>
+            <button type="submit">Submit</button>
+          </form>`
+        }
+      }).createComponent(TestComponent);
+
+      directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+
+      jest.useFakeTimers();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      TestBed.resetTestingModule();
+      jest.clearAllTimers();
+
+      for (let sub in subs) {
+        subs[sub]?.unsubscribe();
+      }
+      subs = {};
+    }));
+
+    it("should throw exception if slice is not provided", (async () => {
+      @Component({
+        selector: 'test-component',
+        template: ``
+      })
+      class TestComponent {
+        form = new FormGroup({
+          firstName: new FormControl('John')
+        });
+      }
+
+      let fixture: ComponentFixture<TestComponent>;
+      let directive: SyncDirective;
+
+      TestBed.configureTestingModule({
+        declarations: [TestComponent],
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+          metaReducers: [forms({'slice': {}})]
+        }), SharedModule]
+      });
+
+      fixture = TestBed.overrideComponent(TestComponent, {
+        set: {
+          template: `
+          <form [formGroup]="form" [ngync]="{}">
+            <input type="text" formControlName="firstName"/>
+            <button type="submit">Submit</button>
+          </form>`
+        }
+      }).createComponent(TestComponent);
+
+      directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+
+      expect(Promise.resolve(directive.ngOnInit())).rejects.toThrow(Error);
+
+      TestBed.resetTestingModule();
+      jest.clearAllTimers();
+    }));
+
+    it("should throw exception if form directive not found", (async () => {
+      @Component({
+        selector: 'test-component',
+        template: ``
+      })
+      class TestComponent {
+        form = new FormGroup({
+          firstName: new FormControl('John')
+        });
+      }
+
+      let fixture: ComponentFixture<TestComponent>;
+      let directive: SyncDirective;
+
+      TestBed.configureTestingModule({
+        declarations: [TestComponent],
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+          metaReducers: [forms({'slice': {}})]
+        }), SharedModule]
+      });
+
+      fixture = TestBed.overrideComponent(TestComponent, {
+        set: {
+          template: `
+          <form [ngync]="model">
+            <input type="text" formControlName="firstName"/>
+            <button type="submit">Submit</button>
+          </form>`
+        }
+      }).createComponent(TestComponent);
+
+      directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+
+      expect(Promise.resolve(directive.ngOnInit())).rejects.toThrow(Error);
+
+      TestBed.resetTestingModule();
+      jest.clearAllTimers();
+    }));
+  });
+  it("should check if all controls are initialized", (async () => {
+    @Component({
+      selector: 'test-component',
+      template: ``
+    })
+    class TestComponent {
+      form = new FormGroup({
+        firstName: new FormControl('John')
+      });
+    }
+
+    let fixture: ComponentFixture<TestComponent>;
+    let directive: SyncDirective;
+
+    TestBed.configureTestingModule({
+      declarations: [TestComponent],
+      imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+        metaReducers: [forms({'slice': {}})]
+      }), SharedModule]
+    });
+
+    fixture = TestBed.overrideComponent(TestComponent, {
+      set: {
+        template: `
+          <form [formGroup]="form" ngync="slice">
+            <input type="text" formControlName="firstName"/>
+            <button type="submit">Submit</button>
+          </form>`
+      }
+    }).createComponent(TestComponent);
+
+    directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+    directive.slice = 'slice';
+
+    jest.useFakeTimers();
+    fixture.detectChanges();
+    jest.advanceTimersByTime(3000);
+    await fixture.whenStable();
+
+    expect(directive.initialized).toBe(true);
+
+    TestBed.resetTestingModule();
+    jest.clearAllTimers();
+  }));
 });
 
