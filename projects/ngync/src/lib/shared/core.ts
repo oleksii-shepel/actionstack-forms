@@ -40,7 +40,6 @@ import {
   NGYNC_CONFIG_TOKEN,
   checkForm,
   deepEqual,
-  getModel,
   getSlice,
   getSubmitted,
   setValue
@@ -151,7 +150,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
       tap((action) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
       filter((action) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
-      withLatestFrom(this.store.select(getModel(this.slice))),
+      withLatestFrom(this.store.select(getSlice(this.slice))),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(([action, state]: [Action, any]) => {
@@ -159,12 +158,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this._updating$.next(true);
 
         let formValue = this.formValue;
-        Object.assign(formValue, state);
+        Object.assign(formValue, state.model);
 
         this.dir.form.patchValue(formValue);
         this.dir.form.updateValueAndValidity();
         this.dir.form.markAsDirty();
-        this.cdr.markForCheck();
 
         if(action.type === FormActions.InitForm) {
           this._initialState = state;
@@ -177,13 +175,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
             this.dir.form.updateValueAndValidity();
             this.cdr.markForCheck();
           }
-
-          this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
+          if(state.submitted !== equal || !state.submitted) {
+            this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
+          }
           this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
           this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
           this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
         }
 
+        this.cdr.markForCheck();
         this._updating$.next(false);
       })
     );
@@ -218,7 +218,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(([input, blur, submitted]) => {
 
         let form = this.formValue;
-        let equal = true;
 
         if(submitted === true) {
           this.dir.form.updateValueAndValidity();
@@ -228,7 +227,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this._submittedState = form;
         }
 
-        if (submitted === true || (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true)) {
+        if (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) {
           this.store.dispatch(UpdateValue({ path: this.slice, value: form }));
         }
       }),
