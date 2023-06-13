@@ -19,6 +19,7 @@ import {
   BehaviorSubject,
   Observable,
   combineLatest,
+  defer,
   delay,
   filter,
   from,
@@ -274,12 +275,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this._updating$.next(false);
       })
     );
-  }
 
-  ngAfterContentInit() {
-
-    this.onControlsChanges$ = this.controls.changes.pipe(
-      startWith(this.controls),
+    this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((controls) => {
         controls.forEach((control: NgControl) => {
@@ -292,11 +289,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       skip(1),
       tap(() => this._input$.next(true))
     );
+  }
 
-    let timeout = setTimeout(() => {
-      this.subscribe();
-      clearTimeout(timeout);
-    }, 0);
+  ngAfterContentInit() {
+    this.subscribe();
   }
 
   ngOnDestroy() {
