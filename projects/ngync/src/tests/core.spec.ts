@@ -409,6 +409,7 @@ describe('core', () => {
 
       directive.dir.form.setValue({ firstName: 'Helen' });
       directive.dir.form.markAsDirty();
+      directive._input$.next(true);
 
       directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
 
@@ -877,6 +878,7 @@ describe('core', () => {
 
       directive.dir.form.setValue({ firstName: 'Helen' });
       directive.dir.form.markAsDirty();
+      directive._input$.next(true);
 
       directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
 
@@ -1022,7 +1024,7 @@ describe('core', () => {
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
 
-      expect(Promise.resolve(directive.ngOnInit())).rejects.toThrow(Error);
+      expect(directive.ngOnInit).toThrow(Error);
 
       TestBed.resetTestingModule();
       jest.clearAllTimers();
@@ -1061,7 +1063,7 @@ describe('core', () => {
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
 
-      expect(Promise.resolve(directive.ngOnInit())).rejects.toThrow(Error);
+      expect(directive.ngOnInit).toThrow(Error);
 
       TestBed.resetTestingModule();
       jest.clearAllTimers();
