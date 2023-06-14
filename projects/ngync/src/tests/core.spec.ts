@@ -156,7 +156,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalled();
     });
 
-    xit('should call subscription when changes in control group happens', async() => {
+    it('should call subscription when changes in control group happens', async() => {
       let stub = jest.fn();
 
       jest.advanceTimersByTime(3000);
@@ -167,9 +167,9 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      directive.dir.form.addControl('lastName', new FormControl('Doe'));
-
+      directive.controls.notifyOnChanges();
       fixture.detectChanges();
+
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
@@ -626,7 +626,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalled();
     });
 
-    xit('should call subscription when changes in control group happens', async() => {
+    it('should call subscription when changes in control group happens', async() => {
       let stub = jest.fn();
 
       jest.advanceTimersByTime(3000);
@@ -637,15 +637,14 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      directive.dir.form.addControl('lastName', new FormControl('Doe'));
-
+      directive.controls.notifyOnChanges();
       fixture.detectChanges();
+
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
       expect(stub).toHaveBeenCalled();
     });
-
     it('should not call subscriptions when component removed from the DOM', async () => {
       let auto = jest.fn();
 
