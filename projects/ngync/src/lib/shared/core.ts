@@ -189,7 +189,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((action) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
       filter((action) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
-      sampleTime(this.debounce),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action: any) => {
 
@@ -226,9 +225,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onChange$ = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
-      sampleTime(this.debounce),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      sampleTime(this.debounce),
       tap(() => this._updating$.next(true)),
       tap(([input, blur, submitted]) => {
 
