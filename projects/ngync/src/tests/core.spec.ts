@@ -247,7 +247,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(1);
+      expect(stub).toHaveBeenCalledTimes(3);
 
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
@@ -257,7 +257,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(2);
+      expect(stub).toHaveBeenCalledTimes(6);
     });
     describe('onChanges', () => {
       it('change', async () => {
@@ -718,7 +718,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(1);
+      expect(stub).toHaveBeenCalledTimes(3);
 
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
@@ -728,7 +728,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(2);
+      expect(stub).toHaveBeenCalledTimes(6);
     });
     describe('onChanges', () => {
       it('change', async () => {
