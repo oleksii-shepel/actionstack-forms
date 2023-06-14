@@ -1,5 +1,5 @@
 import { AutoInit, AutoSubmit, FormActions, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateStatus, UpdateSubmitted, UpdateValue } from '../lib/shared/actions';
-import { forms, logger } from '../lib/shared/reducer';
+import { forms, logger } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
 describe('reducer', () => {

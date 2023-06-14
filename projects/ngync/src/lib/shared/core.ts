@@ -14,17 +14,19 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { Action, ActionsSubject, Store } from '@ngrx/store';
+import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
   combineLatest,
   defer,
   delay,
+  distinctUntilKeyChanged,
   filter,
   from,
   fromEvent,
   map,
+  merge,
   mergeMap,
   repeat,
   sampleTime,
@@ -32,8 +34,7 @@ import {
   startWith,
   take,
   takeWhile,
-  tap,
-  withLatestFrom
+  tap
 } from 'rxjs';
 import {
   DomObserver,
@@ -42,7 +43,6 @@ import {
   checkForm,
   deepEqual,
   getSlice,
-  getSubmitted,
   setValue
 } from '.';
 import {
@@ -107,11 +107,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   };
 
   onInitOrUpdate$!: Observable<any>;
-  onSubmit$!: Observable<any>;
-  onAutoSubmit$!: Observable<any>;
   onChange$!: Observable<any>;
   onAutoInit$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
+  onSubmitOrAutoSubmit$!: Observable<any>;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -148,38 +147,73 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
+    let onSubmit$ = this.actionsSubject.pipe(
+      filter((action) => action.type === FormActions.UpdateSubmitted),
+      filter(value => !!value),
+      map((action: any) => ({value: action.value, type: action.type})),
+    );
+
+    let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
+    let onAutoSubmit$ = fromEvent(submit, 'click').pipe(
+      filter(() => this.autoSubmit && this.dir.form.valid),
+      map(() => ({value: true, type: AutoSubmit.type}))
+    )
+
+    this.onSubmitOrAutoSubmit$ = merge(onSubmit$, onAutoSubmit$).pipe(
+      filter(() => this._initialized),
+      distinctUntilKeyChanged('value'),
+      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      tap((action) => { if(action.type === AutoSubmit.type) { this.store.dispatch(AutoSubmit({ path: this.slice })); } }),
+      tap((action) => {
+        this._updating$.next(true);
+
+        if(action.value === true) {
+          this._submittedState = this.formValue;
+
+          if (this.dir.form.dirty) {
+            this.dir.form.markAsPristine();
+            this.dir.form.updateValueAndValidity();
+            this.cdr.markForCheck();
+            this._submitted$.next(true);
+          }
+        } else {
+          this._submitted$.next(false);
+        }
+
+        this._updating$.next(false);
+      })
+    );
+
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
       tap((action) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
       filter((action) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
-      withLatestFrom(this.store.select(getSlice(this.slice))),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
+      sampleTime(this.debounce),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(([action, state]: [Action, any]) => {
+      tap((action: any) => {
 
         this._updating$.next(true);
 
-        let formValue = this.formValue;
-        Object.assign(formValue, state.model);
-
-        this.dir.form.patchValue(formValue);
+        this.dir.form.patchValue(action.value);
         this.dir.form.updateValueAndValidity();
         this.dir.form.markAsDirty();
 
+        let formValue = this.formValue;
+
         if(action.type === FormActions.InitForm) {
-          this._initialState = state;
+          this._initialState = formValue;
           this._initialized = true;
         } else {
           let equal = deepEqual(formValue, this._submittedState);
-
-          if (equal) {
+          if(equal) {
             this.dir.form.markAsPristine();
             this.dir.form.updateValueAndValidity();
             this.cdr.markForCheck();
           }
-          if(state.submitted !== equal || !state.submitted) {
-            this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
-          }
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
+
+          this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
           this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
           this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
         }
@@ -189,46 +223,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       })
     );
 
-    let submitted = getSubmitted(this.slice);
-    this.onSubmit$ = this.store.select(submitted).pipe(
-      filter(() => this._initialized),
-      map((state: any) => !!state),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
-      tap((state: boolean) => { submitted.release(); this._submitted$.next(state); }),
-      skip(1),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-    );
-
-    let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
-    this.onAutoSubmit$ = fromEvent(submit, 'click').pipe(
-      filter(() => this._initialized),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
-      filter(() => this.dir.form.valid),
-      tap(() => this.store.dispatch(AutoSubmit({ path: this.slice }))),
-      tap(() => this._submitted$.next(true)),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement))
-    );
-
     this.onChange$ = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       sampleTime(this.debounce),
+      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(() => this._updating$.next(true)),
       tap(([input, blur, submitted]) => {
 
         let form = this.formValue;
 
-        if(submitted === true) {
-          this.dir.form.updateValueAndValidity();
-          this.dir.form.markAsPristine();
-          this.cdr.markForCheck();
-
-          this._submittedState = form;
-        }
-
-        if (this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) {
+        if (submitted === true || this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) {
           this.store.dispatch(UpdateValue({ path: this.slice, value: form }));
         }
       }),
@@ -261,7 +267,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((state) => {
         this._updating$.next(true);
-        let formValue = state?.model ?? this.formValue;
+        let formValue = this.formValue;
         if(formValue) {
 
           this.dir.form.markAsPristine();
@@ -292,7 +298,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.subscribe();
+    let timer = setTimeout(() => {
+      this.subscribe();
+      clearTimeout(timer);
+    }, 0);
   }
 
   ngOnDestroy() {
@@ -322,11 +331,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   subscribe() {
     this._subs.a = this.onInitOrUpdate$.subscribe();
-    this._subs.b = this.onSubmit$.subscribe();
-
-    if(this.autoSubmit) {
-      this._subs.c = this.onAutoSubmit$.subscribe();
-    }
+    this._subs.b = this.onSubmitOrAutoSubmit$.subscribe();
 
     this._subs.d = this.onChange$.subscribe();
     this._subs.e = this.onAutoInit$.subscribe();

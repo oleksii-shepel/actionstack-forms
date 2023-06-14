@@ -1,6 +1,6 @@
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
 import { FormActions, FormActionsInternal } from './actions';
-import { deepClone, setValue } from './utils';
+import { deepClone, getValue, setValue } from './utils';
 
 
 
@@ -23,7 +23,7 @@ export const getSubmitted = (slice: string) => createSelector(getSlice(slice), s
 
 
 
-export const forms = (initialState: any = {}) => (reducer: Function) => {
+export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
     state = state ?? initialState;
     let nextState = reducer(state, action);
@@ -35,16 +35,16 @@ export const forms = (initialState: any = {}) => (reducer: Function) => {
 
     switch(action.type) {
       case FormActions.InitForm:
-        return setValue(state, path, { model: deepClone(action.value) } as FormState);
+        return setValue(state, path, { model: Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
 
       case FormActions.UpdateValue:
-        return setValue(state, `${path}.model`, deepClone(action.value));
+        return setValue(state, path, {...getValue(state, path), model: Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
 
       case FormActions.UpdateSubmitted:
         return setValue(state, `${path}.submitted`, action.value);
 
       case FormActionsInternal.ResetForm:
-        return setValue(state, path, { model: deepClone(action.value) } as FormState);
+        return setValue(state, path, { model: Object.keys(action.value).length ? Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) : {} });
 
       case FormActionsInternal.UpdateStatus:
         return setValue(state, `${path}.status`, action.status);
@@ -56,7 +56,7 @@ export const forms = (initialState: any = {}) => (reducer: Function) => {
         return setValue(state, `${path}.dirty`, action.dirty);
 
       case FormActionsInternal.AutoInit:
-        return setValue(state, path, { model: deepClone(action.value) } as FormState);
+        return setValue(state, path, { model: Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
 
       case FormActionsInternal.AutoSubmit:
         return setValue(state, `${path}.submitted`, true);
@@ -69,7 +69,7 @@ export const forms = (initialState: any = {}) => (reducer: Function) => {
 
 
 
-export const logger = (settings: any = {}) => (reducer: Function) => {
+export const logger = (settings: any = {}) => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
     const result = reducer(state, action);
     console.groupCollapsed(action.type);

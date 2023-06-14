@@ -70,7 +70,7 @@ import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
     FormsModule,
     SharedModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [forms(initialState), logger()]
+      metaReducers: [logger(), forms(initialState)]
     }),
 
     NgFormsModule
@@ -81,7 +81,7 @@ export class AppModule { }
 ```
 
 <p align="justify">
-Here we are putting into work two meta-reducers: one for form state syncing and one for logging. How could you guess, the first one is mandatory if you want to save state within the store, but the second is optional. It will come in handy by taking first steps. You can use it in a similar way to the Redux DevTools panel.
+Here we are putting into work two meta-reducers: one for form state syncing and one for logging. Forms reducer is mandatory if you want to save state within the store, but the logger is optional. It will come in handy by taking first steps. You can use it in a similar way to the Redux DevTools.*** As could you guess, the order of meta-reducers matters. So, the first one in meta-reducers list will be executed last. 
 </p>
 <p align="justify">
 That's it, all settings are done and your form have to be synchronized with the store, now you can deep into exploration of internal processes.

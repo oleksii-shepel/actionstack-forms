@@ -89,7 +89,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onAutoSubmit$.subscribe(stub);
+      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
 
       let button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
       button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -147,7 +147,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onSubmit$.subscribe(stub);
+      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
       directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
 
       jest.advanceTimersByTime(3000);
@@ -163,6 +163,10 @@ describe('core', () => {
       await fixture.whenStable();
 
       subs.a = directive.onControlsChanges$.subscribe(stub);
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
       directive.dir.form.addControl('lastName', new FormControl('Doe'));
 
       fixture.detectChanges();
@@ -185,11 +189,10 @@ describe('core', () => {
       let stub = jest.fn();
 
       subs.a = directive.onAutoInit$.subscribe(stub);
-      subs.b = directive.onAutoSubmit$.subscribe(stub);
+      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
       subs.c = directive.onInitOrUpdate$.subscribe(stub);
-      subs.d = directive.onSubmit$.subscribe(stub);
-      subs.e = directive.onChange$.subscribe(stub);
-      subs.f = directive.onControlsChanges$.subscribe(stub);
+      subs.d = directive.onChange$.subscribe(stub);
+      subs.e = directive.onControlsChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -244,7 +247,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(3);
+      expect(stub).toHaveBeenCalledTimes(1);
 
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
@@ -254,7 +257,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(6);
+      expect(stub).toHaveBeenCalledTimes(2);
     });
     describe('onChanges', () => {
       it('change', async () => {
@@ -411,6 +414,9 @@ describe('core', () => {
       directive.dir.form.markAsDirty();
       directive._input$.next(true);
 
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
       directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
 
       jest.advanceTimersByTime(3000);
@@ -553,7 +559,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onAutoSubmit$.subscribe(stub);
+      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
 
       let button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
       button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -611,7 +617,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onSubmit$.subscribe(stub);
+      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
       directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
 
       jest.advanceTimersByTime(3000);
@@ -654,11 +660,10 @@ describe('core', () => {
       let stub = jest.fn();
 
       subs.a = directive.onAutoInit$.subscribe(stub);
-      subs.b = directive.onAutoSubmit$.subscribe(stub);
+      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
       subs.c = directive.onInitOrUpdate$.subscribe(stub);
-      subs.d = directive.onSubmit$.subscribe(stub);
-      subs.e = directive.onChange$.subscribe(stub);
-      subs.f = directive.onControlsChanges$.subscribe(stub);
+      subs.d = directive.onChange$.subscribe(stub);
+      subs.e = directive.onControlsChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -713,7 +718,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(3);
+      expect(stub).toHaveBeenCalledTimes(1);
 
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
@@ -723,7 +728,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(6);
+      expect(stub).toHaveBeenCalledTimes(2);
     });
     describe('onChanges', () => {
       it('change', async () => {

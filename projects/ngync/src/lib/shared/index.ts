@@ -5,7 +5,7 @@ export * from './controls';
 export * from './core';
 export * from './dom';
 export * from './module';
-export * from './reducer';
+export * from './reducers';
 export * from './types';
 export * from './utils';
 export * from './validators';
