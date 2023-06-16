@@ -2,9 +2,13 @@
 
 
 
-export const getValue = (obj: any, prop: string) => prop.split('.').reduce((acc, part) => acc && acc[part], obj);
-
-
+export const getValue = (obj: any, prop: string) => {
+  return prop.split('.').reduce((acc, part) => {
+    if (acc !== undefined && acc !== null && acc[part] !== undefined && acc[part] !== null) {
+      return acc[part];
+    } else { return undefined; }
+  }, obj);
+}
 
 export const setValue = (obj: any, prop: string, val: any) => {
   const split = prop.split('.');
