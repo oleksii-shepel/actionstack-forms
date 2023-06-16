@@ -452,7 +452,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({});
+      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: ''});
     });
     it('formStatus and formValue', async () => {
       let auto = jest.fn();
@@ -919,7 +919,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({});
+      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: ''});
     });
     it('formStatus and formValue', async () => {
       let auto = jest.fn();

@@ -24,3 +24,8 @@ label {
     z-index: 0;
   }
 }
+
+p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

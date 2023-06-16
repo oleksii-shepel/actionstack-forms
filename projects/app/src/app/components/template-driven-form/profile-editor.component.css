@@ -13,3 +13,8 @@ label {
 .ng-invalid:not(.ng-untouched) {
   border-color: red;
 }
+
+p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

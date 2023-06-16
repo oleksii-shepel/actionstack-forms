@@ -194,28 +194,28 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
         this._updating$.next(true);
 
-        this.dir.form.patchValue(action.value);
-        this.dir.form.updateValueAndValidity();
-        this.dir.form.markAsDirty();
-
         let formValue = this.formValue;
+        let equal = true;
 
         if(action.type === FormActions.InitForm) {
           this._initialState = formValue;
           this._initialized = true;
+
+          this.dir.form.patchValue(action.value);
+          this.dir.form.markAsPristine();
+          this.dir.form.updateValueAndValidity();
         } else {
-          let equal = deepEqual(formValue, this._submittedState);
+          equal = deepEqual(formValue, this._submittedState);
           if(equal) {
             this.dir.form.markAsPristine();
             this.dir.form.updateValueAndValidity();
-            this.cdr.markForCheck();
           }
-
-          this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
-          this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
-          this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
         }
+
+        this.store.dispatch(UpdateSubmitted({ path: this.slice, value: equal }));
+        this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
+        this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
+        this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
 
         this.cdr.markForCheck();
         this._updating$.next(false);
@@ -270,12 +270,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         if(formValue) {
 
           this.dir.form.markAsPristine();
-          this.cdr.markForCheck();
+          this.dir.form.updateValueAndValidity();
 
           this._initialized = true;
           this._initialState = formValue;
 
           this.store.dispatch(AutoInit({path: this.slice, value: formValue}));
+          this.store.dispatch(UpdateSubmitted({ path: this.slice, value: false }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
+          this.store.dispatch(UpdateErrors({ path: this.slice, errors: this.dir.errors }));
+          this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
+
+          this.cdr.markForCheck();
         }
         this._updating$.next(false);
       })
@@ -313,7 +319,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this.store.dispatch(ResetForm({ path: this.slice, value: this._submittedState || {} }));
           break;
         case 'empty':
-          this.store.dispatch(ResetForm({ path: this.slice, value: {} }));
+          this.store.dispatch(ResetForm({ path: this.slice, value: this.formValue, resetState: this._initialState }));
           break;
       }
     }

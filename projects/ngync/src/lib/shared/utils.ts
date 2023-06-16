@@ -63,6 +63,27 @@ export function findProps(obj: any): string[] {
 }
 
 
+export function unassign(target: any, source: any[]) {
+  for(let prop in source) {
+    delete target[prop];
+
+  }
+  return target;
+}
+
+export function reset(target: any, source: any[]): any {
+  for(let prop of findProps(source)) {
+    let value = getValue(source, prop);
+    if(typeof value === 'string') {
+      target = setValue(target, prop, '');
+    } else if (typeof value === 'number') {
+      target = setValue(target, prop, 0);
+    } else if (typeof value === 'boolean') {
+      target = setValue(target, prop, false);
+    }
+  }
+  return target;
+}
 
 export function deepEqual(x: any, y: any): boolean {
   return (x && y && typeof x === 'object' && typeof y === 'object') ?

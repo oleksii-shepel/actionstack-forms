@@ -32,7 +32,7 @@ export const UpdateSubmitted = createAction(
 
 export const ResetForm = createAction(
   FormActionsInternal.ResetForm,
-  props<{ path: string; value: any }>()
+  props<{ path: string; value: any; resetState?: any }>()
 );
 
 export const UpdateStatus = createAction(
