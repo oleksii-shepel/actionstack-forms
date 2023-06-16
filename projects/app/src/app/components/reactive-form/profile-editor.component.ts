@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateValue, buildForm, getSlice, getValue } from 'ngync';
-import { Observable, take } from 'rxjs';
+import { UpdateValue, buildForm, getModel, getSlice, getValue } from 'ngync';
+import { Observable, firstValueFrom, fromEvent, take } from 'rxjs';
 import { initialProfile, profileOptions } from '../../models/profile';
-import { ProfileState } from '../../reducers/profile.reducer';
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -12,16 +11,18 @@ import { ProfileState } from '../../reducers/profile.reducer';
   styleUrls: ['./profile-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReactiveProfileEditorComponent implements OnDestroy {
+export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy {
   @Input() caption = '';
   @Output() hacked = new EventEmitter<boolean>();
 
+  profile$: Observable<any>;
+
   slice = "profile";
-  profile$: Observable<ProfileState>;
+
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
   form = this.profileForm;
 
-  a: any;
+  a: any; b: any;
 
   get books() {
     return (this.profileForm.get('books') as FormArray)!.controls;
@@ -31,13 +32,41 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
     return (this.profileForm.get('aliases') as FormArray)!.controls;
   }
 
-  constructor(private fb: FormBuilder, private store: Store) {
+  _collapsed: boolean = true;
+  @HostBinding('class.collapsed') set collapsed(value: boolean) {
+    this._collapsed = value;
+    (async () => {
+      let slice = await firstValueFrom(this.store.select(getModel(this.slice)));
+      this.store.dispatch(UpdateValue({value: {...slice, collapsed : value}, path: this.slice}));
+    })();
+  }
+
+  get collapsed() {
+    return this._collapsed;
+  }
+
+  constructor(private fb: FormBuilder, private store: Store, private elementRef: ElementRef) {
 
     this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model: any = getValue(state, "model") ?? initialProfile;
+      this.collapsed = model.collapsed;
     });
 
+
     this.profile$ = this.store.select(getSlice(this.slice));
+  }
+
+  ngAfterViewInit() {
+    let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
+    let pre = this.elementRef.nativeElement.querySelector('pre');
+    let footer = this.elementRef.nativeElement.querySelector('footer');
+    scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
+    pre.style.height = scrollable.clientHeight + 'px';
+
+    this.b = fromEvent(scrollable, 'scroll').subscribe((e: any) => {
+      pre.style.height = Math.min(scrollable.clientHeight, scrollable.scrollHeight - footer.scrollHeight - e.target.scrollTop) + 'px';
+      pre.scrollTop = e.target.scrollTop * ( pre.scrollHeight / scrollable.scrollHeight);
+    });
   }
 
   updateProfile() {
@@ -84,5 +113,6 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.a.unsubscribe();
+    this.b.unsubscribe();
   }
 }

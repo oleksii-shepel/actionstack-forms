@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
 import { AppComponent } from './components/app/app.component';
 import { HackedBannerComponent } from './components/hacked-banner/hacked-banner.component';
+import { JsonEditorComponent } from './components/json-editor/json-editor.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
 import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
 import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
@@ -23,12 +25,14 @@ import { initialState, reducer } from './reducers';
     FieldDirective,
     FieldArrayDirective,
     FieldGroupDirective,
-    HackedBannerComponent
+    HackedBannerComponent,
+    JsonEditorComponent
   ],
   imports: [
     BrowserModule,
     ReactiveFormsModule,
     FormsModule,
+    BrowserAnimationsModule,
     SharedModule,
     StoreModule.forRoot(reducer, {
       metaReducers: [logger(), forms(initialState)]

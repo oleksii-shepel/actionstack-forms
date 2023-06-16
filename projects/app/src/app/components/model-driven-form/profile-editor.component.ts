@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateValue, deepClone, getSlice, getValue } from 'ngync';
-import { Observable, take } from 'rxjs';
+import { UpdateValue, deepClone, getModel, getSlice, getValue } from 'ngync';
+import { Observable, firstValueFrom, fromEvent, take } from 'rxjs';
 import { initialModel } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
-import { ModelState } from '../../reducers/standard.reducer';
 
 @Component({
   selector: 'standard-profile-editor',
@@ -13,27 +12,53 @@ import { ModelState } from '../../reducers/standard.reducer';
   styleUrls: ['./profile-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StandardProfileEditorComponent implements OnDestroy {
+export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('modelForm') form: NgForm | null = null;
 
   @Input() caption = '';
   @Output() hacked = new EventEmitter<boolean>();
 
-  slice = "model";
-  profile$!: Observable<ModelState>;
+  profile$: Observable<any>;
+
+  slice: string = "model";
   model = initialModel;
 
-  a: any;
+  a: any; b: any;
 
+  _collapsed: boolean = true;
+  @HostBinding('class.collapsed') set collapsed(value: boolean) {
+    this._collapsed = value;
+    (async () => {
+      let slice = await firstValueFrom(this.store.select(getModel(this.slice)));
+      this.store.dispatch(UpdateValue({value: {...slice, collapsed : value}, path: this.slice}));
+    })();
+  }
 
-  constructor(private store: Store<ApplicationState>) {
+  get collapsed() {
+    return this._collapsed;
+  }
+
+  constructor(private store: Store<ApplicationState>, private elementRef: ElementRef) {
 
     this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model: any = getValue(state, "model") ?? initialModel;
       this.model = deepClone(model);
+      this.collapsed = this.model.collapsed;
     });
 
     this.profile$ = this.store.select(getSlice(this.slice));
+  }
+
+  ngAfterViewInit() {
+    let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
+    let pre = this.elementRef.nativeElement.querySelector('pre');
+    let footer = this.elementRef.nativeElement.querySelector('footer');
+    scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
+    pre.style.height = scrollable.clientHeight + 'px';
+    this.b = fromEvent(scrollable, 'scroll').subscribe((e: any) => {
+      pre.style.height = Math.min(scrollable.clientHeight, scrollable.scrollHeight - footer.scrollHeight - e.target.scrollTop) + 'px';
+      pre.scrollTop = e.target.scrollTop * ( pre.scrollHeight / scrollable.scrollHeight);
+    });
   }
 
   updateProfile() {
@@ -68,5 +93,6 @@ export class StandardProfileEditorComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.a.unsubscribe();
+    this.b.unsubscribe();
   }
 }

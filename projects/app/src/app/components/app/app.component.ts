@@ -1,4 +1,5 @@
-import { Component, HostBinding, OnDestroy } from '@angular/core';
+import { AUTO_STYLE, animate, state, style, transition, trigger } from '@angular/animations';
+import { Component, ElementRef, HostBinding, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, filter, map, switchMap, timer } from 'rxjs';
 import { ModalService } from '../../services/modal.service';
 
@@ -7,7 +8,25 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  animations: [
+    trigger('occurence', [
+      state('open', style({
+        height: AUTO_STYLE,
+        opacity: 1,
+      })),
+      state('closed', style({
+        height: AUTO_STYLE,
+        opacity: 0,
+      })),
+      transition('* => closed', [
+        animate('1.5s')
+      ]),
+      transition('* => open', [
+        animate('1.5s')
+      ]),
+  ]),
+  ]
 })
 export class AppComponent implements OnDestroy {
   @HostBinding('class') class ='author';
@@ -21,14 +40,18 @@ export class AppComponent implements OnDestroy {
 
   message: Observable<string>;
 
+  profile = {};
+
   hackedReactive = false;
   hackedTemplateDriven = false;
   hackedModelDriven = false;
 
   hacked$ = new BehaviorSubject<boolean>(false);
+
   sub: any;
 
-  constructor(public modalService: ModalService) {
+  constructor(public modalService: ModalService, public elementRef: ElementRef) {
+
     this.message = this.hacked$.pipe(
       filter(value => value),
       switchMap(() => {let str = '', index = Math.floor(this.text.length * Math.random()); return timer(0, 80).pipe(

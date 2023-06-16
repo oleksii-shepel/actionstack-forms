@@ -1,43 +1,52 @@
-<form #modelForm="ngForm" autocomplete="off" [ngync]="this.slice">
-  <h2>{{caption}}</h2>
-  <label for="firstName">First Name: </label>
-  <input id="firstName" type="text" [(ngModel)]="model.firstName" name="firstName">
+<ng-container *ngIf="profile$ | async as profile">
+  <json-editor [data]="profile" (collapsedChange)="collapsed = $event"></json-editor>
+  <div class="scrollable" [class.collapsed]="collapsed">
+    <pre [style.display]="collapsed ? 'none': 'block'">{{profile | json}}</pre>
 
-  <label for="lastName">Last Name: </label>
-  <input id="lastName" type="text" [(ngModel)]="model.lastName" name="lastName">
+    <form #modelForm="ngForm" autocomplete="off" [ngync]="this.slice">
+      <h2>{{caption}}</h2>
+      <label for="firstName">First Name: </label>
+      <input id="firstName" type="text" [(ngModel)]="model.firstName" name="firstName">
 
-  <div ngModelGroup="address">
-    <h2>Address</h2>
+      <label for="lastName">Last Name: </label>
+      <input id="lastName" type="text" [(ngModel)]="model.lastName" name="lastName">
 
-    <label for="street">Street: </label>
-    <input id="street" type="text" [(ngModel)]="model.address.street" name="street">
+      <div ngModelGroup="address">
+        <h2>Address</h2>
 
-    <label for="city">City: </label>
-    <input id="city" type="text" [(ngModel)]="model.address.city" name="city">
+        <label for="street">Street: </label>
+        <input id="street" type="text" [(ngModel)]="model.address.street" name="street">
 
-    <label for="state">State: </label>
-    <input id="state" type="text" [(ngModel)]="model.address.state" name="state">
+        <label for="city">City: </label>
+        <input id="city" type="text" [(ngModel)]="model.address.city" name="city">
 
-    <label for="zip">Zip Code: </label>
-    <input id="zip" type="text" [(ngModel)]="model.address.zip" name="zip">
+        <label for="state">State: </label>
+        <input id="state" type="text" [(ngModel)]="model.address.state" name="state">
+
+        <label for="zip">Zip Code: </label>
+        <input id="zip" type="text" [(ngModel)]="model.address.zip" name="zip">
+      </div>
+
+      <div ngModelArray="aliases">
+        <h2>Aliases</h2>
+        <button type="button" (click)="addAlias()">+ Add another alias</button>
+
+        <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
+          <label for="aliases.{{i}}">Alias:</label>
+          <input id="aliases.{{i}}" type="text" [(ngModel)]="model.aliases[i]" name="{{i}}">
+        </div>
+      </div>
+
+      <p>Complete the form to enable button.</p>
+      <button type="submit" [disabled]="!modelForm.form.valid" (click)="onSubmit()">Submit</button>
+      <button type="button" (click)="updateProfile()">👇 Update Profile</button>
+    </form>
+
+    <footer>
+      <hr>
+      <p>© 2023 James Bond. All rights reserved.</p>
+      <p>Disclaimer: This project is not affiliated with the James Bond franchise. All rights belong to their respective owners.</p>
+      <p>The project is not commercial. All information provided is found on the Internet on public servers. Created by <a href="https://www.linkedin.com/in/oleksii-shepel-5b6968250/">Oleksii Shepel</a> in 2023.</p>
+    </footer>
   </div>
-
-  <div ngModelArray="aliases">
-    <h2>Aliases</h2>
-    <button type="button" (click)="addAlias()">+ Add another alias</button>
-
-    <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
-      <label for="aliases.{{i}}">Alias:</label>
-      <input id="aliases.{{i}}" type="text" [(ngModel)]="model.aliases[i]" name="{{i}}">
-    </div>
-  </div>
-
-
-  <p>Complete the form to enable button.</p>
-  <button type="submit" [disabled]="!modelForm.form.valid" (click)="onSubmit()">Submit</button>
-  <button type="button" (click)="updateProfile()">👇 Update Profile</button>
-</form>
-
-<hr>
-
-<p>Form State: {{ profile$ | async | json }}</p>
+</ng-container>

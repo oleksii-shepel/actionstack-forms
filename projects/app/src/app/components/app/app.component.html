@@ -11,15 +11,10 @@
       <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D" alt="ngync" width="100"/>
     </div>
   </nav>
+
   <reactive-profile-editor *ngIf="showReactiveProfileEditor" (hacked)="showModal('reactive')" [caption]="getCaption('reactive')"></reactive-profile-editor>
   <template-profile-editor *ngIf="showTemplateProfileEditor" (hacked)="showModal('template-driven')" [caption]="getCaption('template-driven')"></template-profile-editor>
   <standard-profile-editor *ngIf="showStandardProfileEditor" (hacked)="showModal('standard')" [caption]="getCaption('standard')"></standard-profile-editor>
-  <footer>
-    <hr>
-    <p>© 2023 James Bond. All rights reserved.</p>
-    <p>Disclaimer: This project is not affiliated with the James Bond franchise. All rights belong to their respective owners.</p>
-    <p>The project is not commercial. All information provided is found on the Internet on public servers. Created by <a href="https://www.linkedin.com/in/oleksii-shepel-5b6968250/">Oleksii Shepel</a> in 2023.</p>
-  </footer>
 </main>
 
 <hacked-modal id="modal">

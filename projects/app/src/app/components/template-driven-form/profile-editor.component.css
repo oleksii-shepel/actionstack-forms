@@ -1,7 +1,7 @@
 /* ProfileEditorComponent's private CSS styles */
 
 form {
-  padding-top: 1rem;
+  padding-top: 0rem;
 }
 
 label {
@@ -14,7 +14,76 @@ label {
   border-color: red;
 }
 
-p {
-  text-overflow: ellipsis;
+:host {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 100%;
+  grid-template-areas:
+  "header"
+  "main";
+}
+
+json-editor {
+  margin-top: 20px;
+  grid-area: header;
+}
+
+.scrollable {
+  grid-area: main;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 2fr 1fr;
+  grid-template-areas:
+  "form   pre"
+  "footer footer";
+  overflow: auto;
+  margin-left: -2rem;
+  margin-right: -2rem;
+  margin-top: 0rem;
+  margin-bottom: -1rem;
+  padding: 0 12px 0 20px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.scrollable.collapsed {
+  grid-template-columns: 100%;
+  grid-template-areas:
+  "form"
+  "footer";
+}
+
+form {
+  grid-area: form;
+}
+
+pre {
+  grid-area: pre;
+  border-radius: 0;
+  position: sticky;
+  top: 0;
+  left: 0;
+  margin: 0;
   overflow: hidden;
+}
+
+footer {
+  grid-area: footer;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+}
+
+.scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+  background-color: #dbdbdb;
+  border-radius: 100px;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  background-color: #908e8d;
+  border-radius: 100px;
 }

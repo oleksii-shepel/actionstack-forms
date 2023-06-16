@@ -1,0 +1,33 @@
+:host {
+  display: grid;
+}
+
+header {
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border-style: dashed;
+
+  & h2 {
+    margin: 0;
+  }
+
+  & div {
+    display: flex;
+    flex: 1;
+    justify-content: flex-start;
+    overflow: hidden;
+
+    & span {
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  & button {
+    margin: 0;
+  }
+}

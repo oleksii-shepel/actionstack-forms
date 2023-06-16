@@ -1,0 +1,5 @@
+<header>
+  <div [innerHTML]="changes"></div>
+  <button *ngIf="collapsed" (click)="toggle(collapsed)">Expand</button>
+  <button *ngIf="!collapsed" (click)="toggle(collapsed)">Collapse</button>
+</header>

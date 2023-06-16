@@ -14,6 +14,7 @@ export interface Profile {
   books: string[];
   quotes: string;
   aliases: string[];
+  collapsed: boolean;
 }
 
 export const initialProfile: Profile = {
@@ -48,6 +49,7 @@ export const initialProfile: Profile = {
 ❝ I think it's the same with all the relationships between a man and a woman. They can survive anything so long as some kind of basic humanity exists between the two people. When all kindness has gone, when one person obviously and sincerely doesn't care if the other is alive or dead, then it's just no good.
 ❝ Everyone has the revolver of resignation in his pocket.`,
   aliases: [''],
+  collapsed: true
 }
 
 export const profileOptions: ModelOptions<Profile> = {
@@ -63,7 +65,8 @@ export const profileOptions: ModelOptions<Profile> = {
   selected: {},
   books: {},
   quotes: {},
-  aliases: {}
+  aliases: {},
+  collapsed: {}
 }
 
 export interface Hero {
@@ -76,6 +79,7 @@ export interface Hero {
     zip: string;
   };
   aliases: string[];
+  collapsed: boolean;
 }
 
 export const initialHero: Hero = {
@@ -88,6 +92,7 @@ export const initialHero: Hero = {
     zip: '82130'
   },
   aliases: ['Mr Fisher', 'Robert Sterling', 'St. John Smyth'],
+  collapsed: true
 }
 
 export const heroOptions: ModelOptions<Profile> = {
@@ -99,7 +104,8 @@ export const heroOptions: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: {}
+  aliases: {},
+  collapsed: {}
 }
 
 export interface Model {
@@ -112,6 +118,7 @@ export interface Model {
     zip: string;
   };
   aliases: string[];
+  collapsed: boolean;
 }
 
 export const initialModel: Model = {
@@ -124,6 +131,7 @@ export const initialModel: Model = {
     zip: '00000'
   },
   aliases: ['Domino'],
+  collapsed: true
 }
 
 export const modelOptions: ModelOptions<Model> = {
@@ -135,6 +143,7 @@ export const modelOptions: ModelOptions<Model> = {
     state: {},
     zip: {},
   },
-  aliases: {}
+  aliases: {},
+  collapsed: {}
 }
 

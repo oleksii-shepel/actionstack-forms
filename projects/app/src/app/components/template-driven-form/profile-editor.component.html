@@ -1,43 +1,53 @@
-<form #heroForm="ngForm" autocomplete="off" [ngync]="this.slice">
-  <h2>{{caption}}</h2>
-  <label for="firstName">First Name: </label>
-  <input id="firstName" type="text" ngField="firstName">
+<ng-container *ngIf="profile$ | async as profile">
+  <json-editor [data]="profile" (collapsedChange)="collapsed = $event"></json-editor>
 
-  <label for="lastName">Last Name: </label>
-  <input id="lastName" type="text" ngField="lastName">
+  <div class="scrollable" [class.collapsed]="collapsed">
+    <pre [style.display]="collapsed ? 'none': 'block'">{{profile | json}}</pre>
+    <form #heroForm="ngForm" autocomplete="off" [ngync]="this.slice">
+      <h2>{{caption}}</h2>
+      <label for="firstName">First Name: </label>
+      <input id="firstName" type="text" ngField="firstName">
 
-  <div ngFieldGroup="address">
-    <h2>Address</h2>
+      <label for="lastName">Last Name: </label>
+      <input id="lastName" type="text" ngField="lastName">
 
-    <label for="street">Street: </label>
-    <input id="street" type="text" ngField="street">
+      <div ngFieldGroup="address">
+        <h2>Address</h2>
 
-    <label for="city">City: </label>
-    <input id="city" type="text" ngField="city">
+        <label for="street">Street: </label>
+        <input id="street" type="text" ngField="street">
 
-    <label for="state">State: </label>
-    <input id="state" type="text" ngField="state">
+        <label for="city">City: </label>
+        <input id="city" type="text" ngField="city">
 
-    <label for="zip">Zip Code: </label>
-    <input id="zip" type="text" ngField="zip">
+        <label for="state">State: </label>
+        <input id="state" type="text" ngField="state">
+
+        <label for="zip">Zip Code: </label>
+        <input id="zip" type="text" ngField="zip">
+      </div>
+
+      <div ngFieldArray="aliases">
+        <h2>Aliases</h2>
+        <button type="button" (click)="addAlias()">+ Add another alias</button>
+
+        <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
+          <label for="aliases.{{i}}">Alias:</label>
+          <input id="aliases.{{i}}" type="text" ngField="{{i}}">
+        </div>
+      </div>
+
+
+      <p>Complete the form to enable button.</p>
+      <button type="submit" [disabled]="!heroForm.form.valid" (click)="onSubmit()">Submit</button>
+      <button type="button" (click)="updateProfile()">👇 Update Profile</button>
+    </form>
+
+    <footer>
+      <hr>
+      <p>© 2023 James Bond. All rights reserved.</p>
+      <p>Disclaimer: This project is not affiliated with the James Bond franchise. All rights belong to their respective owners.</p>
+      <p>The project is not commercial. All information provided is found on the Internet on public servers. Created by <a href="https://www.linkedin.com/in/oleksii-shepel-5b6968250/">Oleksii Shepel</a> in 2023.</p>
+    </footer>
   </div>
-
-  <div ngFieldArray="aliases">
-    <h2>Aliases</h2>
-    <button type="button" (click)="addAlias()">+ Add another alias</button>
-
-    <div *ngFor="let alias of model.aliases; let i=index; trackBy:trackById;">
-      <label for="aliases.{{i}}">Alias:</label>
-      <input id="aliases.{{i}}" type="text" ngField="{{i}}">
-    </div>
-  </div>
-
-
-  <p>Complete the form to enable button.</p>
-  <button type="submit" [disabled]="!heroForm.form.valid" (click)="onSubmit()">Submit</button>
-  <button type="button" (click)="updateProfile()">👇 Update Profile</button>
-</form>
-
-<hr>
-
-<p>Form State: {{ profile$ | async | json }}</p>
+</ng-container>
