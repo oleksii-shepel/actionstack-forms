@@ -37,7 +37,7 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
       case FormActions.InitForm:
         return setValue(state, path, { model: Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
 
-      case FormActions.UpdateValue:
+      case FormActions.UpdateForm:
         return setValue(state, path, {...getValue(state, path), model: Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
 
       case FormActions.UpdateSubmitted:
@@ -45,6 +45,9 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
       case FormActionsInternal.ResetForm:
         return setValue(state, path, { model: action.resetState ? reset(unassign(deepClone(getValue(state, `${path}.model`) || {}), action.value), action.resetState) : Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
+
+      case FormActionsInternal.UpdateValue:
+          return setValue(state, path, Object.assign(deepClone(getValue(state, `${path}`) || {}), action.value));
 
       case FormActionsInternal.UpdateStatus:
         return setValue(state, `${path}.status`, action.status);

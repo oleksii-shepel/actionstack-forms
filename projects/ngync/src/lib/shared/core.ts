@@ -52,9 +52,9 @@ import {
   ResetForm,
   UpdateDirty,
   UpdateErrors,
+  UpdateForm,
   UpdateStatus,
-  UpdateSubmitted,
-  UpdateValue
+  UpdateSubmitted
 } from './actions';
 
 
@@ -187,7 +187,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
       tap((action) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
-      filter((action) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
+      filter((action) => action.type === FormActions.InitForm || action.type === FormActions.UpdateForm),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action: any) => {
@@ -234,7 +234,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         let form = this.formValue;
 
         if (submitted === true || this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) {
-          this.store.dispatch(UpdateValue({ path: this.slice, value: form }));
+          this.store.dispatch(UpdateForm({ path: this.slice, value: form }));
         }
       }),
       tap(([input, blur, submitted, _]) => {

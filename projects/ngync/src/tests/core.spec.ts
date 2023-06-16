@@ -5,7 +5,7 @@ import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, Reacti
 import { StoreModule } from "@ngrx/store";
 import { firstValueFrom } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, InitForm, SyncDirective, UpdateSubmitted, UpdateValue, forms, getModel, getSubmitted } from "../public-api";
+import { AutoInit, AutoSubmit, InitForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSubmitted } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -117,7 +117,7 @@ describe('core', () => {
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
     });
 
-    it('should call subscription when UpdateValue action dispatched', async() => {
+    it('should call subscription when UpdateForm action dispatched', async() => {
       let stub = jest.fn();
 
       subs.a = directive.onAutoInit$.subscribe(stub);
@@ -128,7 +128,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalled();
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -199,7 +199,7 @@ describe('core', () => {
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
 
       directive._input$.next(true);
@@ -249,9 +249,9 @@ describe('core', () => {
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
       expect(stub).toHaveBeenCalledTimes(3);
 
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'John' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -587,7 +587,7 @@ describe('core', () => {
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
     });
 
-    it('should call subscription when UpdateValue action dispatched', async() => {
+    it('should call subscription when UpdateForm action dispatched', async() => {
       let stub = jest.fn();
 
       subs.a = directive.onAutoInit$.subscribe(stub);
@@ -598,7 +598,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalled();
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -669,7 +669,7 @@ describe('core', () => {
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
 
       directive._input$.next(true);
@@ -719,9 +719,9 @@ describe('core', () => {
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
       expect(stub).toHaveBeenCalledTimes(3);
 
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'Helen' } }));
-      directive.store.dispatch(UpdateValue({ path:'slice', value: { firstName: 'John' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();

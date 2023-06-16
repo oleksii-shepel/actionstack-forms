@@ -1,4 +1,4 @@
-import { AutoInit, AutoSubmit, FormActions, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateStatus, UpdateSubmitted, UpdateValue } from '../lib/shared/actions';
+import { AutoInit, AutoSubmit, FormActions, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateStatus, UpdateSubmitted, UpdateValue } from '../lib/shared/actions';
 import { forms, logger } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
@@ -45,12 +45,16 @@ describe('reducer', () => {
     expected = { slice: { model } };
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateValue({path: "slice", value: model}));
+    newState = f((state: any, action: any) => {})(initialState, UpdateForm({path: "slice", value: model}));
     expected = deepClone(initialState); (expected as any)['slice'].model = model;
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => {})(initialState, UpdateSubmitted({path: "slice", value: true}));
     expected = deepClone(initialState); (expected as any)['slice'].submitted = true;
+    expect(newState).toEqual(expected);
+
+    newState = f((state: any, action: any) => {})(initialState, UpdateValue({path: "slice.model", value: model}));
+    expected = deepClone(initialState); (expected as any)['slice'].model = model;
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => {})(initialState, ResetForm({path: "slice", value: model}));
