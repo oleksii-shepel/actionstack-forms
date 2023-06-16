@@ -1,7 +1,7 @@
 <h1>ngync</h1>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/3b2856417c1cffb883f09c47157a5895791247ba/projects/ngync/src/maskot.svg" alt="ngync" width="200"/>
+  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/324aeb7e314964a6d733316e3d33c633cc14a39e/projects/ngync/src/maskot_funny.svg" alt="ngync" width="200"/>
 </p>
 
   ![npm version](https://badge.fury.io/js/ngync.svg)

@@ -193,6 +193,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((action: any) => {
 
         this._updating$.next(true);
+        this.dir.form.patchValue(action.value);
 
         let formValue = this.formValue;
         let equal = true;
@@ -201,7 +202,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this._initialState = formValue;
           this._initialized = true;
 
-          this.dir.form.patchValue(action.value);
           this.dir.form.markAsPristine();
           this.dir.form.updateValueAndValidity();
         } else {
