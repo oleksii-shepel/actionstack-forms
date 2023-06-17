@@ -264,8 +264,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((state) => {
         if(state?.model) {
           _intersection = _intersection ?? intersection(state.model, this.controls);
-          this.dir.form.patchValue(_intersection); return true;
-        } else { return false; }
+          this.dir.form.patchValue(_intersection);
+        }
+        return true;
       }),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),

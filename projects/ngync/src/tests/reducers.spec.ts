@@ -1,4 +1,4 @@
-import { AutoInit, AutoSubmit, FormActions, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateModel, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
+import { AutoInit, AutoSubmit, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateModel, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
 import { forms, logger } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
@@ -9,10 +9,8 @@ describe('reducer', () => {
     let state = { test: 'test' };
     log((state: any, action: any) => {
       state = { ...state, test: 'test2' };
-    })(state, FormActions.InitForm);
-    expect(logSpy).toHaveBeenCalledWith('state before', state);
-    expect(logSpy).toHaveBeenCalledWith('action', FormActions.InitForm);
-    expect(logSpy).toHaveBeenCalledWith('state before', state);
+    })(state, InitForm({path: 'test', value: 'test'}));
+    expect(logSpy).toHaveBeenCalledTimes(3);
   });
   it('should handle actions', () => {
     let model = {

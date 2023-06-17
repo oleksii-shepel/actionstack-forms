@@ -114,9 +114,11 @@ export function deepClone(objectToClone: any) {
 
   let obj = Array.isArray(objectToClone) ? [] : boxed(objectToClone) ? objectToClone : typeof objectToClone === 'object' ? {} : objectToClone;
 
-  for (const key in objectToClone) {
-    let value = objectToClone[key];
-    (obj as any)[key] = (typeof value === "object") ? deepClone(value) : value;
+  if(typeof objectToClone !== 'string') {
+    for (const key in objectToClone) {
+      let value = objectToClone[key];
+      (obj as any)[key] = (typeof value === "object") ? deepClone(value) : value;
+    }
   }
 
   return obj;
