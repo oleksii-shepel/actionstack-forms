@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateForm, UpdateValue, buildForm, getSlice, getValue } from 'ngync';
+import { UpdateForm, UpdateModel, buildForm, getSlice, getValue } from 'ngync';
 import { Observable, fromEvent, take } from 'rxjs';
 import { initialProfile, profileOptions } from '../../models/profile';
 
@@ -35,7 +35,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateValue({value: value, path: `${this.slice}::collapsed`}));
+    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
   }
 
   get collapsed() {

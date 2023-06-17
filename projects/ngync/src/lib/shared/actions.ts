@@ -8,7 +8,7 @@ export enum FormActions {
 
 export enum FormActionsInternal {
   ResetForm = '[Form] Reset Form',
-  UpdateValue = '[Form] Update Value',
+  UpdateModel = '[Form] Update Value',
   UpdateStatus = '[Form] Update Status',
   UpdateDirty = '[Form] Update Dirty',
   UpdateErrors = '[Form] Update Errors',
@@ -26,8 +26,8 @@ export const UpdateForm = createAction(
   props<{ path: string; value: any; }>()
 );
 
-export const UpdateValue = createAction(
-  FormActionsInternal.UpdateValue,
+export const UpdateModel = createAction(
+  FormActionsInternal.UpdateModel,
   props<{ path: string; value: any; }>()
 );
 
