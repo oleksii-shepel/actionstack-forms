@@ -48,8 +48,8 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
       case FormActionsInternal.UpdateModel:
         let paths = path.split('::');
-        let real = paths.length === 2 ? `${paths[0]}.model.${path[1]}` : `${paths[0]}.model`
-        return primitive(action.value) ? setValue(state, real, action.value) : setValue(state, real, Object.assign(deepClone(getValue(state, `${path[0]}.model`) || {}), action.value));
+        let prop = paths.length === 2 ? `${paths[0]}.model.${paths[1]}` : `${paths[0]}.model`
+        return primitive(action.value) ? setValue(state, prop, action.value) : setValue(state, prop, Object.assign(deepClone(getValue(state, `${path[0]}.model`) || {}), action.value));
 
       case FormActionsInternal.UpdateStatus:
         return setValue(state, `${path}.status`, action.status);

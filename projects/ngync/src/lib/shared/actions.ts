@@ -8,7 +8,7 @@ export enum FormActions {
 
 export enum FormActionsInternal {
   ResetForm = '[Form] Reset Form',
-  UpdateModel = '[Form] Update Value',
+  UpdateModel = '[Form] Update Model',
   UpdateStatus = '[Form] Update Status',
   UpdateDirty = '[Form] Update Dirty',
   UpdateErrors = '[Form] Update Errors',
