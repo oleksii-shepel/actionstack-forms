@@ -97,10 +97,14 @@ export function deepEqual(x: any, y: any): boolean {
 
 
 
+export const boxed = (value: any) => typeof value === 'object' && (value instanceof String || value instanceof Number || value instanceof Boolean || value instanceof Symbol);
+
+
+
 export function deepClone(objectToClone: any) {
   if (!objectToClone) return objectToClone;
 
-  let obj = Array.isArray(objectToClone) ? [] : typeof objectToClone === 'object' ? {} : objectToClone;
+  let obj = Array.isArray(objectToClone) ? [] : boxed(objectToClone) ? objectToClone : typeof objectToClone === 'object' ? {} : objectToClone;
 
   for (const key in objectToClone) {
     let value = objectToClone[key];
