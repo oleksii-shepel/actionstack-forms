@@ -48,15 +48,10 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 
     let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
-    let pre = this.elementRef.nativeElement.querySelector('pre');
-    let footer = this.elementRef.nativeElement.querySelector('footer');
     scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
-    pre.style.height = scrollable.clientHeight + 'px';
 
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
-      pre.style.height = Math.min(scrollable.clientHeight, scrollable.scrollHeight - footer.scrollHeight - (e.target.scrollTop || 0)) + 'px';
-      pre.scrollTop = e.target.scrollTop * ( pre.scrollHeight / scrollable.scrollHeight);
     });
   }
 
