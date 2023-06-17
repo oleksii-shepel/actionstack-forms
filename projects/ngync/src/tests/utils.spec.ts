@@ -1,4 +1,4 @@
-import { deepClone, deepCloneJSON, deepEqual, findProps, getValue, iterable, prop, setValue } from '../lib/shared/utils';
+import { deepClone, deepCloneJSON, deepEqual, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/shared/utils';
 describe('utils', () => {
   it('should get value', () => {
     let obj1 = { a: { b: { c: 1 } } };
@@ -74,6 +74,13 @@ describe('utils', () => {
 
     expect(deepEqual(deepCloneJSON(obj1), obj2)).toEqual(true);
     expect(deepEqual(deepCloneJSON(obj1), obj3)).toEqual(false);
+  });
+
+  it('intersection', () => {
+    let obj1 = { a: 1, b: 2, c: 3 };
+    let obj2 = { a: 4, b: 5, d: 7 };
+
+    expect(intersection(obj1, obj2)).toEqual({ a: 1, b: 2 });
   });
 
 });

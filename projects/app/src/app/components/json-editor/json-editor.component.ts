@@ -10,11 +10,10 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 })
 export class JsonEditorComponent implements OnChanges {
   JSON = JSON;
-  collapsed = true;
   changes = "";
 
   @Input() data: any = {};
-
+  @Input() collapsed = true;
   @Output() collapsedChange = new EventEmitter<boolean>();
 
   ngOnChanges(changes: SimpleChanges) {

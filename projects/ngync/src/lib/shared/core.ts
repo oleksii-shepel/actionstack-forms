@@ -40,9 +40,9 @@ import {
   DomObserver,
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
-  checkForm,
   deepEqual,
   getSlice,
+  intersection,
   setValue
 } from '.';
 import {
@@ -256,14 +256,20 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       })
     );
 
+    let _intersection: any = undefined;
     this.onAutoInit$ = this.store.select(getSlice(this.slice)).pipe(
       delay(0), take(1),
-      repeat({ count: 10 }),
-      tap((state) => { if(state?.model) { this.dir.form.patchValue(state.model); }}),
-      filter((state) => {return (state?.model) ? checkForm(this.dir.form, state.model): true;}),
+      repeat({ count: 10 , delay: this.debounce }),
+      filter(() => !this._initDispatched && !this._initialized && this.controlsDefined),
+      filter((state) => {
+        if(state?.model) {
+          _intersection = _intersection ?? intersection(state.model, this.controls);
+          this.dir.form.patchValue(_intersection); return true;
+        } else { return false; }
+      }),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
-      filter(() => !this._initDispatched && !this._initialized),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      filter(() => !this._initDispatched && !this._initialized),
       tap((state) => {
         this._updating$.next(true);
         let formValue = this.formValue;
@@ -344,7 +350,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._subs.f = this.onControlsChanges$.subscribe();
   }
 
-  get initialized(): boolean {
+  get controlsDefined(): boolean {
     if(!this.controls) { return false; }
 
     let value = true;

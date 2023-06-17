@@ -1112,7 +1112,7 @@ describe('core', () => {
     jest.advanceTimersByTime(3000);
     await fixture.whenStable();
 
-    expect(directive.initialized).toBe(true);
+    expect(directive.controlsDefined).toBe(true);
 
     TestBed.resetTestingModule();
     jest.clearAllTimers();

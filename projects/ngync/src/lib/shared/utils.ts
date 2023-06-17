@@ -10,6 +10,8 @@ export const getValue = (obj: any, prop: string) => {
   }, obj);
 }
 
+
+
 export const setValue = (obj: any, prop: string, val: any) => {
   const split = prop.split('.');
   const isArray = (split: string[]) => split.length >= 2 && !isNaN(+split[1]);
@@ -67,6 +69,7 @@ export function findProps(obj: any): string[] {
 }
 
 
+
 export function unassign(target: any, source: any[]) {
   for(let prop in source) {
     delete target[prop];
@@ -74,6 +77,8 @@ export function unassign(target: any, source: any[]) {
   }
   return target;
 }
+
+
 
 export function reset(target: any, source: any[]): any {
   for(let prop of findProps(source)) {
@@ -89,6 +94,8 @@ export function reset(target: any, source: any[]): any {
   return target;
 }
 
+
+
 export function deepEqual(x: any, y: any): boolean {
   return (x && y && typeof x === 'object' && typeof y === 'object') ?
     (Object.keys(x).length === Object.keys(y).length) &&
@@ -99,6 +106,7 @@ export function deepEqual(x: any, y: any): boolean {
 
 export const boxed = (value: any) => typeof value === 'object' && (value instanceof String || value instanceof Number || value instanceof Boolean || value instanceof Symbol);
 export const primitive = (value: any) => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'symbol' || typeof value === 'undefined' || value === null;
+
 
 
 export function deepClone(objectToClone: any) {
@@ -119,4 +127,15 @@ export function deepClone(objectToClone: any) {
 export function deepCloneJSON(objectToClone: any) {
   if (!objectToClone) return objectToClone;
   return JSON.parse(JSON.stringify(objectToClone));
+}
+
+
+
+export function intersection(x: any, y: any) {
+  return Object.keys(x).reduce((result, key) => {
+    if (key in y) {
+      result[key] = x[key];
+    }
+    return result;
+  }, {} as any);
 }

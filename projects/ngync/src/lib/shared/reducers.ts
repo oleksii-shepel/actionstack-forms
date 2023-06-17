@@ -78,9 +78,12 @@ export const logger = (settings: any = {}) => (reducer: ActionReducer<any>): any
   return (state: any, action: any) => {
     const result = reducer(state, action);
     console.groupCollapsed(action.type);
-    console.log('state before', state);
-    console.log('action', action);
-    console.log('state after', result);
+    let actionCopy = deepClone(action);
+    actionCopy.path = (actionCopy?.path ?? '').replace(/::/g, '.model.').replace(/\.$/, '');
+    delete actionCopy.type;
+    console.log(actionCopy);
+    console.log('0:', getValue(state, actionCopy.path));
+    console.log('1:', getValue(result, actionCopy.path));
     console.groupEnd();
     return result;
   };

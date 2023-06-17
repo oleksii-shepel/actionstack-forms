@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmi
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { UpdateForm, UpdateModel, buildForm, getSlice, getValue } from 'ngync';
-import { Observable, fromEvent, take } from 'rxjs';
+import { Observable, fromEvent, merge, shareReplay, take } from 'rxjs';
 import { initialProfile, profileOptions } from '../../models/profile';
 
 @Component({
@@ -15,7 +15,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Input() caption = '';
   @Output() hacked = new EventEmitter<boolean>();
 
-  profile$: Observable<any>;
+  profile$!: Observable<any>;
 
   slice = "profile";
 
@@ -43,25 +43,26 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   constructor(private fb: FormBuilder, private store: Store, private elementRef: ElementRef) {
+  }
+
+  ngAfterViewInit() {
 
     this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
       let model: any = getValue(state, "model") ?? initialProfile;
       this.collapsed = model.collapsed;
     });
 
+    this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 
-    this.profile$ = this.store.select(getSlice(this.slice));
-  }
-
-  ngAfterViewInit() {
     let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
     let pre = this.elementRef.nativeElement.querySelector('pre');
     let footer = this.elementRef.nativeElement.querySelector('footer');
     scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     pre.style.height = scrollable.clientHeight + 'px';
 
-    this.b = fromEvent(scrollable, 'scroll').subscribe((e: any) => {
-      pre.style.height = Math.min(scrollable.clientHeight, scrollable.scrollHeight - footer.scrollHeight - e.target.scrollTop) + 'px';
+    this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {
+      scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
+      pre.style.height = Math.min(scrollable.clientHeight, scrollable.scrollHeight - footer.scrollHeight - (e.target.scrollTop || 0)) + 'px';
       pre.scrollTop = e.target.scrollTop * ( pre.scrollHeight / scrollable.scrollHeight);
     });
   }
