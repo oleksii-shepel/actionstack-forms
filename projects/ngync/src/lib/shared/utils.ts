@@ -98,7 +98,7 @@ export function deepEqual(x: any, y: any): boolean {
 
 
 export const boxed = (value: any) => typeof value === 'object' && (value instanceof String || value instanceof Number || value instanceof Boolean || value instanceof Symbol);
-
+export const primitive = (value: any) => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'symbol' || typeof value === 'undefined' || value === null;
 
 
 export function deepClone(objectToClone: any) {

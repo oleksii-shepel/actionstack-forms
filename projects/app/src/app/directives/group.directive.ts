@@ -42,7 +42,6 @@ export class FieldGroupDirective extends AbstractFormGroupDirective implements O
     const container = self._findContainer(this.path);
     const group = this.form;
     container?.registerControl(this.name, group);
-    // group.updateValueAndValidity({emitEvent: false});
   }
 
   override ngOnDestroy(): void {
