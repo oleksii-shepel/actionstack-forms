@@ -1,8 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateValue, deepClone, getSlice, getValue } from 'ngync';
-import { Observable, fromEvent, take } from 'rxjs';
+import { UpdateForm, UpdateValue, deepClone, getModel, getSlice, getValue } from 'ngync';
+import { Observable, firstValueFrom, fromEvent, take } from 'rxjs';
 import { initialHero } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
 
@@ -27,7 +27,10 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateValue({value: value, path: "hero.model.collapsed"}));
+    (async () => {
+      let slice = await firstValueFrom(this.store.select(getModel(this.slice)));
+      this.store.dispatch(UpdateForm({value: {...slice, collapsed : value}, path: this.slice}));
+    })();
   }
 
   get collapsed() {
