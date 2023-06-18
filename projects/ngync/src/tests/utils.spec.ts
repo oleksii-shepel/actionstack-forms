@@ -59,12 +59,15 @@ describe('utils', () => {
   });
 
   it('should deep clone', () => {
-    let obj1 = { a: 1, b: 2, c: 3 };
-    let obj2 = { a: 1, b: 2, c: 3 };
-    let obj3 = { a: 1, b: 2, c: 4 };
+    let date = new Date();
+    let obj1 = { a: 1, b: 2, c: 3, d: BigInt(12121212), e: date };
+    let obj2 = { a: 1, b: 2, c: 3, d: BigInt(12121212), e: date };
+    let obj3 = { a: 1, b: 2, c: 4, d: BigInt(12121213), e: date };
+    let obj4 = { a: 1, b: 2, c: 4, d: BigInt(12121212), e: new Date() };
 
     expect(deepEqual(deepClone(obj1), obj2)).toEqual(true);
     expect(deepEqual(deepClone(obj1), obj3)).toEqual(false);
+    expect(deepEqual(deepClone(obj1), obj4)).toEqual(false);
   });
 
   it('should deep clone json', () => {

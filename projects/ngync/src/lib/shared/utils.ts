@@ -97,24 +97,41 @@ export function reset(target: any, source: any[]): any {
 
 
 export function deepEqual(x: any, y: any): boolean {
-  return (x && y && typeof x === 'object' && typeof y === 'object') ?
-    (Object.keys(x).length === Object.keys(y).length) &&
-      Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true) : (x === y);
+  let equal = false;
+  if(x && y && typeof x === 'object' && typeof y === 'object') {
+    equal = Object.keys(x).length === Object.keys(y).length;
+    if(equal) {
+      equal = Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
+    }
+  } else {
+    equal = x.valueOf() === y.valueOf();
+  }
+  return equal;
 }
 
 
 
-export const boxed = (value: any) => typeof value === 'object' && (value instanceof String || value instanceof Number || value instanceof Boolean || value instanceof Symbol);
-export const primitive = (value: any) => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'symbol' || typeof value === 'undefined' || value === null;
+export const boxed = (value: any) => typeof value === 'object' && value.valueOf;
+export const primitive = (value: any) => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'symbol' || typeof value === 'bigint' || typeof value === 'undefined' || value === null;
 
 
 
 export function deepClone(objectToClone: any) {
   if (!objectToClone) return objectToClone;
 
-  let obj = Array.isArray(objectToClone) ? [] : boxed(objectToClone) ? objectToClone : typeof objectToClone === 'object' ? {} : objectToClone;
+  let obj = undefined;
+  if(Array.isArray(objectToClone)) { obj = []; }
+  else if (boxed(objectToClone)) {
+    if (objectToClone instanceof Date) { obj = new Date(objectToClone.valueOf()); }
+    else { obj = objectToClone.constructor(objectToClone.valueOf()); }
+  }
+  else if(typeof objectToClone === 'object') {
+    obj = Object.create(Object.getPrototypeOf(objectToClone));
+  } else {
+    obj = objectToClone;
+  }
 
-  if(typeof objectToClone !== 'string') {
+  if(objectToClone && typeof objectToClone !== 'string') {
     for (const key in objectToClone) {
       let value = objectToClone[key];
       (obj as any)[key] = (typeof value === "object") ? deepClone(value) : value;
