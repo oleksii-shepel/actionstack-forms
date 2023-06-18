@@ -62,7 +62,6 @@ export interface NgyncConfig {
   debounce?: number;
   resetOnDestroy?: 'no-changes' | 'initial' | 'submitted' | 'empty';
   updateOn?: 'change' | 'blur' | 'submit';
-  autoSubmit?: boolean;
 }
 
 
@@ -79,7 +78,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   debounce!: number;
   resetOnDestroy!: string;
   updateOn!: string;
-  autoSubmit!: boolean;
 
   dir!: NgForm | FormGroupDirective;
 
@@ -135,7 +133,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.debounce = config.debounce;
     this.resetOnDestroy = config.resetOnDestroy;
     this.updateOn = config.updateOn;
-    this.autoSubmit = config.autoSubmit;
 
     if (!this.slice) {
       throw new Error('Misuse of sync directive');
@@ -154,7 +151,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
     let onAutoSubmit$ = fromEvent(submit, 'click').pipe(
       delay(0),
-      filter(() => this.autoSubmit && this.dir.form.valid),
+      filter(() => this.dir.form.valid),
       map(() => ({value: true, type: AutoSubmit.type}))
     )
 
