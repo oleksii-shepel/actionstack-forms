@@ -1,3 +1,4 @@
+import { AUTO_STYLE, animate, state, style, transition, trigger } from '@angular/animations';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -10,17 +11,33 @@ import { ApplicationState } from '../../reducers';
   selector: 'standard-profile-editor',
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('occurence', [
+      state('false', style({
+        height: AUTO_STYLE,
+        opacity: 1,
+      })),
+      state('true', style({
+        height: AUTO_STYLE,
+        opacity: 0,
+      })),
+      transition('* => true', [
+        animate('0.5s')
+      ]),
+      transition('* => false', [
+        animate('0.5s')
+      ]),
+  ])]
 })
 export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('modelForm') form: NgForm | null = null;
+  @ViewChild('heroForm') form: NgForm | null = null;
 
   @Input() caption = '';
   @Output() hacked = new EventEmitter<boolean>();
-
   profile$!: Observable<any>;
 
-  slice: string = "model";
+  slice = "model";
   model = initialModel;
 
   a: any; b: any;
@@ -48,11 +65,14 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 
     let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
-    scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
-
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     });
+
+    let timeout = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+      clearTimeout(timeout);
+    }, 0);
   }
 
   updateProfile() {
@@ -66,13 +86,14 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
         zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
       },
       aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
-    }, path: "model"}));
+    }, path: "hero"}));
 
     this.hacked.emit(true);
   }
 
   addAlias() {
     this.model.aliases.push('');
+    this.store.dispatch(UpdateForm({value: this.model, path: "hero"}));
   }
 
   trackById(index: number, obj: string): any {

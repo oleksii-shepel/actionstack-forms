@@ -1,65 +1,66 @@
 <ng-container>
   <json-editor [data]="profile$ | async" [(collapsed)]="collapsed"></json-editor>
   <div class="scrollable" [class.collapsed]="collapsed">
-    <pre [style.display]="collapsed ? 'none': 'block'">{{profile$ | async | json}}</pre>
+    <main>
+      <pre [style.display]="collapsed ? 'none': 'block'" [@occurence]="collapsed">{{profile$ | async | json}}</pre>
 
-    <form [formGroup]="profileForm" autocomplete="off" [ngync]="this.slice">
-      <h2>{{caption}}</h2>
-      <div class="bookmark">
-        <a (click)="addToBookmark(bookmark)">
-          <label for="bookmark" [ngStyle]="{'display': 'none'}">Bookmark</label>
-          <input class="checkbox" id="bookmark" type="checkbox" checked="checked" (click)="addToBookmark($event.target)" formControlName="bookmark" #bookmark>
-          <span>Add to bookmarks</span>
-        </a>
-      </div>
-
-      <label for="firstName">First Name: </label>
-      <input id="firstName" type="text" formControlName="firstName">
-
-      <label for="lastName">Last Name: </label>
-      <input id="lastName" type="text" formControlName="lastName">
-
-      <div formGroupName="address">
-        <h2>Address</h2>
-
-        <label for="street">Street: </label>
-        <input id="street" type="text" formControlName="street">
-
-        <label for="city">City: </label>
-        <input id="city" type="text" formControlName="city">
-
-        <label for="state">State: </label>
-        <input id="state" type="text" formControlName="state">
-
-        <label for="zip">Zip Code: </label>
-        <input id="zip" type="text" formControlName="zip">
-      </div>
-      <div>
-        <label for="quotes">Quotes: </label>
-        <textarea id="quotes" formControlName="quotes"></textarea>
-
-        <label for="books">Books: </label>
-        <select id="books" formControlName="selected" (change)="onSelectChange($event)">
-          <option *ngFor="let book of books; let i=index;" [value]="i">{{book.value}}</option>
-        </select>
-      </div>
-
-      <div formArrayName="aliases">
-        <h2>Aliases</h2>
-        <button type="button" (click)="addAlias()">+ Add another alias</button>
-
-        <div *ngFor="let alias of aliases; let i=index">
-          <label for="aliases.{{i}}">Alias:</label>
-          <input id="aliases.{{i}}" type="text" formControlName="{{i}}">
+      <form [formGroup]="profileForm" autocomplete="off" [ngync]="this.slice">
+        <h2>{{caption}}</h2>
+        <div class="bookmark">
+          <a (click)="addToBookmark(bookmark)">
+            <label for="bookmark" [ngStyle]="{'display': 'none'}">Bookmark</label>
+            <input class="checkbox" id="bookmark" type="checkbox" checked="checked" (click)="addToBookmark($event.target)" formControlName="bookmark" #bookmark>
+            <span>Add to bookmarks</span>
+          </a>
         </div>
-      </div>
+
+        <label for="firstName">First Name: </label>
+        <input id="firstName" type="text" formControlName="firstName">
+
+        <label for="lastName">Last Name: </label>
+        <input id="lastName" type="text" formControlName="lastName">
+
+        <div formGroupName="address">
+          <h2>Address</h2>
+
+          <label for="street">Street: </label>
+          <input id="street" type="text" formControlName="street">
+
+          <label for="city">City: </label>
+          <input id="city" type="text" formControlName="city">
+
+          <label for="state">State: </label>
+          <input id="state" type="text" formControlName="state">
+
+          <label for="zip">Zip Code: </label>
+          <input id="zip" type="text" formControlName="zip">
+        </div>
+        <div>
+          <label for="quotes">Quotes: </label>
+          <textarea id="quotes" formControlName="quotes"></textarea>
+
+          <label for="books">Books: </label>
+          <select id="books" formControlName="selected" (change)="onSelectChange($event)">
+            <option *ngFor="let book of books; let i=index;" [value]="i">{{book.value}}</option>
+          </select>
+        </div>
+
+        <div formArrayName="aliases">
+          <h2>Aliases</h2>
+          <button type="button" (click)="addAlias()">+ Add another alias</button>
+
+          <div *ngFor="let alias of aliases; let i=index">
+            <label for="aliases.{{i}}">Alias:</label>
+            <input id="aliases.{{i}}" type="text" formControlName="{{i}}">
+          </div>
+        </div>
 
 
-      <p>Complete the form to enable button.</p>
-      <button type="submit" [disabled]="!profileForm.valid" (click)="onSubmit()">Submit</button>
-      <button type="button" (click)="updateProfile()">👇 Update Profile</button>
-    </form>
-
+        <p>Complete the form to enable button.</p>
+        <button type="submit" [disabled]="!profileForm.valid" (click)="onSubmit()">Submit</button>
+        <button type="button" (click)="updateProfile()">👇 Update Profile</button>
+      </form>
+    </main>
     <footer>
       <hr>
       <p>© 2023 James Bond. All rights reserved.</p>

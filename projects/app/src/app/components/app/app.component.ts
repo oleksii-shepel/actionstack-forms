@@ -1,4 +1,3 @@
-import { AUTO_STYLE, animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, ElementRef, HostBinding, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, filter, map, switchMap, timer } from 'rxjs';
 import { ModalService } from '../../services/modal.service';
@@ -8,25 +7,7 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  animations: [
-    trigger('occurence', [
-      state('open', style({
-        height: AUTO_STYLE,
-        opacity: 1,
-      })),
-      state('closed', style({
-        height: AUTO_STYLE,
-        opacity: 0,
-      })),
-      transition('* => closed', [
-        animate('1.5s')
-      ]),
-      transition('* => open', [
-        animate('1.5s')
-      ]),
-  ]),
-  ]
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnDestroy {
   @HostBinding('class') class ='author';

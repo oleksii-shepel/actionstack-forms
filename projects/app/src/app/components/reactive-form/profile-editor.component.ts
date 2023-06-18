@@ -1,3 +1,4 @@
+import { AUTO_STYLE, animate, state, style, transition, trigger } from '@angular/animations';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -9,7 +10,24 @@ import { initialProfile, profileOptions } from '../../models/profile';
   selector: 'reactive-profile-editor',
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('occurence', [
+      state('false', style({
+        height: AUTO_STYLE,
+        opacity: 1,
+      })),
+      state('true', style({
+        height: AUTO_STYLE,
+        opacity: 0,
+      })),
+      transition('* => true', [
+        animate('0.5s')
+      ]),
+      transition('* => false', [
+        animate('0.5s')
+      ]),
+  ])]
 })
 export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy {
   @Input() caption = '';
@@ -55,11 +73,15 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 
     let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
-    scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
-
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     });
+
+    let timeout = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+      clearTimeout(timeout);
+    }, 0);
+
   }
 
   updateProfile() {
