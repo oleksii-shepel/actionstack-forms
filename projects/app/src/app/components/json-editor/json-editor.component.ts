@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { findProps, getValue } from 'ngync';
+import { deepEqual, difference, findProps, getValue } from 'ngync';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
 
@@ -17,51 +17,36 @@ export class JsonEditorComponent implements OnChanges {
   @Output() collapsedChange = new EventEmitter<boolean>();
 
   ngOnChanges(changes: SimpleChanges) {
-    if((!changes['data'].previousValue || !changes['data'].currentValue)) {
-      return;
-    }
+    changes['data'].previousValue = changes['data'].previousValue ?? {};
+    changes['data'].currentValue = changes['data'].currentValue ?? {};
+    if(deepEqual(changes['data'].previousValue, changes['data'].currentValue)) { return; }
 
-    let prevProps = findProps(changes['data'].previousValue);
-    let currProps = findProps(changes['data'].currentValue);
-    let prevIntersection = prevProps.filter(x => currProps.includes(x));
-    let currIntersection = currProps.filter(x => prevProps.includes(x));
+    let diff = difference(changes['data'].previousValue, changes['data'].currentValue);
     let changedProperties = "";
-    if(changes['data'].firstChange === false) {
-      if(currIntersection.length === prevIntersection.length) {
-        // no changes in length
-        changedProperties = "Changed: ";
-        let changed = false;
-        for(let prop of currIntersection) {
-          let prevValue = getValue(changes['data'].previousValue, prop);
-          let currValue = getValue(changes['data'].currentValue, prop);
-          if(prevValue !== currValue) {
-            changedProperties += `<b>${prop}</b> (${currValue}), `;
-            changed = true;
-          }
-        }
-        changedProperties = changedProperties.replace(/, $/, "<br/>");
 
-        if(!changed){
-          changedProperties = changedProperties.replace(/Changed\: /, "");
-        }
+    if(diff.changed) {
+      changedProperties = "Changed: ";
+      let props = findProps(diff.changed);
+      for(let prop of props) {
+        changedProperties += `<b>${prop}</b> (${getValue(diff.changed, prop)}), `;
       }
-
-      if (prevProps.length > prevIntersection.length) {
-        // removed
-        changedProperties += "Removed: ";
-        prevProps.filter(x => !prevIntersection.includes(x)).forEach(x => changedProperties += `<b>${x}</b>, `);
-        changedProperties = changedProperties.replace(/, $/, "<br/>");
-      }
-
-      if(currProps.length > currIntersection.length) {
-        // added
-        changedProperties += "Added: ";
-        currProps.filter(x => !currIntersection.includes(x)).forEach(x => changedProperties += `<b>${x}</b>, `);
-        changedProperties = changedProperties.replace(/, $/, "<br/>");
-      }
-
-      changedProperties = changedProperties.replace(/<br\/>$/, "");
+      changedProperties = changedProperties.replace(/, $/, "<br/>");
     }
+
+    if (diff.removed) {
+      changedProperties += "Removed: ";
+      Object.keys(diff.removed).forEach(x => changedProperties += `<b>${x}</b>, `);
+      changedProperties = changedProperties.replace(/, $/, "<br/>");
+    }
+
+    if(diff.added) {
+      changedProperties += "Added: ";
+      Object.keys(diff.added).forEach(x => changedProperties += `<b>${x}</b>, `);
+      changedProperties = changedProperties.replace(/, $/, "<br/>");
+    }
+
+    changedProperties = changedProperties.replace(/<br\/>$/, "");
+
     this.changes = `<span>${changedProperties}</span>`;
     this.data = changes['data'].currentValue;
   }

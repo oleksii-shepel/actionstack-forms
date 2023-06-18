@@ -1,6 +1,6 @@
 import { ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
 import { FormActions, FormActionsInternal } from './actions';
-import { deepClone, getValue, primitive, reset, setValue, unassign } from './utils';
+import { deepClone, difference, getValue, primitive, reset, setValue, unassign } from './utils';
 
 
 
@@ -82,16 +82,16 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
 
 
-export const logger = (settings: any = {}) => (reducer: ActionReducer<any>): any => {
+export const logger = (_: any = {}) => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
     const result = reducer(state, action);
     console.groupCollapsed(action.type);
     let actionCopy = deepClone(action);
-    actionCopy.path = (actionCopy?.path ?? '').replace(/::/g, '.model.').replace(/\.$/, '');
     delete actionCopy.type;
     console.log(actionCopy);
-    console.log('0:', getValue(state, actionCopy.path));
-    console.log('1:', getValue(result, actionCopy.path));
+    actionCopy.path = (actionCopy?.path ?? '').replace(/::/g, '.model.').replace(/\.$/, '');
+    if(actionCopy.path) { console.log('Δ:', difference(getValue(state, actionCopy.path), getValue(result, actionCopy.path))); }
+    else { console.log('Δ:', difference(state, result)); }
     console.groupEnd();
     return result;
   };

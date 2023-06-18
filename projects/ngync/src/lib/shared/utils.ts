@@ -54,7 +54,7 @@ export function findProps(obj: any): string[] {
   const findKeys = (obj: any, prefix: string = '') => {
     for (let prop in obj) {
       let sub = obj[prop]
-      if(typeof(sub) !== 'object') {
+      if(!sub || typeof(sub) !== 'object') {
         result.push(`${prefix}${prop}`)
       }
       else {
@@ -155,4 +155,60 @@ export function intersection(x: any, y: any) {
     }
     return result;
   }, {} as any);
+}
+
+
+export interface Difference {
+  added?: any;
+  removed?: any;
+  changed?: any;
+}
+
+
+
+export function difference(x: any, y: any) : Difference {
+  let diff = {} as Difference;
+
+  x = x ?? {};
+  y = y ?? {};
+
+  let xProps = findProps(x);
+  let yProps = findProps(y);
+
+  let xIntersection = xProps.filter(value => yProps.includes(value));
+  let yIntersection = yProps.filter(value => xProps.includes(value));
+
+  if(yIntersection.length === xIntersection.length && yIntersection.length > 0) {
+    diff.changed = {};
+
+    for(let prop of yIntersection) {
+      let prevValue = getValue(x, prop);
+      let currValue = getValue(y, prop);
+      if(prevValue !== currValue) {
+        diff.changed = setValue(diff.changed, prop, currValue);
+      }
+    }
+
+    if(Object.keys(diff.changed).length === 0) {
+      delete diff.changed;
+    }
+  }
+
+  if (xProps.length > xIntersection.length) {
+    let removed = xProps.filter(x => !xIntersection.includes(x));
+    diff.removed = removed.reduce((obj, prop) => {
+      obj = setValue(obj, prop, getValue(x, prop));
+      return obj;
+    }, {});
+  }
+
+  if (yProps.length > yIntersection.length) {
+    let added = yProps.filter(y => !yIntersection.includes(y));
+    diff.added = added.reduce((obj, prop) => {
+      obj = setValue(obj, prop, getValue(y, prop));
+      return obj;
+    }, {});
+  }
+
+  return diff;
 }
