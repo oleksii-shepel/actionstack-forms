@@ -3,9 +3,9 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, InitForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSubmitted } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSubmitted } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -70,7 +70,7 @@ describe('core', () => {
     it('should dispatch AutoInit action', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -82,7 +82,7 @@ describe('core', () => {
     it('should dispatch AutoSubmit action', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -120,7 +120,7 @@ describe('core', () => {
     it('should call subscription when UpdateForm action dispatched', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -140,7 +140,7 @@ describe('core', () => {
     it('should call subscription when UpdateSubmitted action dispatched', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -178,7 +178,7 @@ describe('core', () => {
     it('should not call subscriptions when component removed from the DOM', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -188,11 +188,10 @@ describe('core', () => {
       fixture.detectChanges();
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
-      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
-      subs.c = directive.onInitOrUpdate$.subscribe(stub);
-      subs.d = directive.onChange$.subscribe(stub);
-      subs.e = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.onSubmitOrAutoSubmit$.subscribe(stub);
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+      subs.c = directive.onChanges$.subscribe(stub);
+      subs.d = directive.onControlsChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -217,7 +216,7 @@ describe('core', () => {
     it('dispatch InitForm before AutoInit action triggered', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.actionsSubject.pipe(filter(action => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -228,7 +227,7 @@ describe('core', () => {
     it('onInitOrUpdate', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -263,7 +262,7 @@ describe('core', () => {
       it('change', async () => {
         let auto = jest.fn();
 
-        subs.a = directive.onAutoInit$.subscribe(auto);
+        subs.a = directive.onControlsChanges$.subscribe(auto);
 
         jest.advanceTimersByTime(3000);
         await fixture.whenStable();
@@ -306,7 +305,7 @@ describe('core', () => {
         directive.updateOn = 'blur';
 
         let auto = jest.fn();
-        subs.a = directive.onAutoInit$.subscribe(auto);
+        subs.a = directive.onControlsChanges$.subscribe(auto);
 
         jest.advanceTimersByTime(3000);
         await fixture.whenStable();
@@ -354,7 +353,7 @@ describe('core', () => {
         directive.updateOn = 'submitted';
 
         let auto = jest.fn();
-        subs.a = directive.onAutoInit$.subscribe(auto);
+        subs.a = directive.onControlsChanges$.subscribe(auto);
 
         jest.advanceTimersByTime(3000);
         await fixture.whenStable();
@@ -403,7 +402,7 @@ describe('core', () => {
     it('ngOnDestroy', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -457,7 +456,7 @@ describe('core', () => {
     it('formStatus and formValue', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -540,7 +539,7 @@ describe('core', () => {
     it('should dispatch AutoInit action', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -552,7 +551,7 @@ describe('core', () => {
     it('should dispatch AutoSubmit action', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -590,7 +589,7 @@ describe('core', () => {
     it('should call subscription when UpdateForm action dispatched', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -610,7 +609,7 @@ describe('core', () => {
     it('should call subscription when UpdateSubmitted action dispatched', async() => {
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
+      subs.a = directive.onControlsChanges$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -648,7 +647,7 @@ describe('core', () => {
     it('should not call subscriptions when component removed from the DOM', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -658,11 +657,10 @@ describe('core', () => {
       fixture.detectChanges();
       let stub = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(stub);
-      subs.b = directive.onSubmitOrAutoSubmit$.subscribe(stub);
-      subs.c = directive.onInitOrUpdate$.subscribe(stub);
-      subs.d = directive.onChange$.subscribe(stub);
-      subs.e = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.onSubmitOrAutoSubmit$.subscribe(stub);
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+      subs.c = directive.onChanges$.subscribe(stub);
+      subs.d = directive.onControlsChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -687,7 +685,7 @@ describe('core', () => {
     it('dispatch InitForm before AutoInit action triggered', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.actionsSubject.pipe(filter(action => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -698,7 +696,7 @@ describe('core', () => {
     it('onInitOrUpdate', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -733,7 +731,7 @@ describe('core', () => {
       it('change', async () => {
         let auto = jest.fn();
 
-        subs.a = directive.onAutoInit$.subscribe(auto);
+        subs.a = directive.onControlsChanges$.subscribe(auto);
 
         jest.advanceTimersByTime(3000);
         await fixture.whenStable();
@@ -776,7 +774,7 @@ describe('core', () => {
         directive.updateOn = 'blur';
 
         let auto = jest.fn();
-        subs.a = directive.onAutoInit$.subscribe(auto);
+        subs.a = directive.onControlsChanges$.subscribe(auto);
 
         jest.advanceTimersByTime(3000);
         await fixture.whenStable();
@@ -824,7 +822,7 @@ describe('core', () => {
         directive.updateOn = 'submitted';
 
         let auto = jest.fn();
-        subs.a = directive.onAutoInit$.subscribe(auto);
+        subs.a = directive.onControlsChanges$.subscribe(auto);
 
         jest.advanceTimersByTime(3000);
         await fixture.whenStable();
@@ -873,7 +871,7 @@ describe('core', () => {
     it('ngOnDestroy', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -924,7 +922,7 @@ describe('core', () => {
     it('formStatus and formValue', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.onAutoInit$.subscribe(auto);
+      subs.a = directive.onControlsChanges$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -1073,49 +1071,5 @@ describe('core', () => {
       jest.clearAllTimers();
     }));
   });
-  it("should check if all controls are initialized", (async () => {
-    @Component({
-      selector: 'test-component',
-      template: ``
-    })
-    class TestComponent {
-      form = new FormGroup({
-        firstName: new FormControl('John')
-      });
-    }
-
-    let fixture: ComponentFixture<TestComponent>;
-    let directive: SyncDirective;
-
-    TestBed.configureTestingModule({
-      declarations: [TestComponent],
-      imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-        metaReducers: [forms({'slice': {}})]
-      }), SharedModule]
-    });
-
-    fixture = TestBed.overrideComponent(TestComponent, {
-      set: {
-        template: `
-          <form [formGroup]="form" ngync="slice">
-            <input type="text" formControlName="firstName"/>
-            <button type="submit">Submit</button>
-          </form>`
-      }
-    }).createComponent(TestComponent);
-
-    directive = fixture.debugElement.children[0].injector.get(SyncDirective);
-    directive.slice = 'slice';
-
-    jest.useFakeTimers();
-    fixture.detectChanges();
-    jest.advanceTimersByTime(3000);
-    await fixture.whenStable();
-
-    expect(directive.controlsDefined).toBe(true);
-
-    TestBed.resetTestingModule();
-    jest.clearAllTimers();
-  }));
 });
 
