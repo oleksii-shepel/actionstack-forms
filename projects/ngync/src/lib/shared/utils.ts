@@ -123,10 +123,10 @@ export function deepClone(objectToClone: any) {
   if(Array.isArray(objectToClone)) { obj = []; }
   else if (boxed(objectToClone)) {
     if (objectToClone instanceof Date) { obj = new Date(objectToClone.valueOf()); }
-    else { obj = objectToClone.constructor(objectToClone.valueOf()); }
+    else { obj = {...objectToClone.constructor(objectToClone.valueOf())}; }
   }
   else if(typeof objectToClone === 'object') {
-    obj = Object.create(Object.getPrototypeOf(objectToClone));
+    obj = {};
   } else {
     obj = objectToClone;
   }
@@ -134,12 +134,7 @@ export function deepClone(objectToClone: any) {
   if(objectToClone && typeof objectToClone !== 'string') {
     for (const key in objectToClone) {
       let value = objectToClone[key];
-      if(typeof value === 'object') { value = deepClone(value); }
-      if((Object.getOwnPropertyDescriptor(obj, key) || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(obj), key) || {}).writable) {
-        obj[key] = value;
-      } else {
-        obj = {...obj, key: value};
-      }
+      obj[key] = typeof value === 'object' ? deepClone(value) : value;
     }
   }
 
