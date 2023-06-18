@@ -42,7 +42,8 @@ export const iterable = (obj: any) => {
 
 
 export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[prop] }) => any) {
-  let str = expression.toString().split('=>',).at(1)!.trim();
+  let noCommentsStr = expression.toString().replace(/\/\*(.|[\r\n])*?\*\//g, '').replace(/\/\/.*/gm, '');
+  let str = noCommentsStr.split('=>',).at(1)!.trim();
   return str.substring(str.indexOf('.') + 1, str.length).replace(/\]/g, '').replace(/\[/g, '.');
 }
 
