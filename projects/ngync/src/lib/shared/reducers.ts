@@ -89,8 +89,8 @@ export const logger = (_: any = {}) => (reducer: ActionReducer<any>): any => {
     let actionCopy = deepClone(action);
     delete actionCopy.type;
     console.log(actionCopy);
-    actionCopy.path = (actionCopy?.path ?? '').replace(/::/g, '.model.').replace(/\.$/, '');
-    if(actionCopy.path) { console.log('Δ:', difference(getValue(state, actionCopy.path), getValue(result, actionCopy.path))); }
+    actionCopy.path = (actionCopy?.path ?? '').replace(/::/g, `${propModel('')}.`).replace(/\.$/, '').trim();
+    if(actionCopy.path.length > 0) { console.log('Δ:', difference(getValue(state, actionCopy.path), getValue(result, actionCopy.path))); }
     else { console.log('Δ:', difference(state, result)); }
     console.groupEnd();
     return result;
