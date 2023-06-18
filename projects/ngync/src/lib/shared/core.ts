@@ -350,7 +350,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       } else if (typeof value === 'boolean') {
         target = setValue(target, prop, false);
       } else if (typeof value === 'bigint') {
-        target = setValue(target, prop, 0n);
+        target = setValue(target, prop, BigInt(0));
       }
     }
     return target;
