@@ -37,46 +37,46 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
     let nextState = reducer(state, action);
     let path = action?.path;
 
-    if(!path) {
-      return nextState;
+    if(path) {
+      switch(action.type) {
+        case FormActions.InitForm:
+          return setValue(state, path, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
+
+        case FormActions.UpdateForm:
+          return setValue(state, path, {...getValue(state, path), model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
+
+        case FormActions.UpdateSubmitted:
+          return setValue(state, propSubmitted(path), action.value);
+
+        case FormActionsInternal.ResetForm:
+          return setValue(state, path, { model: action.resetState ? primitive(action.resetState) ? action.resetState : reset(unassign(deepClone(getValue(state, propModel(path)) || {}), action.value), action.resetState) : Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
+
+        case FormActionsInternal.UpdateModel:
+          let paths = path.split('::');
+          let property = paths.length === 2 ? `${propModel(paths[0])}.${paths[1]}` : propModel(paths[0]);
+          return primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propModel(paths[0])) || {}), action.value));
+
+        case FormActionsInternal.UpdateStatus:
+          return setValue(state, propStatus(path), action.status);
+
+        case FormActionsInternal.UpdateErrors:
+          return setValue(state, propErrors(path), deepClone(action.errors));
+
+        case FormActionsInternal.UpdateDirty:
+          return setValue(state, propDirty(path), action.dirty);
+
+        case FormActionsInternal.AutoInit:
+          return setValue(state, path, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
+
+        case FormActionsInternal.AutoSubmit:
+          return setValue(state, propSubmitted(path), true);
+
+        default:
+          return nextState;
+      }
     }
 
-    switch(action.type) {
-      case FormActions.InitForm:
-        return setValue(state, path, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
-
-      case FormActions.UpdateForm:
-        return setValue(state, path, {...getValue(state, path), model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
-
-      case FormActions.UpdateSubmitted:
-        return setValue(state, propSubmitted(path), action.value);
-
-      case FormActionsInternal.ResetForm:
-        return setValue(state, path, { model: action.resetState ? primitive(action.resetState) ? action.resetState : reset(unassign(deepClone(getValue(state, propModel(path)) || {}), action.value), action.resetState) : Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
-
-      case FormActionsInternal.UpdateModel:
-        let paths = path.split('::');
-        let property = paths.length === 2 ? `${propModel(paths[0])}.${paths[1]}` : propModel(paths[0]);
-        return primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propModel(paths[0])) || {}), action.value));
-
-      case FormActionsInternal.UpdateStatus:
-        return setValue(state, propStatus(path), action.status);
-
-      case FormActionsInternal.UpdateErrors:
-        return setValue(state, propErrors(path), deepClone(action.errors));
-
-      case FormActionsInternal.UpdateDirty:
-        return setValue(state, propDirty(path), action.dirty);
-
-      case FormActionsInternal.AutoInit:
-        return setValue(state, path, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
-
-      case FormActionsInternal.AutoSubmit:
-        return setValue(state, propSubmitted(path), true);
-
-      default:
-        return nextState;
-    }
+    return nextState;
   }
 }
 
