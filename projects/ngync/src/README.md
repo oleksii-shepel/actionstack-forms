@@ -89,7 +89,7 @@ That's it, all settings are done and your form have to be synchronized with the 
 By default, ngync will generate tracing actions every time user enters the data in the form. They have to be displayed in console of your browser. This behavior can be changed by passing on a special updateOn attribute to the directive. It can take one of three values: 'change', 'blur' or 'submit'. The tracing actions will be generated respectively every time user enters the data, when user leaves one of the form fields or when entire form is submitted or to be submitted.
 </p>
 <p align="justify">
-If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. But if you definitely want to do it by yourself, you can do it without hesitation. There are four actions supported byngync right out of the box. I think, the names speak for themselves and the parameter list for each of them can be found in the source code of the library. Here is the list of actions:
+If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. Directive is pretty smart and can initialize form controls automatically if the state is present and also can notice submitting event. But if you definitely want to do it by yourself, you can do it without hesitation. There are five actions supported by ngync right out of the box. I think, the names are self-descriptive and the parameter list for each of them can be found in the source code of the library. Here is the narrow list of actions (other actions are also available but you need to understand how they work before using them):
 </p>
 
 ```typescript
@@ -97,6 +97,8 @@ export enum FormActions {
   InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
   UpdateSubmitted = '[Form] Update Submitted',
+  UpdateModel = '[Form] Update Model',
+  ResetForm = '[Form] Reset Form'
 }
 ```
 
@@ -104,12 +106,8 @@ export enum FormActions {
 As you can see you are completely redeemed from the tedium of implementation of constituent parts of the Redux pattern. In all the cases NgRx has detailed documentation that you may need in your work. This is foreign parish and we have to deal with it with all our passion and devotion.
 </p>
 <p align="justify">
-I have to admit that there are no other docs of ngync except for this readme. It is probably a matter of time and interest. I stand for the idea that the best documentation is the code itself. Hopefully, it is concise and self describing. The library goes along with sample application which will help you orient in the theme. The link to the source repo of the project is <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>. If you have any questions or suggestions, I will respond as soon as possible.
+I have to admit that there are no other docs of ngync except for this readme. It is probably a matter of time and interest. I stand for the idea that the best documentation is the code itself. Hopefully it is turned out concise and self-descriptive. The library goes along with sample application which will help you orient in the theme. The link to the source repo of the project is <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>. If you have any questions or suggestions, I will respond as soon as possible.
 </p>
-<p align="justify">
-The active phase of the project is passed by and the first version of software is packaged. The project is well-tested manually, but it lacks on comprehensive test coverage. Don't risk in production. It is free. You are allowed to use, copy and modify the codebase. I kindly recommend to join the project development in this repo. You are welcome!
-</p>
-
 <h2>Bonus</h2>
 <p align="justify">
 Of course, there is a bonus stored up together with the library. ngync has extended template-driven approach with missing feature of <b>ngModelArray</b>.

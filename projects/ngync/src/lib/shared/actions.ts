@@ -4,11 +4,11 @@ export enum FormActions {
   InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
   UpdateSubmitted = '[Form] Update Submitted',
+  UpdateModel = '[Form] Update Model',
+  ResetForm = '[Form] Reset Form',
 }
 
 export enum FormActionsInternal {
-  ResetForm = '[Form] Reset Form',
-  UpdateModel = '[Form] Update Model',
   UpdateStatus = '[Form] Update Status',
   UpdateDirty = '[Form] Update Dirty',
   UpdateErrors = '[Form] Update Errors',
@@ -27,7 +27,7 @@ export const UpdateForm = createAction(
 );
 
 export const UpdateModel = createAction(
-  FormActionsInternal.UpdateModel,
+  FormActions.UpdateModel,
   props<{ path: string; value: any; }>()
 );
 
@@ -37,8 +37,8 @@ export const UpdateSubmitted = createAction(
 );
 
 export const ResetForm = createAction(
-  FormActionsInternal.ResetForm,
-  props<{ path: string; value: any; resetState?: any }>()
+  FormActions.ResetForm,
+  props<{ path: string; value: 'initial' | 'submitted' | 'empty'}>()
 );
 
 export const UpdateStatus = createAction(

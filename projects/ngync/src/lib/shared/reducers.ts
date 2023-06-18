@@ -1,6 +1,6 @@
 import { ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
 import { FormActions, FormActionsInternal } from './actions';
-import { deepClone, difference, getValue, primitive, reset, setValue, unassign } from './utils';
+import { deepClone, difference, getValue, primitive, setValue } from './utils';
 
 
 
@@ -48,13 +48,13 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
         case FormActions.UpdateSubmitted:
           return setValue(state, propSubmitted(path), action.value);
 
-        case FormActionsInternal.ResetForm:
-          return setValue(state, path, { model: action.resetState ? primitive(action.resetState) ? action.resetState : reset(unassign(deepClone(getValue(state, propModel(path)) || {}), action.value), action.resetState) : Object.assign(deepClone(getValue(state, `${path}.model`) || {}), action.value) });
-
-        case FormActionsInternal.UpdateModel:
+        case FormActions.UpdateModel:
           let paths = path.split('::');
           let property = paths.length === 2 ? `${propModel(paths[0])}.${paths[1]}` : propModel(paths[0]);
           return primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propModel(paths[0])) || {}), action.value));
+
+        case FormActions.ResetForm:
+          return nextState;
 
         case FormActionsInternal.UpdateStatus:
           return setValue(state, propStatus(path), action.status);

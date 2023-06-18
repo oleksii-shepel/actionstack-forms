@@ -5,7 +5,7 @@ import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, Reacti
 import { StoreModule } from "@ngrx/store";
 import { filter, firstValueFrom } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSubmitted } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSubmitted } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -62,7 +62,6 @@ describe('core', () => {
       expect(directive.slice).toBe('slice');
       expect(directive.dir instanceof FormGroupDirective).toBeTruthy();
       expect(directive.debounce).toBe(NGYNC_CONFIG_DEFAULT.debounce);
-      expect(directive.resetOnDestroy).toBe(NGYNC_CONFIG_DEFAULT.resetOnDestroy);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
 
@@ -420,32 +419,21 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      directive.resetOnDestroy = 'no-changes';
-      directive.ngOnDestroy();
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'Helen'});
-
-      directive.resetOnDestroy = 'initial';
-      directive.ngOnDestroy();
+      directive.store.dispatch(ResetForm({path :'slice', value: 'initial'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'John'});
 
-      directive.resetOnDestroy = 'submitted';
-      directive.ngOnDestroy();
+      directive.store.dispatch(ResetForm({path :'slice', value: 'submitted'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'Helen'});
 
-      directive.resetOnDestroy = 'empty';
-      directive.ngOnDestroy();
+      directive.store.dispatch(ResetForm({path :'slice', value: 'empty'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -530,7 +518,6 @@ describe('core', () => {
       expect(directive.slice).toBe('slice');
       expect(directive.dir instanceof NgForm).toBeTruthy();
       expect(directive.debounce).toBe(NGYNC_CONFIG_DEFAULT.debounce);
-      expect(directive.resetOnDestroy).toBe(NGYNC_CONFIG_DEFAULT.resetOnDestroy);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
 
@@ -880,37 +867,29 @@ describe('core', () => {
       directive.dir.form.markAsDirty();
       directive._input$.next(true);
 
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
       directive.store.dispatch(UpdateSubmitted({path :'slice', value: true}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      directive.resetOnDestroy = 'no-changes';
-      directive.ngOnDestroy();
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'Helen'});
-
-      directive.resetOnDestroy = 'initial';
-      directive.ngOnDestroy();
+      directive.store.dispatch(ResetForm({path :'slice', value: 'initial'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'John'});
 
-      directive.resetOnDestroy = 'submitted';
-      directive.ngOnDestroy();
+      directive.store.dispatch(ResetForm({path :'slice', value: 'submitted'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'Helen'});
 
-      directive.resetOnDestroy = 'empty';
-      directive.ngOnDestroy();
+      directive.store.dispatch(ResetForm({path :'slice', value: 'empty'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();

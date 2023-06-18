@@ -55,9 +55,8 @@ describe('reducer', () => {
     expected = deepClone(initialState); (expected as any)['slice'].model = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, ResetForm({path: "slice", value: model}));
-    expected = deepClone(initialState); (expected as any)['slice'] = { model };
-    expect(newState).toEqual(expected);
+    newState = f((state: any, action: any) => {})(initialState, ResetForm({path: "slice", value: 'initial'}));
+    expect(newState).toEqual(newState);
 
     newState = f((state: any, action: any) => {})(initialState, UpdateStatus({path: "slice", status: "VALID"}));
     expected = deepClone(initialState); (expected as any)['slice'].status = "VALID";

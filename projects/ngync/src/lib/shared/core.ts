@@ -40,7 +40,9 @@ import {
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
   deepEqual,
+  findProps,
   getModel,
+  getValue,
   setValue
 } from '.';
 import {
@@ -48,7 +50,6 @@ import {
   AutoSubmit,
   FormActions,
   FormActionsInternal,
-  ResetForm,
   UpdateDirty,
   UpdateErrors,
   UpdateForm,
@@ -60,14 +61,13 @@ import {
 export interface NgyncConfig {
   slice: string;
   debounce?: number;
-  resetOnDestroy?: 'unchanged' | 'initial' | 'submitted' | 'empty';
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
 
 @Directive({
   selector:
-    'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]',
+    `form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]`,
   exportAs: 'ngync',
 })
 export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
@@ -107,6 +107,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   onChanges$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
   onSubmitOrAutoSubmit$!: Observable<any>;
+  onReset$!: Observable<any>;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -143,19 +144,21 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
 
     let onSubmit$ = this.actionsSubject.pipe(
+      filter((action: any) => action?.path === this.slice),
       filter((action) => action.type === FormActions.UpdateSubmitted),
       filter(value => !!value),
-      map((action: any) => ({value: action.value, type: action.type})),
+      map((action: any) => (UpdateSubmitted({path: this.slice, value: action.value}))),
     );
 
     let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
     let onAutoSubmit$ = fromEvent(submit, 'click').pipe(
       delay(0),
       filter(() => this.dir.form.valid),
-      map(() => ({value: true, type: AutoSubmit.type}))
+      map(() => (AutoSubmit({path: this.slice})))
     )
 
     this.onSubmitOrAutoSubmit$ = merge(onSubmit$, onAutoSubmit$).pipe(
+      filter((action: any) => action?.path === this.slice),
       filter(() => this._initialized),
       distinctUntilKeyChanged('value'),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
@@ -182,6 +185,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
+      filter((action: any) => action?.path === this.slice),
       tap((action) => { if (action.type === FormActions.InitForm) { this._initDispatched = true; } }),
       filter((action) => action.type === FormActionsInternal.AutoInit || action.type === FormActions.InitForm || action.type === FormActions.UpdateForm),
       mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
@@ -269,6 +273,28 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(value => !this._initialized && !this._initDispatched ? this.store.dispatch(AutoInit({ path: this.slice, value: value })) : false),
     );
+
+    this.onReset$ = this.actionsSubject.pipe(
+      filter((action: any) => action?.path === this.slice),
+      filter((action: any) => action.type === FormActions.ResetForm),
+      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      tap((action: any) => {
+        if(action.value){
+          switch(action.value) {
+            case 'initial':
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this._initialState || {} }));
+              break;
+            case 'submitted':
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this._submittedState || {} }));
+              break;
+            case 'empty':
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset(this.formValue)}));
+              break;
+          }
+        }
+      }));
+
   }
 
   ngAfterContentInit() {
@@ -279,20 +305,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
-    if (this.resetOnDestroy !== 'unchanged') {
-      switch(this.resetOnDestroy) {
-        case 'initial':
-          this.store.dispatch(ResetForm({ path: this.slice, value: this._initialState || {} }));
-          break;
-        case 'submitted':
-          this.store.dispatch(ResetForm({ path: this.slice, value: this._submittedState || {} }));
-          break;
-        case 'empty':
-          this.store.dispatch(ResetForm({ path: this.slice, value: this.formValue, resetState: this._initialState }));
-          break;
-      }
-    }
-
     for (const sub of Object.keys(this._subs)) {
       this._subs[sub].unsubscribe();
     }
@@ -307,8 +319,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._subs.a = this.onInitOrUpdate$.subscribe();
     this._subs.b = this.onSubmitOrAutoSubmit$.subscribe();
 
-    this._subs.d = this.onChanges$.subscribe();
-    this._subs.e = this.onControlsChanges$.subscribe();
+    this._subs.c = this.onChanges$.subscribe();
+    this._subs.d = this.onControlsChanges$.subscribe();
+    this._subs.e = this.onReset$.subscribe();
   }
 
   get formValue(): any {
@@ -324,5 +337,22 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   get formStatus(): FormControlStatus {
     this.dir.form.updateValueAndValidity({ onlySelf: true, emitEvent: false });
     return this.dir.form.status;
+  }
+
+  reset(target: any, source?: any): any {
+    if(!source) { source = target; }
+    for(let prop of findProps(source)) {
+      let value = getValue(source, prop);
+      if(typeof value === 'string') {
+        target = setValue(target, prop, '');
+      } else if (typeof value === 'number') {
+        target = setValue(target, prop, 0);
+      } else if (typeof value === 'boolean') {
+        target = setValue(target, prop, false);
+      } else if (typeof value === 'bigint') {
+        target = setValue(target, prop, 0n);
+      }
+    }
+    return target;
   }
 }
