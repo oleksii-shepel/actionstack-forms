@@ -153,6 +153,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
     let onAutoSubmit$ = fromEvent(submit, 'click').pipe(
+      delay(0),
       filter(() => this.autoSubmit && this.dir.form.valid),
       map(() => ({value: true, type: AutoSubmit.type}))
     )
