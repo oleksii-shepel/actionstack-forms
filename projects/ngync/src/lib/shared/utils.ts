@@ -134,7 +134,12 @@ export function deepClone(objectToClone: any) {
   if(objectToClone && typeof objectToClone !== 'string') {
     for (const key in objectToClone) {
       let value = objectToClone[key];
-      (obj as any)[key] = (typeof value === "object") ? deepClone(value) : value;
+      if(typeof value === 'object') { value = deepClone(value); }
+      if((Object.getOwnPropertyDescriptor(obj, key) || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(obj), key) || {}).writable) {
+        obj[key] = value;
+      } else {
+        obj = {...obj, key: value};
+      }
     }
   }
 
