@@ -64,7 +64,6 @@ describe('core', () => {
       expect(directive.debounce).toBe(NGYNC_CONFIG_DEFAULT.debounce);
       expect(directive.resetOnDestroy).toBe(NGYNC_CONFIG_DEFAULT.resetOnDestroy);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
-      expect(directive.autoSubmit).toBe(NGYNC_CONFIG_DEFAULT.autoSubmit);
     });
 
     it('should dispatch AutoInit action', async() => {
@@ -533,7 +532,6 @@ describe('core', () => {
       expect(directive.debounce).toBe(NGYNC_CONFIG_DEFAULT.debounce);
       expect(directive.resetOnDestroy).toBe(NGYNC_CONFIG_DEFAULT.resetOnDestroy);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
-      expect(directive.autoSubmit).toBe(NGYNC_CONFIG_DEFAULT.autoSubmit);
     });
 
     it('should dispatch AutoInit action', async() => {

@@ -60,7 +60,7 @@ import {
 export interface NgyncConfig {
   slice: string;
   debounce?: number;
-  resetOnDestroy?: 'no-changes' | 'initial' | 'submitted' | 'empty';
+  resetOnDestroy?: 'unchanged' | 'initial' | 'submitted' | 'empty';
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
@@ -279,7 +279,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
-    if (this.resetOnDestroy !== 'no-changes') {
+    if (this.resetOnDestroy !== 'unchanged') {
       switch(this.resetOnDestroy) {
         case 'initial':
           this.store.dispatch(ResetForm({ path: this.slice, value: this._initialState || {} }));
