@@ -1,7 +1,6 @@
 
 
 
-
 export const getValue = (obj: any, prop?: string) => {
   if(!prop) { return obj; }
   return prop.split('.').reduce((acc, part) => acc && acc[part], obj);
@@ -35,7 +34,8 @@ export const setValue = (obj: any, prop: string, val: any) => {
 export const iterable = (obj: any) => {
   return { [Symbol.iterator]: function* () {
     if(Array.isArray(obj)) { for(let element of obj) { yield element; } }
-    else { for(let element of Object.keys(obj).sort()) { yield obj[element]; } }
+    else if(!primitive(obj) && typeof obj[Symbol.iterator] === 'function') { for(let element of Array.from(obj).sort()) { yield element; } }
+    else if(!!obj && typeof obj === 'object') { for(let element of Object.keys(obj).sort()) { yield obj[element]; } }
   }}
 }
 
@@ -52,9 +52,10 @@ export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[pr
 export function findProps(obj: any): string[] {
   var result: string[] = [];
   const findKeys = (obj: any, prefix: string = '') => {
+    if(primitive(obj) || boxed(obj) || Object.keys(obj).length === 0) { return; }
     for (let prop in obj) {
-      let sub = obj[prop]
-      if(!sub || typeof(sub) !== 'object' || Object.keys(sub).length === 0) {
+      let sub = obj[prop];
+      if(primitive(sub) || boxed(sub) || Object.keys(sub).length === 0) {
         result.push(`${prefix}${prop}`)
       }
       else {
@@ -93,7 +94,7 @@ export function deepEqual(x: any, y: any): boolean {
 
 
 
-export const boxed = (value: any) => typeof value === 'object' && !!value && value.valueOf() !== value;
+export const boxed = (value: any) => !!value && value.valueOf() !== value;
 export const primitive = (value: any) => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'symbol' || typeof value === 'bigint' || typeof value === 'undefined' || value === null;
 
 

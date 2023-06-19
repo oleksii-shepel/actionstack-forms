@@ -6,12 +6,20 @@ describe('utils', () => {
     let obj3 = { a: [{ b: { c: 1 } }] };
     let obj4 = [ { b: { c: 1 } } ];
     let obj5 = {a: Object(BigInt(1))};
+    let map = new Map([['key1', 'value1'], ['key2', 'value2']]), set = new Set([1, 2, 3, 3]), array: any[] = [], array2 = [1, 2, 3];
+    let obj6 = { s: map, t: set, o: array, p: array2 };
 
     expect(getValue(obj1, 'a.b.c')).toEqual(1);
     expect(getValue(obj2, 'a.b.0.c')).toEqual(1);
     expect(getValue(obj3, 'a.0.b.c')).toEqual(1);
     expect(getValue(obj4, '0.b.c')).toEqual(1);
     expect(getValue(obj5, 'a').valueOf()).toEqual(1n);
+    expect(getValue(obj6, 's')).toEqual(map);
+    expect(getValue(obj6, 't')).toEqual(set);
+    expect(getValue(obj6, 'o')).toEqual([]);
+    expect(getValue(obj6, 'p.0')).toEqual(1);
+    expect(getValue(obj6, 'p.1')).toEqual(2);
+    expect(getValue(obj6, 'p.2')).toEqual(3);
   });
 
   it('should set value', () => {
@@ -46,11 +54,19 @@ describe('utils', () => {
   });
 
   it('should find props', () => {
-    let obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]}, e: BigInt(1) };
-    let obj2 = { a: Object(BigInt(1)), b: Object(false) };
+    let obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]}, e: BigInt(1), f: false, g: true, h: null, i: undefined, j: NaN, k: Infinity, l: -Infinity, m: '', n: 'a', q: {}, r: {a: 1}}
+    let obj2 = { s: new Map([['key1', 'value1'], ['key2', 'value2']]), t: new Set([1, 2, 3, 3]), o: [], p: [1, 2, 3] };
+    let obj3 = null;
+    let obj4 = undefined;
+    let obj5 = 'string';
+    let obj6 = [1, {a: 1}, {a: {b: 1}}];
 
-    expect(findProps(obj)).toEqual(['a', 'b', 'c', 'd.a', 'd.b.0', 'd.b.1', 'd.b.2', 'e']);
-    expect(findProps(obj2)).toEqual(['a', 'b']);
+    expect(findProps(obj)).toEqual(['a', 'b', 'c', 'd.a', 'd.b.0', 'd.b.1', 'd.b.2', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'q', 'r.a']);
+    expect(findProps(obj2)).toEqual(['s', 't', 'o', 'p.0', 'p.1', 'p.2']);
+    expect(findProps(obj3)).toEqual([]);
+    expect(findProps(obj4)).toEqual([]);
+    expect(findProps(obj5)).toEqual([]);
+    expect(findProps(obj6)).toEqual(['0', '1.a', '2.a.b']);
   });
 
   it('should deep equal', () => {
@@ -95,6 +111,9 @@ describe('utils', () => {
     let obj6 = undefined;
     let obj7 = new Date();
     let obj8 = new RegExp('a');
+    let obj9 = new String('a');
+    let obj10 = true;
+    let obj11 = 1;
 
     expect(boxed(obj1)).toEqual(false);
     expect(boxed(obj2)).toEqual(false);
@@ -104,6 +123,10 @@ describe('utils', () => {
     expect(boxed(obj6)).toEqual(false);
     expect(boxed(obj7)).toEqual(true);
     expect(boxed(obj8)).toEqual(false);
+    expect(boxed(obj9)).toEqual(true);
+    expect(boxed(obj10)).toEqual(false);
+    expect(boxed(obj11)).toEqual(false);
+
   });
 
   it('intersection', () => {
