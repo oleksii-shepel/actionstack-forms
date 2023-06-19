@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostBinding, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, filter, map, switchMap, timer } from 'rxjs';
+import { occurence } from '../../animations/animations';
 import { ModalService } from '../../services/modal.service';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
@@ -7,7 +8,8 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  animations: [occurence]
 })
 export class AppComponent implements OnDestroy {
   @HostBinding('class') class ='author';

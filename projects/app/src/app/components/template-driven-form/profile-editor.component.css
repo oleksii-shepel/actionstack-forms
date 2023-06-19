@@ -16,6 +16,7 @@ label {
 
 :host {
   display: grid;
+  align-items: flex-start;
   gap: 20px;
   grid-template-columns: 100%;
   grid-template-areas:

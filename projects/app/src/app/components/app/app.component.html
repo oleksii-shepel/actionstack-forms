@@ -1,5 +1,5 @@
 
-<main>
+<main [ngSwitch]="editor">
   <nav>
     <div>
       <button type="button" (click)="toggleEditor('reactive')">Reactive Form</button>
@@ -12,9 +12,17 @@
     </div>
   </nav>
 
-  <reactive-profile-editor *ngIf="showReactiveProfileEditor" (hacked)="showModal('reactive')" [caption]="getCaption('reactive')"></reactive-profile-editor>
-  <template-profile-editor *ngIf="showTemplateProfileEditor" (hacked)="showModal('template-driven')" [caption]="getCaption('template-driven')"></template-profile-editor>
-  <standard-profile-editor *ngIf="showStandardProfileEditor" (hacked)="showModal('standard')" [caption]="getCaption('standard')"></standard-profile-editor>
+  <ng-container *ngSwitchCase="'reactive'">
+    <reactive-profile-editor (hacked)="showModal('reactive')" [caption]="getCaption('reactive')"></reactive-profile-editor>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'template-driven'">
+    <template-profile-editor (hacked)="showModal('template-driven')" [caption]="getCaption('template-driven')"></template-profile-editor>
+   </ng-container>
+
+  <ng-container *ngSwitchCase="'standard'">
+    <standard-profile-editor (hacked)="showModal('standard')" [caption]="getCaption('standard')"></standard-profile-editor>
+  </ng-container>
 </main>
 
 <hacked-modal id="modal">

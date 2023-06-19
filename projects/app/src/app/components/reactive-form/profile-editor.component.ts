@@ -1,9 +1,9 @@
-import { AUTO_STYLE, animate, state, style, transition, trigger } from '@angular/animations';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { UpdateForm, UpdateModel, buildForm, getSlice, getValue } from 'ngync';
 import { Observable, fromEvent, merge, shareReplay, take } from 'rxjs';
+import { occurence } from '../../animations/animations';
 import { initialProfile, profileOptions } from '../../models/profile';
 
 @Component({
@@ -11,23 +11,7 @@ import { initialProfile, profileOptions } from '../../models/profile';
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('occurence', [
-      state('false', style({
-        height: AUTO_STYLE,
-        opacity: 1,
-      })),
-      state('true', style({
-        height: AUTO_STYLE,
-        opacity: 0,
-      })),
-      transition('* => true', [
-        animate('0.5s')
-      ]),
-      transition('* => false', [
-        animate('0.5s')
-      ]),
-  ])]
+  animations: [occurence]
 })
 export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy {
   @Input() caption = '';
@@ -77,11 +61,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     });
 
-    let timeout = setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-      clearTimeout(timeout);
-    }, 0);
-
+    window.dispatchEvent(new Event('resize'));
   }
 
   updateProfile() {

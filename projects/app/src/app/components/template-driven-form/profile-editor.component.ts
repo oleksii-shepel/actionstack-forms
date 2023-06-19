@@ -1,9 +1,9 @@
-import { AUTO_STYLE, animate, state, style, transition, trigger } from '@angular/animations';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { UpdateForm, UpdateModel, deepClone, getSlice, getValue } from 'ngync';
 import { Observable, fromEvent, merge, shareReplay, take } from 'rxjs';
+import { occurence } from '../../animations/animations';
 import { initialHero } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
 
@@ -12,23 +12,7 @@ import { ApplicationState } from '../../reducers';
   templateUrl: './profile-editor.component.html',
   styleUrls: ['./profile-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('occurence', [
-      state('false', style({
-        height: AUTO_STYLE,
-        opacity: 1,
-      })),
-      state('true', style({
-        height: AUTO_STYLE,
-        opacity: 0,
-      })),
-      transition('* => true', [
-        animate('0.5s')
-      ]),
-      transition('* => false', [
-        animate('0.5s')
-      ]),
-  ])]
+  animations: [occurence]
 })
 export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('heroForm') form: NgForm | null = null;
@@ -69,10 +53,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     });
 
-    let timeout = setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-      clearTimeout(timeout);
-    }, 0);
+    window.dispatchEvent(new Event('resize'));
   }
 
   updateProfile() {

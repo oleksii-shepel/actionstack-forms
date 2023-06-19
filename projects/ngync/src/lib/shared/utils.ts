@@ -54,7 +54,7 @@ export function findProps(obj: any): string[] {
   const findKeys = (obj: any, prefix: string = '') => {
     for (let prop in obj) {
       let sub = obj[prop]
-      if(!sub || typeof(sub) !== 'object') {
+      if(!sub || typeof(sub) !== 'object' || Object.keys(sub).length === 0) {
         result.push(`${prefix}${prop}`)
       }
       else {
@@ -86,14 +86,14 @@ export function deepEqual(x: any, y: any): boolean {
       equal = Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
     }
   } else {
-    equal = x.valueOf() === y.valueOf();
+    equal = x === y || x?.valueOf() === y?.valueOf();
   }
   return equal;
 }
 
 
 
-export const boxed = (value: any) => typeof value === 'object' && value.valueOf;
+export const boxed = (value: any) => typeof value === 'object' && !!value && value.valueOf() !== value;
 export const primitive = (value: any) => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'symbol' || typeof value === 'bigint' || typeof value === 'undefined' || value === null;
 
 
