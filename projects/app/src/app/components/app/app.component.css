@@ -72,6 +72,7 @@
   display: block;
   background-color: #eee;
   background-image: url('../../../assets/james_bond_poster.png');
+  transition: background-image 0.5s ease-in-out;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
@@ -81,6 +82,7 @@
   display: block;
   background-color: #c0c0c0;
   background-image: url('../../../assets/james_bond.png');
+  transition: background-image 0.5s ease-in-out;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
@@ -98,6 +100,7 @@
   display: block;
   background-color: rgba(250, 236, 218, 0.97);
   background-image: url('../../../assets/james_bond_model.png');
+  transition: background-image 0.5s ease-in-out;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;

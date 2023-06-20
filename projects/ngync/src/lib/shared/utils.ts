@@ -18,7 +18,7 @@ export const setValue = (obj: any, prop: string, val: any) => {
     let root = Array.isArray(obj)? [...obj]: {...obj};
     let item = root;
     while(split.length >= 1) {
-      const key = split.at(0)!;
+      const key = split[0];
       item[key] = isArray(split) ? [...(item[key] || [])] : isObject(split) ? {...item[key]} : val;
 
       item = item[key];
@@ -43,8 +43,13 @@ export const iterable = (obj: any) => {
 
 export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[prop] }) => any) {
   let noCommentsStr = expression.toString().replace(/\/\*(.|[\r\n])*?\*\//g, '').replace(/\/\/.*/gm, '');
-  let str = noCommentsStr.split('=>',).at(1)!.trim();
-  return str.substring(str.indexOf('.') + 1, str.length).replace(/\]/g, '').replace(/\[/g, '.');
+  let split = noCommentsStr.split('=>');
+  if(split && split.length == 2) {
+    let str = noCommentsStr.split('=>')[1].trim();
+    return str.substring(str.indexOf('.') + 1, str.length).replace(/\]/g, '').replace(/\[/g, '.');
+  } else {
+    throw new Error('Invalid expression');
+  }
 }
 
 
