@@ -44,7 +44,6 @@ ngync directive expects from user a string that consists of a sequence of proper
 export interface NgyncConfig {
   slice: string;
   debounce?: number;
-  resetOnDestroy?: 'unchanged' | 'initial' | 'submitted' | 'empty';
   updateOn?: 'change' | 'blur' | 'submit';
 }
 ```
