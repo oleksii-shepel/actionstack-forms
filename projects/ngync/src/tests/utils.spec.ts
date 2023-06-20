@@ -6,7 +6,7 @@ describe('utils', () => {
     let obj3 = { a: [{ b: { c: 1 } }] };
     let obj4 = [ { b: { c: 1 } } ];
     let obj5 = {a: Object(BigInt(1))};
-    let map = new Map([['key1', 'value1'], ['key2', 'value2']]), set = new Set([1, 2, 3, 3]), array: any[] = [], array2 = [1, 2, 3];
+    let map = new Map([[Object(1), 'value1'], ['key2', 'value2']]), set = new Set([{a: 1}, {b: 2}, 3, 3]), array: any[] = [], array2 = [1, 2, 3];
     let obj6 = { s: map, t: set, o: array, p: array2 };
 
     expect(getValue(obj1, 'a.b.c')).toEqual(1);
@@ -76,6 +76,8 @@ describe('utils', () => {
 
     expect(deepEqual(obj1, obj2)).toEqual(true);
     expect(deepEqual(obj1, obj3)).toEqual(false);
+    expect(deepEqual(obj1, obj3)).toEqual(true);
+    expect(deepEqual(obj1, obj3)).toEqual(true);
   });
 
   it('should deep clone', () => {
@@ -85,12 +87,20 @@ describe('utils', () => {
     let obj3 = { a: 1, b: 2, c: 4, d: BigInt(12121213), e: date };
     let obj4 = { a: 1, b: 2, c: 4, d: BigInt(12121212), e: new Date() };
     let obj5 = { a: 1, b: 2, c: 4, d: Object(BigInt(12121212)), e: new Date() };
+    let obj6 = { a: new Map([['key1', 'value1'], ['key2', 'value2']]) };
+    let ref6 = { a: new Map([['key1', 'value1'], ['key2', 'value3'], ]) };
+    let obj7 = { a: new Set([1, 2, 3, 4]) };
+    let ref7 = { a: new Set([1, 2, 3, 5]) };
 
     expect(deepEqual(deepClone(obj1), obj1)).toEqual(true);
     expect(deepEqual(deepClone(obj2), obj2)).toEqual(true);
     expect(deepEqual(deepClone(obj3), obj3)).toEqual(true);
     expect(deepEqual(deepClone(obj4), obj4)).toEqual(true);
     expect(deepEqual(deepClone(obj5), obj5)).toEqual(true);
+    expect(deepEqual(deepClone(obj6), obj6)).toEqual(true);
+    expect(deepEqual(deepClone(obj7), obj7)).toEqual(true);
+    expect(deepEqual(deepClone(obj6), ref6)).toEqual(false);
+    expect(deepEqual(deepClone(obj7), ref7)).toEqual(false);
   });
 
   it('should deep clone json', () => {

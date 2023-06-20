@@ -84,7 +84,13 @@ export function deepEqual(x: any, y: any): boolean {
   if(x && y && typeof x === 'object' && typeof y === 'object') {
     equal = Object.keys(x).length === Object.keys(y).length;
     if(equal) {
-      equal = Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
+      if(x instanceof Map &&  y instanceof Map) {
+        equal = x.size === y.size && [...x.entries()].every(([key, value]) => (y.has(key) && deepEqual(y.get(key), value)));
+      } else if(x instanceof Set &&  y instanceof Set) {
+        equal = x.size === y.size && [...x.entries()].every(([key, value]) => y.has(key));
+      } else {
+        equal = Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
+      }
     }
   } else {
     equal = x === y || x?.valueOf() === y?.valueOf();
@@ -100,7 +106,7 @@ export const primitive = (value: any) => typeof value === 'string' || typeof val
 
 
 export function deepClone(objectToClone: any) {
-  if (!objectToClone) return objectToClone;
+  if (primitive(objectToClone)) return objectToClone;
 
   let obj = undefined;
   if(Array.isArray(objectToClone)) { obj = []; }
@@ -109,15 +115,10 @@ export function deepClone(objectToClone: any) {
     else { obj = {...objectToClone.constructor(objectToClone.valueOf())}; }
   }
   else if(typeof objectToClone === 'object') {
-    obj = {};
-  } else {
-    obj = objectToClone;
-  }
+    obj = {...objectToClone};
 
-  if(objectToClone && typeof objectToClone !== 'string') {
-    for (const key in objectToClone) {
-      let value = objectToClone[key];
-      obj[key] = typeof value === 'object' ? deepClone(value) : value;
+    for (const key in obj) {
+      obj[key] = deepClone(obj[key]);
     }
   }
 
