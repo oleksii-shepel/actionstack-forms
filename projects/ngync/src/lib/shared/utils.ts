@@ -109,17 +109,17 @@ export function deepClone(objectToClone: any) {
   if (primitive(objectToClone)) return objectToClone;
 
   let obj = undefined;
-  if(Array.isArray(objectToClone)) { obj = []; }
+  if(Array.isArray(objectToClone)) { obj = [...objectToClone]; }
   else if (boxed(objectToClone)) {
     if (objectToClone instanceof Date) { obj = new Date(objectToClone.valueOf()); }
     else { obj = {...objectToClone.constructor(objectToClone.valueOf())}; }
   }
   else if(typeof objectToClone === 'object') {
     obj = {...objectToClone};
+  }
 
-    for (const key in obj) {
-      obj[key] = deepClone(obj[key]);
-    }
+  for (const key in obj) {
+    obj[key] = deepClone(obj[key]);
   }
 
   return obj;
