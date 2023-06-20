@@ -76,8 +76,6 @@ describe('utils', () => {
 
     expect(deepEqual(obj1, obj2)).toEqual(true);
     expect(deepEqual(obj1, obj3)).toEqual(false);
-    expect(deepEqual(obj1, obj3)).toEqual(true);
-    expect(deepEqual(obj1, obj3)).toEqual(true);
   });
 
   it('should deep clone', () => {

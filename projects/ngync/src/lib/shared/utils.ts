@@ -109,17 +109,18 @@ export function deepClone(objectToClone: any) {
   if (primitive(objectToClone)) return objectToClone;
 
   let obj = undefined;
-  if(Array.isArray(objectToClone)) { obj = [...objectToClone]; }
-  else if (boxed(objectToClone)) {
+  if (boxed(objectToClone)) {
     if (objectToClone instanceof Date) { obj = new Date(objectToClone.valueOf()); }
-    else { obj = {...objectToClone.constructor(objectToClone.valueOf())}; }
+    else { obj = {...objectToClone.constructor(objectToClone.valueOf())}; return obj; }
   }
-  else if(typeof objectToClone === 'object') {
-    obj = {...objectToClone};
-  }
+  else if(objectToClone instanceof Map) { obj = new Map(objectToClone); return obj; }
+  else if(objectToClone instanceof Set) { obj = new Set(objectToClone); return obj; }
+  else if(Array.isArray(objectToClone)) { obj = [...objectToClone]; }
+  else if (typeof objectToClone === 'object') { obj = {...objectToClone}; }
 
   for (const key in obj) {
-    obj[key] = deepClone(obj[key]);
+    let value = objectToClone[key];
+    obj[key] = typeof value === 'object' ? deepClone(value) : value;
   }
 
   return obj;
