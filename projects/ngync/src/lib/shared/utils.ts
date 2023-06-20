@@ -74,15 +74,6 @@ export function findProps(obj: any): string[] {
 
 
 
-export function unassign(target: any, source: any[]) {
-  for(let prop in source) {
-    delete target[prop];
-
-  }
-  return target;
-}
-
-
 
 export function deepEqual(x: any, y: any): boolean {
   let equal = false;
