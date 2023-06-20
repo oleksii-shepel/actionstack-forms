@@ -51,8 +51,8 @@ export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[pr
 
 export function findProps(obj: any): string[] {
   var result: string[] = [];
+  if(primitive(obj) || boxed(obj) || Object.keys(obj).length === 0) { return result; }
   const findKeys = (obj: any, prefix: string = '') => {
-    if(primitive(obj) || boxed(obj) || Object.keys(obj).length === 0) { return; }
     for (let prop in obj) {
       let sub = obj[prop];
       if(primitive(sub) || boxed(sub) || Object.keys(sub).length === 0) {
