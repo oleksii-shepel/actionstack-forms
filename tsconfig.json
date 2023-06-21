@@ -24,12 +24,6 @@
     "importHelpers": true,
     "useDefineForClassFields": false,
     "esModuleInterop":true,
-    "target": "esnext",
-    "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
