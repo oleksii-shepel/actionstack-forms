@@ -8,7 +8,7 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  styleUrls: ['./app.component.scss'],
   animations: [occurence]
 })
 export class AppComponent implements OnDestroy {

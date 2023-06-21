@@ -6,7 +6,7 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 @Component({
   selector: 'json-editor',
   templateUrl: './json-editor.component.html',
-  styleUrls: ['./json-editor.component.css'],
+  styleUrls: ['./json-editor.component.scss'],
 })
 export class JsonEditorComponent implements OnChanges {
   JSON = JSON;
