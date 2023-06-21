@@ -24,6 +24,7 @@
     "importHelpers": true,
     "useDefineForClassFields": false,
     "esModuleInterop":true,
+    "target": "es2020"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
