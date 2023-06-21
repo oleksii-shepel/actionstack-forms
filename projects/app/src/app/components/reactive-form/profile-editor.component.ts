@@ -53,8 +53,9 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
 
     let state = await firstValueFrom(this.store.select(getModel(this.slice)));
 
-    let model = Object.assign(deepClone(state || {}), initialProfile);
+    let model = state ? deepClone(state) : initialProfile;
     this.initialized = true;
+    this.collapsed = true;
 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 

@@ -46,9 +46,9 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
     let state = await firstValueFrom(this.store.select(getModel(this.slice)));
 
-    this.model = Object.assign(deepClone(state || {}), initialModel);
-    this.collapsed = this.model.collapsed;
+    this.model = state ? deepClone(state) : initialModel;
     this.initialized = true;
+    this.collapsed = true;
 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 

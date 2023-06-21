@@ -47,9 +47,9 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
     if(!state) {
       asapScheduler.schedule(() => {
         this.store.dispatch(InitForm({value: deepClone(initialHero), path: this.slice}))
-        this.model = Object.assign(deepClone(state || {}), initialHero);
-        this.collapsed = this.model.collapsed;
+        this.model = state ? deepClone(state) : initialHero;
         this.initialized = true;
+        this.collapsed = true;
       });
     }
 

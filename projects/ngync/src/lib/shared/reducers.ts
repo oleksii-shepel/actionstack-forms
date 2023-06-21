@@ -88,11 +88,11 @@ export const logger = (_: any = {}) => (reducer: ActionReducer<any>): any => {
     console.groupCollapsed(action.type);
     let actionCopy = deepClone(action);
     delete actionCopy.type;
-    let path = (actionCopy?.path ?? '') as string;
-    let sep = path.indexOf('::');
-    path = path.substring(0, sep === -1 ? path.length : sep).trim();
+    let actionPath = actionCopy?.path ?? '';
+    let sep = actionPath.indexOf('::');
+    let path = actionPath.substring(0, sep === -1 ? actionPath.length : sep).trim();
     delete actionCopy.path;
-    console.log("path: '%c%s%c', payload: %o", "color: red;", path, "color: black;", actionCopy);
+    console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
     let diff = path.length > 0 ? difference(getValue(state, path), getValue(result, path)): difference(state, result);
     console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
     console.groupEnd();
