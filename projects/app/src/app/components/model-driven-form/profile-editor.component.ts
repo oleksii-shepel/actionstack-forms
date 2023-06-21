@@ -1,8 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateForm, UpdateModel, deepClone, getSlice, getValue } from 'ngync';
-import { Observable, fromEvent, merge, shareReplay, take } from 'rxjs';
+import { UpdateForm, UpdateModel, deepClone, getModel, getSlice } from 'ngync';
+import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialModel } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
@@ -19,8 +19,9 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   @Input() caption = '';
   @Output() hacked = new EventEmitter<boolean>();
-  profile$!: Observable<any>;
 
+  profile$!: Observable<any>;
+  initialized = false;
   slice = "model";
   model = initialModel;
 
@@ -29,7 +30,9 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
+    if(this.initialized) {
+      this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
+    }
   }
 
   get collapsed() {
@@ -39,12 +42,13 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   constructor(private store: Store<ApplicationState>, private elementRef: ElementRef) {
   }
 
-  ngAfterViewInit() {
-    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
-      let model: any = getValue(state, "model") ?? initialModel;
-      this.model = deepClone(model);
-      this.collapsed = this.model.collapsed;
-    });
+  async ngAfterViewInit() {
+
+    let state = await firstValueFrom(this.store.select(getModel(this.slice)));
+
+    this.model = Object.assign(deepClone(state || {}), initialModel);
+    this.collapsed = this.model.collapsed;
+    this.initialized = true;
 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 
@@ -88,7 +92,6 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   ngOnDestroy() {
-    this.a.unsubscribe();
     this.b.unsubscribe();
   }
 }

@@ -1,8 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateForm, UpdateModel, buildForm, getSlice, getValue } from 'ngync';
-import { Observable, fromEvent, merge, shareReplay, take } from 'rxjs';
+import { UpdateForm, UpdateModel, buildForm, deepClone, getModel, getSlice } from 'ngync';
+import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialProfile, profileOptions } from '../../models/profile';
 
@@ -18,7 +18,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Output() hacked = new EventEmitter<boolean>();
 
   profile$!: Observable<any>;
-
+  initialized = false;
   slice = "profile";
 
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
@@ -37,7 +37,9 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
+    if(this.initialized) {
+      this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
+    }
   }
 
   get collapsed() {
@@ -47,12 +49,12 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   constructor(private fb: FormBuilder, private store: Store, private elementRef: ElementRef) {
   }
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
 
-    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
-      let model: any = getValue(state, "model") ?? initialProfile;
-      this.collapsed = model.collapsed;
-    });
+    let state = await firstValueFrom(this.store.select(getModel(this.slice)));
+
+    let model = Object.assign(deepClone(state || {}), initialProfile);
+    this.initialized = true;
 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
 
@@ -107,7 +109,6 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   ngOnDestroy() {
-    this.a.unsubscribe();
     this.b.unsubscribe();
   }
 }

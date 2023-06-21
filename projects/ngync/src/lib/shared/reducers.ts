@@ -33,7 +33,7 @@ export const propSubmitted = (path: string) => `${path}.submitted`;
 
 export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
-    state = state ?? initialState;
+    state = state ?? deepClone(initialState);
     let nextState = reducer(state, action);
     let path = action?.path;
 
