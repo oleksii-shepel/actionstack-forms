@@ -43,7 +43,7 @@
             "outputPath": "dist/app",
             "index": "projects/app/src/index.html",
             "main": "projects/app/src/main.ts",
-            "polyfills": "zone.js",
+            "polyfills": "./node_modules/zone.js",
             "tsConfig": "projects/app/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [

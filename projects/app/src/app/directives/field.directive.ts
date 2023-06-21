@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Directive, EventEmitter, Host, Inject, Input, OnDestroy, OnInit, Optional, Output, Provider, Self, forwardRef } from '@angular/core';
-import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
-import { CALL_SET_DISABLED_STATE, SyncDirective, composeAsyncValidators, composeValidators, getSlice, getValue, selectValueAccessor } from 'ngync';
+import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, Validator, ValidatorFn } from '@angular/forms';
+import { CALL_SET_DISABLED_STATE, SetDisabledStateOption, SyncDirective, composeAsyncValidators, composeValidators, getSlice, getValue, selectValueAccessor } from 'ngync';
 import { Subject, distinctUntilChanged, map, takeUntil } from 'rxjs';
 import { FieldArrayDirective } from './array.directive';
 import { FieldGroupDirective } from './group.directive';
@@ -21,12 +21,12 @@ const formControlBinding: Provider = {
   [{provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true}]
 ], exportAs: 'ngField'})
 export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgControl {
-  @Input("ngField") override name!: string;
+  @Input("ngField") override name: string = '';
   @Output('ngFieldChange') override update = new EventEmitter();
 
   override control: FormControl<string | null>;
   override valueAccessor: ControlValueAccessor | null;
-  override viewModel: any;
+  override viewModel: any = undefined;
 
   _parent: ControlContainer;
   _ngStore: SyncDirective;
@@ -48,7 +48,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
       @Optional() @Inject(CALL_SET_DISABLED_STATE) callSetDisabledState?:
           SetDisabledStateOption,
           ) {
-    super(parent, validators, asyncValidators, valueAccessors, changeDetectorRef, callSetDisabledState);
+    super(parent, validators, asyncValidators, valueAccessors, changeDetectorRef);
 
     this._parent = parent;
     this._ngStore = ngStore;
