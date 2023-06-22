@@ -106,7 +106,7 @@ export class AppComponent implements OnDestroy {
     }
 
     this.hacked$.next(true);
-    this.modalService.open(this.templateRef);
+    this.modalService.open('modal');
   }
 
   ngOnDestroy() {
