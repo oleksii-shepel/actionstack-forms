@@ -71,7 +71,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
         zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
       },
       aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
-    }, path: "hero"}));
+    }, path: "model"}));
 
     this.hacked.emit(true);
   }
