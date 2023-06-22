@@ -18,7 +18,7 @@ export class AppComponent implements OnDestroy {
   editor: EditorType = 'reactive';
 
   text = [
-    'Mr. Bond, life without foe is just as bad as listening to the Beatles without earmuffs!',
+    'Mr. Bond, living without a foe is just as bad as listening to the Beatles without earmuffs!',
     'Mr. Bond, this is indeed a pleasure to look after all your attempts to master the computer.',
     'Mr. Bond, I want to offer you a deal. I\'ll give you the access codes to the missile control system, and you\'ll give me the password to the computer system. Agreed?',
     'Mr. Bond, despite the fact that we are enemies, I offer you my delightful disruptive services',
