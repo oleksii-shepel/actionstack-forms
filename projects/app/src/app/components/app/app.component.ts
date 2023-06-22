@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostBinding, OnDestroy } from '@angular/core';
+import { Component, ElementRef, HostBinding, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { BehaviorSubject, Observable, filter, map, switchMap, timer } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { ModalService } from '../../services/modal.service';
@@ -13,12 +13,16 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 })
 export class AppComponent implements OnDestroy {
   @HostBinding('class') class ='author';
+  @ViewChild('template') templateRef!: TemplateRef<any>;
+
   editor: EditorType = 'reactive';
 
   text = [
-    'Mr. Bond, you have just made a big mistake and you will regret it very soon. I promise you...',
-    'Mr. Bond, my hackers deliberately have hacked your computer. Looking forward to your next steps...',
-    'Mr. Bond, that\'s a Dom Pérignon \'55. It would be a pity not to have a drink with you...',
+    'Mr. Bond, life without foe is just as bad as listening to the Beatles without earmuffs!',
+    'Mr. Bond, this is indeed a pleasure to look after all your attempts to master the computer.',
+    'Mr. Bond, I want to offer you a deal. I\'ll give you the access codes to the missile control system, and you\'ll give me the password to the computer system. Agreed?',
+    'Mr. Bond, despite the fact that we are enemies, I offer you my delightful disruptive services',
+    'Mr. Bond, sometimes I think you\'re the only one who understands me.',
   ]
 
   message: Observable<string>;
@@ -102,7 +106,7 @@ export class AppComponent implements OnDestroy {
     }
 
     this.hacked$.next(true);
-    this.modalService.open('modal');
+    this.modalService.open(this.templateRef);
   }
 
   ngOnDestroy() {
