@@ -1,5 +1,5 @@
-import { Component, ElementRef, HostBinding, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { BehaviorSubject, Observable, filter, map, switchMap, timer } from 'rxjs';
+import { Component, ElementRef, HostBinding, OnDestroy, ViewChild, ViewContainerRef } from '@angular/core';
+import { BehaviorSubject, concatMap, filter, finalize, from, map, mergeMap, take, tap } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { ModalService } from '../../services/modal.service';
 
@@ -9,47 +9,41 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [occurence]
+  animations: [occurence],
 })
 export class AppComponent implements OnDestroy {
   @HostBinding('class') class ='author';
-  @ViewChild('template') templateRef!: TemplateRef<any>;
+  @ViewChild('view', {read: ViewContainerRef}) viewContainerRef!: ViewContainerRef;
 
   editor: EditorType = 'reactive';
+  selectedColor: string = 'rgba(255, 0, 0, 0.5)';
 
-  text = [
-    'Mr. Bond, living without a foe is just as bad as listening to the Beatles without earmuffs!',
-    'Mr. Bond, this is indeed a pleasure to look after all your attempts to master the computer.',
-    'Mr. Bond, I want to offer you a deal. I\'ll give you the access codes to the missile control system, and you\'ll give me the password to the computer system. Agreed?',
-    'Mr. Bond, despite the fact that we are enemies, I offer you my delightful disruptive services',
-    'Mr. Bond, sometimes I think you\'re the only one who understands me.',
-  ]
-
-  message: Observable<string>;
+  text = [{
+    id: 'default-modal',
+    photo: 'dr_no.png',
+    color: '#e03a3a',
+    text: 'Mr. Bond, how do you like your tea?'
+  }, {
+    id: 'default-modal',
+    photo: 'moneypenny.png',
+    color: 'rgb(154, 192, 154)',
+    text: 'A gun and a radio. Not exactly Christmas, is it?'
+   }, {
+    id: 'default-modal',
+    photo: 'm.png',
+    color: 'rgb(124, 124, 255)',
+    text: 'A license to kill is also a license not to kill.'
+  }, {
+    id: 'default-modal',
+    photo: 'honey_ryder.png',
+    color: 'rgba(180, 99, 180)',
+    text: 'James, where have you been? I thought you were on a plane.'
+  }]
 
   profile = {};
-
-  hackedReactive = false;
-  hackedTemplateDriven = false;
-  hackedModelDriven = false;
-
-  hacked$ = new BehaviorSubject<boolean>(false);
-
   sub: any;
 
   constructor(public modalService: ModalService, public elementRef: ElementRef) {
-
-    this.message = this.hacked$.pipe(
-      filter(value => value),
-      switchMap(() => {let str = '', index = Math.floor(this.text.length * Math.random()); return timer(0, 80).pipe(
-        map((i) => {
-          if(i < this.text[index].length) {
-            str += this.text[index].charAt(i);
-          }
-          return str;
-        })
-      )}
-    ));
   }
 
   get showReactiveProfileEditor() {
@@ -79,34 +73,32 @@ export class AppComponent implements OnDestroy {
     }
   }
 
-  getCaption(type: string) {
-    switch(type) {
-      case 'reactive':
-        return !this.hackedReactive ? 'Author' : 'Villain';
-      case 'template-driven':
-        return !this.hackedTemplateDriven ? 'Agent' : 'Villain';
-      case 'standard':
-        return !this.hackedModelDriven ? 'Model' : 'Villain';
-    }
-
-    return '';
+  ngAfterViewInit() {
+    this.modalService.set(this.viewContainerRef);
   }
 
-  showModal(type: string) {
-    switch(type) {
-      case 'reactive':
-        this.hackedReactive = true;
-        break;
-      case 'template-driven':
-        this.hackedTemplateDriven = true;
-        break;
-      case 'standard':
-        this.hackedModelDriven = true;
-        break;
+  shuffle(array: any[]): any[] {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
     }
+    return array;
+  }
 
-    this.hacked$.next(true);
-    this.modalService.open('modal');
+  readMessages() {
+
+
+    let updating$ = new BehaviorSubject<boolean>(false);
+    this.sub = from(this.shuffle(this.text)).pipe(
+      mergeMap((value) => from(updating$).pipe(filter((value)=> !value), take(1), map(() => value), tap(() => updating$.next(true)))),
+      concatMap((value) => from(this.modalService.open(value).written$).pipe(filter((value)=> value), take(1), map(() => value))),
+      tap(() => this.text.shift()),
+      tap(() => console.log(this.text)),
+      tap(() => updating$.next(false)),
+      finalize(() => this.text.shift())
+    ).subscribe();
   }
 
   ngOnDestroy() {

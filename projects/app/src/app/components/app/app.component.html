@@ -5,6 +5,7 @@
       <button type="button" (click)="toggleEditor('reactive')">Reactive Form</button>
       <button type="button" (click)="toggleEditor('template-driven')">Custom Directives Form</button>
       <button type="button" (click)="toggleEditor('standard')">Template-Driven Form</button>
+      <button type="button" id="messages" (click)="readMessages()" [disabled]="!text.length">💌 Inbox<i *ngIf="text.length">{{text.length}}</i></button>
     </div>
     <div>
       <h1>Angular Forms powered by<a href="https://www.npmjs.com/package/ngync">ngync library</a>™</h1>
@@ -13,20 +14,16 @@
   </nav>
 
   <ng-container *ngSwitchCase="'reactive'">
-    <reactive-profile-editor (hacked)="showModal('reactive')" [caption]="getCaption('reactive')"></reactive-profile-editor>
+    <reactive-profile-editor [caption]="'Author'"></reactive-profile-editor>
   </ng-container>
 
   <ng-container *ngSwitchCase="'template-driven'">
-    <template-profile-editor (hacked)="showModal('template-driven')" [caption]="getCaption('template-driven')"></template-profile-editor>
+    <template-profile-editor [caption]="'Agent'"></template-profile-editor>
    </ng-container>
 
   <ng-container *ngSwitchCase="'standard'">
-    <standard-profile-editor (hacked)="showModal('standard')" [caption]="getCaption('standard')"></standard-profile-editor>
+    <standard-profile-editor [caption]="'Model'"></standard-profile-editor>
   </ng-container>
 </main>
 
-<hacked-modal id="modal">
-  <p><img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D" alt="hacked"/>
-    <span>{{message | async}}</span>
-  </p>
-</hacked-modal>
+<ng-container #view></ng-container>

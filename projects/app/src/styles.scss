@@ -33,7 +33,7 @@ body {
 }
 body::after{
    position:absolute; width:0; height:0; overflow:hidden; z-index:-1;
-   content:url(./assets/james_bond.png) url(./assets/james_bond_model.png) url(./assets/james_bond_poster.png) url(./assets/maskot.svg) url(./assets/dr_no.png);
+   content:url(./assets/james_bond.png) url(./assets/james_bond_model.png) url(./assets/james_bond_poster.png) url(./assets/maskot.svg) url(./assets/dr_no.png) url(./assets/honey_ryder.png) url(./assets/moneypenny.png) url(./assets/m.png);
 }
 .modal-open {
   overflow: inherit;

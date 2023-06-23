@@ -5,8 +5,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
 import { AppComponent } from './components/app/app.component';
-import { HackedBannerComponent } from './components/hacked-banner/hacked-banner.component';
 import { JsonEditorComponent } from './components/json-editor/json-editor.component';
+import { MessengerComponent } from './components/messenger/messenger.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
 import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
 import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
@@ -21,11 +21,10 @@ import { initialState, reducer } from './reducers';
     ReactiveProfileEditorComponent,
     TemplateProfileEditorComponent,
     StandardProfileEditorComponent,
-    HackedBannerComponent,
     FieldDirective,
     FieldArrayDirective,
     FieldGroupDirective,
-    HackedBannerComponent,
+    MessengerComponent,
     JsonEditorComponent
   ],
   imports: [

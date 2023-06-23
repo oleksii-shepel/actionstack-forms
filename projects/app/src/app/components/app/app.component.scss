@@ -13,7 +13,7 @@
     & div {
       display: flex;
       flex-direction: row;
-      align-items: center;
+      align-items: stretch;
 
       & h1 {
         display: inline-block;
@@ -142,8 +142,20 @@ nav button {
   font-size: inherit;
 }
 
-hacked-modal {
-  & img {
-    content:url(../../../assets/dr_no.png);
+#messages {
+  text-wrap: nowrap;
+
+  & i {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    font-style: normal;
+    background-color: cornflowerblue;
+    vertical-align: top;
+    border-radius: 50%;
+    padding: 0.3rem;
+    font-size: 1rem;
+    margin-left: 0.5rem;
+    margin-top: -0.7rem;
   }
 }

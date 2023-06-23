@@ -1,0 +1,7 @@
+<div class="modal">
+  <div class="modal-body" [style.backgroundColor]="data.color">
+    <p><img [style.content]="'url('+ data.photo + ')'" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D" alt="messenger"/>
+      <span>{{message$ | async}}</span>
+    </p>
+  </div>
+</div>

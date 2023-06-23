@@ -1,47 +1,33 @@
-import { Injectable } from '@angular/core';
-
-export class ModalWindow {
-  id: string | undefined;
-  isOpen: boolean;
-
-  constructor() {
-    this.id = undefined;
-    this.isOpen = false;
-  }
-
-  open() {}
-
-  close() {}
-}
+import { EmbeddedViewRef, Injectable, ViewContainerRef } from '@angular/core';
+import { MessengerComponent } from '../components/messenger/messenger.component';
 
 @Injectable({ providedIn: 'root' })
 export class ModalService {
-  private modals: ModalWindow[] = [];
+  viewContainerRef!: ViewContainerRef;
 
-  add(modal: ModalWindow) {
-    if (!modal.id || this.modals.find((x) => x.id === modal.id)) {
-      throw new Error('modal must have a unique id attribute');
+  set(value: ViewContainerRef) {
+    this.viewContainerRef = value;
+  }
+
+  open(data: any) {
+    const componentRef = this.viewContainerRef.createComponent(MessengerComponent);
+    componentRef.instance.data = data;
+    this.viewContainerRef.insert(componentRef.hostView);
+    return componentRef.instance;
+  }
+
+  pop() {
+    if(this.viewContainerRef.length === 0) { return; }
+    this.viewContainerRef.remove(0);
+  }
+
+  close(modal: HTMLElement) {
+    for(let i = 0; i < this.viewContainerRef.length; i++) {
+      let viewRef = this.viewContainerRef.get(i)! as EmbeddedViewRef<any>;
+      if(viewRef.rootNodes.some(node => node === modal)) {
+        this.viewContainerRef.remove(i);
+        break;
+      }
     }
-
-    this.modals.push(modal);
-  }
-
-  remove(modal: ModalWindow) {
-    this.modals = this.modals.filter((x) => x === modal);
-  }
-
-  open(id: string) {
-    const modal = this.modals.find((x) => x.id === id);
-
-    if (!modal) {
-      throw new Error(`modal '${id}' not found`);
-    }
-
-    modal.open();
-  }
-
-  close() {
-    const modal = this.modals.find((x) => x.isOpen);
-    modal?.close();
   }
 }

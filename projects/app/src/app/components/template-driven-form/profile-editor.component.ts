@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { InitForm, UpdateForm, UpdateModel, deepClone, getModel, getSlice } from 'ngync';
@@ -18,7 +18,6 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   @ViewChild('heroForm') form: NgForm | null = null;
 
   @Input() caption = '';
-  @Output() hacked = new EventEmitter<boolean>();
 
   profile$!: Observable<any>;
   initialized = false;
@@ -62,29 +61,6 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
 
     window.dispatchEvent(new Event('resize'));
   }
-
-  updateProfile() {
-    this.store.dispatch(UpdateForm({value: {
-      firstName: 'Dr. Julius No',
-      lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      address: {
-        street: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        city: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        state: 'Jamaica',
-        zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-      },
-      aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
-    }, path: "hero"}));
-
-    this.hacked.emit(true);
-  }
-
-/** This code will not work properly because such an action remains invisible to the actionsSubject's subscription
- * async init(obj: any) {
- *   let state = await firstValueFrom(this.store.select(getModel(this.slice)));
- *   this.store.dispatch(InitForm({value: obj, path: this.slice}));
- * }
- */
 
   addAlias() {
     this.model.aliases.push('');

@@ -18,7 +18,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   @ViewChild('heroForm') form: NgForm | null = null;
 
   @Input() caption = '';
-  @Output() hacked = new EventEmitter<boolean>();
+  @Output() messenger = new EventEmitter<boolean>();
 
   profile$!: Observable<any>;
   initialized = false;
@@ -58,22 +58,6 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
     });
 
     window.dispatchEvent(new Event('resize'));
-  }
-
-  updateProfile() {
-    this.store.dispatch(UpdateForm({value: {
-      firstName: 'Dr. Julius No',
-      lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      address: {
-        street: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        city: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        state: 'Jamaica',
-        zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-      },
-      aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
-    }, path: "model"}));
-
-    this.hacked.emit(true);
   }
 
   addAlias() {

@@ -2,7 +2,7 @@
   <json-editor [data]="profile$ | async" [(collapsed)]="collapsed"></json-editor>
   <div class="scrollable" [class.collapsed]="collapsed">
     <main>
-      <pre [style.display]="collapsed ? 'none': 'block'" [@occurence]="collapsed">{{profile$ | async | json}}</pre>
+      <pre [style.display]="collapsed ? 'none': 'block'" [@occurence]="!collapsed">{{profile$ | async | json}}</pre>
 
       <form [formGroup]="profileForm" autocomplete="off" [ngync]="this.slice">
         <h2>{{caption}}</h2>
@@ -58,7 +58,6 @@
 
         <p>Complete the form to enable button.</p>
         <button type="submit" [disabled]="!profileForm.valid" (click)="onSubmit()">Submit</button>
-        <button type="button" (click)="updateProfile()">👇 Update Profile</button>
       </form>
     </main>
     <footer>

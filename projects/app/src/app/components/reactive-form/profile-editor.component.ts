@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateForm, UpdateModel, buildForm, deepClone, getModel, getSlice } from 'ngync';
+import { UpdateModel, buildForm, deepClone, getModel, getSlice } from 'ngync';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialProfile, profileOptions } from '../../models/profile';
@@ -15,7 +15,6 @@ import { initialProfile, profileOptions } from '../../models/profile';
 })
 export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy {
   @Input() caption = '';
-  @Output() hacked = new EventEmitter<boolean>();
 
   profile$!: Observable<any>;
   initialized = false;
@@ -65,25 +64,6 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
     });
 
     window.dispatchEvent(new Event('resize'));
-  }
-
-  updateProfile() {
-    this.store.dispatch(UpdateForm({value: {
-      bookmark: true,
-      firstName: 'Dr. Julius No',
-      lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      address: {
-        street: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        city: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        state: 'Jamaica',
-        zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-      },
-      selected: 5,
-      quotes: `Unfortunately I misjudged you. You are just a stupid policeman whose luck has run out.`,
-      aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
-    }, path: "profile"}));
-
-    this.hacked.emit(true);
   }
 
   addAlias() {

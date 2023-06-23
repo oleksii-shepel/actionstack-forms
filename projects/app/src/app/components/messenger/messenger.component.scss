@@ -1,8 +1,6 @@
 /* MODAL STYLES
 -------------------------------*/
-hacked-modal {
-  display: none;
-
+messenger {
   .modal {
     display: flex;
     justify-content: center;
@@ -13,11 +11,11 @@ hacked-modal {
 
   .modal-body {
     padding: 20px;
-    background: #e03a3a;
     color: #fff;
-    border-radius: 3px;
-    text-align: justify;
+    border-radius: 10px;
+    text-align: start;
     width: 600px;
+    user-select: none;
 
     p {
       display: inline-flex;
