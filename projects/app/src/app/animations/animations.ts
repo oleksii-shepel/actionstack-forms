@@ -1,18 +1,14 @@
-import { AUTO_STYLE, animate, state, style, transition, trigger } from "@angular/animations";
+import { AUTO_STYLE, animate, style, transition, trigger } from "@angular/animations";
 
 export const occurence = trigger('occurence', [
-  state('false', style({
-    height: AUTO_STYLE,
-    opacity: 1,
-  })),
-  state('true', style({
-    height: AUTO_STYLE,
-    opacity: 0,
-  })),
-  transition('* => true', [
-    animate('0.5s')
+  transition('void => *', [
+    style({ display: 'block', opacity: 0, width: 0}),
+    animate('0.5s', style({ display: 'block', opacity: 1, width: AUTO_STYLE })),
+    style({ display: 'block'}),
   ]),
-  transition('* => false', [
-    animate('0.5s')
+  transition('* => void', [
+    style({ display: 'block', opacity: 1, width: AUTO_STYLE }),
+    animate('0.5s', style({ display: 'block', opacity: 0, width: 0 })),
+    style({ display: 'none' }),
   ]),
 ])
