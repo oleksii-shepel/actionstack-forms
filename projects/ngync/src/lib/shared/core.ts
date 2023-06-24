@@ -53,6 +53,7 @@ import {
   AutoSubmit,
   FormActions,
   FormActionsInternal,
+  FormDestroyed,
   UpdateDirty,
   UpdateErrors,
   UpdateForm,
@@ -91,8 +92,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   _input$ = new BehaviorSubject<boolean>(false);
   _submitted$ = new BehaviorSubject<boolean>(false);
   _statusCheck$ = new BehaviorSubject<boolean>(false);
+  _initialized$ = new BehaviorSubject<boolean>(false);
 
-  _initialized = false;
   _initDispatched = false;
 
   _subs = {} as any;
@@ -112,7 +113,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   onSubmitOrAutoSubmit$!: Observable<any>;
   onReset$!: Observable<any>;
   onStatusChanges$!: Observable<any>;
-  onAction$: any;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -164,7 +164,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onSubmitOrAutoSubmit$ = merge(onSubmit$, onAutoSubmit$).pipe(
       filter((action: any) => action?.path === this.slice),
-      filter(() => this._initialized),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       distinctUntilKeyChanged('value'),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action) => { if(action.type === AutoSubmit.type) { this.store.dispatch(AutoSubmit({ path: this.slice })); } }),
@@ -198,7 +199,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
         if(action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
           this._initialState = formValue;
-          this._initialized = true;
+          this._initialized$.next(true);
 
           this.dir.form.markAsPristine();
         } else {
@@ -220,7 +221,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onChanges$ = combineLatest([this._input$, this._blur$, this._submitted$]).pipe(
       filter(([input, blur, submitted]) => (input || blur || submitted)),
-      filter(() => this._initialized),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       sampleTime(this.debounce),
       tap(([input, blur, submitted]) => {
@@ -260,12 +262,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         });
       }),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(value => !this._initialized && !this._initDispatched ? this.store.dispatch(AutoInit({ path: this.slice, value: value })) : this._input$.next(true)),
+      tap(value => !this._initialized$.value && !this._initDispatched ? this.store.dispatch(AutoInit({ path: this.slice, value: value })) : this._input$.next(true)),
     );
 
     this.onReset$ = this.actionsSubject.pipe(
       filter((action: any) => action?.path === this.slice),
       filter((action: any) => action.type === FormActions.ResetForm),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action: any) => {
         if(action.value){
@@ -287,6 +291,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       filter((value) => value !== 'PENDING'),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value, errors: this.dir.form.errors})),
       pairwise(),
       distinctUntilChanged(([prev, curr]: [any, any]) => prev.status === curr.status && deepEqual(prev.errors, curr.errors)),
@@ -308,6 +314,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
+    this.store.dispatch(FormDestroyed({ path: this.slice }));
+
     for (const sub of Object.keys(this._subs)) {
       this._subs[sub].unsubscribe();
     }
@@ -315,6 +323,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._blur$.complete();
     this._input$.complete();
     this._submitted$.complete();
+    this._statusCheck$.complete();
+    this._initialized$.complete();
   }
 
   subscribe() {

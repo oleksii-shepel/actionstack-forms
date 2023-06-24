@@ -14,6 +14,7 @@ export enum FormActionsInternal {
   UpdateErrors = '[Form] Update Errors',
   AutoInit = '[Form] Auto Init',
   AutoSubmit = '[Form] Auto Submit',
+  FormDestroyed = '[Form] Form Destroyed',
 }
 
 export const InitForm = createAction(
@@ -66,3 +67,7 @@ export const AutoSubmit = createAction(
   props<{ path: string; }>()
 );
 
+export const FormDestroyed = createAction(
+  FormActionsInternal.FormDestroyed,
+  props<{ path: string; }>()
+);

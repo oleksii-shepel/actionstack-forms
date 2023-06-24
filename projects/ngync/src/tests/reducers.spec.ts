@@ -1,17 +1,8 @@
 import { AutoInit, AutoSubmit, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateModel, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
-import { forms, logger } from '../lib/shared/reducers';
+import { forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
 describe('reducer', () => {
-  it('should log', () => {
-    let log = logger('test');
-    let logSpy = jest.spyOn(console, 'log');
-    let state = { test: 'test' };
-    log((state: any, action: any) => {
-      state = { ...state, test: 'test2' };
-    })(state, InitForm({path: 'test', value: 'test'}));
-    expect(logSpy).toHaveBeenCalledTimes(2);
-  });
   it('should handle actions', () => {
     let model = {
       firstName: 'John',
@@ -36,7 +27,7 @@ describe('reducer', () => {
       }
     };
 
-    let f = forms(initialState);
+    let f = forms(initialState, false);
     let expected = {};
 
     let newState = f((state: any, action: any) => {})(initialState, InitForm({path: "slice", value: model}));

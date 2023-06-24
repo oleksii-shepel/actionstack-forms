@@ -1,5 +1,6 @@
-import { ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
+import { Action, ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
 import { FormActions, FormActionsInternal } from './actions';
+import { Queue } from './queue';
 import { deepClone, difference, getValue, primitive, setValue } from './utils';
 
 
@@ -30,61 +31,92 @@ export const propStatus = (path: string) => `${path}.status`;
 export const propSubmitted = (path: string) => `${path}.submitted`;
 
 
+export const actionQueues = new Map<string, Queue<Action>>();
 
-export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
-  return (state: any, action: any) => {
+export const forms = (initialState: any = {}, logging = true) => (reducer: ActionReducer<any>): any => {
+
+  const metaReducer = (state: any, action: any) => {
+
     state = state ?? deepClone(initialState);
     let nextState = reducer(state, action);
     let path = action?.path;
 
     if(path) {
-      switch(action.type) {
-        case FormActions.InitForm:
-          return setValue(state, path, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
+      let slice = path.split('::')[0];
+      actionQueues.has(slice) || actionQueues.set(slice, new Queue<Action>());
+      let queue = actionQueues.get(slice)!;
 
-        case FormActions.UpdateForm:
-          return setValue(state, path, {...getValue(state, path), model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
+      if(queue.initialized$.value) {
+        switch(action.type) {
+          case FormActions.InitForm:
+            nextState = setValue(state, slice, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(slice)) || {}), action.value) });
+            break;
+          case FormActions.UpdateForm:
+            nextState = setValue(state, slice, {...getValue(state, slice), model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(slice)) || {}), action.value) });
+            break;
+          case FormActions.UpdateSubmitted:
+            nextState = setValue(state, propSubmitted(slice), action.value);
+            break;
+          case FormActions.UpdateModel:
+            let paths = slice.split('::');
+            let property = paths.length === 2 ? `${propModel(paths[0])}.${paths[1]}` : propModel(paths[0]);
+            nextState = primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propModel(paths[0])) || {}), action.value));
+            break;
+          case FormActions.ResetForm:
+            nextState = nextState;
+            break;
+          case FormActionsInternal.UpdateStatus:
+            nextState = setValue(state, propStatus(slice), action.status);
+            break;
+          case FormActionsInternal.UpdateErrors:
+            nextState = setValue(state, propErrors(slice), deepClone(action.errors));
+            break;
+          case FormActionsInternal.UpdateDirty:
+            nextState = setValue(state, propDirty(slice), action.dirty);
+            break;
+          case FormActionsInternal.AutoInit:
+            nextState = setValue(state, slice, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(slice)) || {}), action.value) });
+            break;
+          case FormActionsInternal.AutoSubmit:
+            nextState = setValue(state, propSubmitted(slice), true);
+            break;
+          case FormActionsInternal.FormDestroyed:
+            while(queue.length > 0) {
+              let nextAction = queue.dequeue();
+              nextState = metaReducer(nextState, nextAction);
+            }
+            actionQueues.delete(slice);
+            break;
+        }
 
-        case FormActions.UpdateSubmitted:
-          return setValue(state, propSubmitted(path), action.value);
+        nextState = logger(logging)(() => nextState)(state, action);
+        return nextState;
 
-        case FormActions.UpdateModel:
-          let paths = path.split('::');
-          let property = paths.length === 2 ? `${propModel(paths[0])}.${paths[1]}` : propModel(paths[0]);
-          return primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propModel(paths[0])) || {}), action.value));
+      } else if (action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
+        queue.initialized$.next(true);
+        nextState = metaReducer(nextState, action);
 
-        case FormActions.ResetForm:
-          return nextState;
+        while(queue.length > 0) {
+          let nextAction = queue.dequeue();
+          nextState = metaReducer(nextState, nextAction);
+        }
 
-        case FormActionsInternal.UpdateStatus:
-          return setValue(state, propStatus(path), action.status);
-
-        case FormActionsInternal.UpdateErrors:
-          return setValue(state, propErrors(path), deepClone(action.errors));
-
-        case FormActionsInternal.UpdateDirty:
-          return setValue(state, propDirty(path), action.dirty);
-
-        case FormActionsInternal.AutoInit:
-          return setValue(state, path, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(path)) || {}), action.value) });
-
-        case FormActionsInternal.AutoSubmit:
-          return setValue(state, propSubmitted(path), true);
-
-        default:
-          return nextState;
+        return nextState;
+      }
+      else {
+        queue.enqueue(action);
       }
     }
-
     return nextState;
   }
+
+  return metaReducer;
 }
 
-
-
-export const logger = (_: any = {}) => (reducer: ActionReducer<any>): any => {
+const logger = (logging = true) => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
     const result = reducer(state, action);
+    if(!logging || action?.postponed) { return result; }
     console.groupCollapsed(action.type);
     let actionCopy = deepClone(action);
     delete actionCopy.type;
