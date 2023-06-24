@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostBinding, OnDestroy, ViewChild, ViewContainerRef } from '@angular/core';
-import { BehaviorSubject, concatMap, filter, finalize, from, map, mergeMap, take, tap } from 'rxjs';
+import { BehaviorSubject, concatMap, filter, from, map, mergeMap, take, tap } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { ModalService } from '../../services/modal.service';
 
@@ -89,14 +89,11 @@ export class AppComponent implements OnDestroy {
 
   readMessages() {
 
-
     let updating$ = new BehaviorSubject<boolean>(false);
     this.sub = from(this.shuffle(this.text)).pipe(
-      mergeMap((value) => from(updating$).pipe(filter((value)=> !value), take(1), map(() => value), tap(() => updating$.next(true)))),
+      mergeMap((value) => from(updating$).pipe(filter(value => !value), take(1), map(() => value), tap(() => updating$.next(false)))),
       concatMap((value) => from(this.modalService.open(value).written$).pipe(filter((value)=> value), take(1), map(() => value))),
-      tap(() => this.text.shift()),
-      tap(() => updating$.next(false)),
-      finalize(() => this.text.shift())
+      tap(() => this.text.shift())
     ).subscribe();
   }
 
