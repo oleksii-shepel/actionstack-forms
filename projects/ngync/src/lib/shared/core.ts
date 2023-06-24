@@ -27,7 +27,6 @@ import {
   fromEvent,
   map,
   merge,
-  mergeMap,
   sampleTime,
   startWith,
   switchMap,
@@ -87,7 +86,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   _blur$ = new BehaviorSubject<boolean>(false);
   _input$ = new BehaviorSubject<boolean>(false);
   _submitted$ = new BehaviorSubject<boolean>(false);
-  _updating$ = new BehaviorSubject<boolean>(false);
 
   _initialized = false;
   _initDispatched = false;
@@ -161,11 +159,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action?.path === this.slice),
       filter(() => this._initialized),
       distinctUntilKeyChanged('value'),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action) => { if(action.type === AutoSubmit.type) { this.store.dispatch(AutoSubmit({ path: this.slice })); } }),
       tap((action) => {
-        this._updating$.next(true);
 
         if(action.value === true) {
           this._submittedState = this.formValue;
@@ -179,8 +175,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         } else {
           this._submitted$.next(false);
         }
-
-        this._updating$.next(false);
       })
     );
 
@@ -188,11 +182,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action?.path === this.slice),
       tap((action) => { if (action.type === FormActions.InitForm) { this._initDispatched = true; } }),
       filter((action) => action.type === FormActionsInternal.AutoInit || action.type === FormActions.InitForm || action.type === FormActions.UpdateForm),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action: any) => {
 
-        this._updating$.next(true);
         this.dir.form.patchValue(action.value);
 
         let formValue = this.formValue;
@@ -218,17 +210,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this.store.dispatch(UpdateStatus({ path: this.slice, status: this.dir.status }));
 
         this.cdr.markForCheck();
-        this._updating$.next(false);
       })
     );
 
-    this.onChanges$ = combineLatest([this._input$, this._blur$, this._submitted$, this._updating$]).pipe(
-      filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
+    this.onChanges$ = combineLatest([this._input$, this._blur$, this._submitted$]).pipe(
+      filter(([input, blur, submitted]) => (input || blur || submitted)),
       filter(() => this._initialized),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       sampleTime(this.debounce),
-      tap(() => this._updating$.next(true)),
       tap(([input, blur, submitted]) => {
 
         let form = this.formValue;
@@ -236,8 +225,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         if (submitted === true || this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) {
           this.store.dispatch(UpdateForm({ path: this.slice, value: form }));
         }
-      }),
-      tap(([input, blur, submitted, _]) => {
 
         if(input === true) {
           this._input$.next(false);
@@ -250,8 +237,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         if(submitted === true) {
           this._submitted$.next(false);
         }
-
-        this._updating$.next(false);
 
       })
     );
@@ -269,7 +254,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         });
       }),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(value => !this._initialized && !this._initDispatched ? this.store.dispatch(AutoInit({ path: this.slice, value: value })) : false),
     );
@@ -277,7 +261,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onReset$ = this.actionsSubject.pipe(
       filter((action: any) => action?.path === this.slice),
       filter((action: any) => action.type === FormActions.ResetForm),
-      mergeMap((value) => from(this._updating$).pipe(filter((value)=> !value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action: any) => {
         if(action.value){
@@ -312,7 +295,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._blur$.complete();
     this._input$.complete();
     this._submitted$.complete();
-    this._updating$.complete();
   }
 
   subscribe() {
