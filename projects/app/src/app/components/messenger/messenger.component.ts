@@ -7,7 +7,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { BehaviorSubject, concatMap, delay, iif, map, of, takeWhile, tap, timer } from 'rxjs';
-import { occurence } from '../../animations/animations';
+import { messenger } from '../../animations/animations';
 import { ModalService } from '../../services/modal.service';
 
 @Component({
@@ -15,7 +15,7 @@ import { ModalService } from '../../services/modal.service';
   templateUrl: './messenger.component.html',
   styleUrls: ['./messenger.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  animations: [occurence]
+  animations: [messenger]
 })
 export class MessengerComponent implements OnInit, OnDestroy {
   @Input() id = 'default-modal';
@@ -60,5 +60,9 @@ export class MessengerComponent implements OnInit, OnDestroy {
   written() {
     this.written$.next(true);
     this.written$.complete();
+  }
+
+  animationDone(e: any) {
+    e.toState === 'void' && this.modalService.close(this.element);
   }
 }

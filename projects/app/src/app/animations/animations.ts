@@ -2,13 +2,22 @@ import { AUTO_STYLE, animate, style, transition, trigger } from "@angular/animat
 
 export const occurence = trigger('occurence', [
   transition('void => *', [
-    style({ display: 'block', opacity: 0, width: 0}),
-    animate('0.5s', style({ display: 'block', opacity: 1, width: AUTO_STYLE })),
-    style({ display: 'block'}),
+    style({ opacity: 0, width: 0}),
+    animate('0.5s', style({ opacity: 1, width: AUTO_STYLE })),
   ]),
   transition('* => void', [
-    style({ display: 'block', opacity: 1, width: AUTO_STYLE }),
-    animate('0.5s', style({ display: 'block', opacity: 0, width: 0 })),
-    style({ display: 'none' }),
+    style({ opacity: 1, width: AUTO_STYLE }),
+    animate('0.5s', style({ opacity: 0, width: 0 })),
+  ]),
+])
+
+export const messenger = trigger('messenger', [
+  transition('void => *', [
+    style({ opacity: 0, width: 0}),
+    animate('0.5s', style({ opacity: 1, width: AUTO_STYLE })),
+  ]),
+  transition('* => void', [
+    style({ opacity: 1 }),
+    animate('0.5s', style({ opacity: 0 })),
   ]),
 ])

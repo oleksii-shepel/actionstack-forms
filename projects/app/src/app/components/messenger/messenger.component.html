@@ -1,5 +1,5 @@
 <div class="modal">
-  <div class="modal-body" [style.backgroundColor]="data.color">
+  <div class="modal-body" [style.backgroundColor]="data.color" *ngIf="!written$.value" [@messenger] (@messenger.done)="animationDone($event)">
     <p><img [style.content]="'url('+ data.photo + ')'" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D" alt="messenger"/>
       <span>{{message$ | async}}</span>
     </p>

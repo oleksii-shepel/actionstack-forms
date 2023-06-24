@@ -95,7 +95,6 @@ export class AppComponent implements OnDestroy {
       mergeMap((value) => from(updating$).pipe(filter((value)=> !value), take(1), map(() => value), tap(() => updating$.next(true)))),
       concatMap((value) => from(this.modalService.open(value).written$).pipe(filter((value)=> value), take(1), map(() => value))),
       tap(() => this.text.shift()),
-      tap(() => this.modalService.pop()),
       tap(() => updating$.next(false)),
       finalize(() => this.text.shift())
     ).subscribe();
