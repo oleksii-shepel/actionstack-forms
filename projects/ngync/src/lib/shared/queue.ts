@@ -11,6 +11,26 @@ export class Queue<T> {
       private tail: number = 0
   ) { }
 
+  public first(element: T): void {
+    if(this.length === 0) {
+      this.enqueue(element);
+    } else {
+      this.elements[this.head] = element;
+      this.updated$.next(true);
+    }
+  }
+
+  public shift(element: T): void {
+    if(this.length === this.maxLength) {
+      this.dequeue();
+      console.warn('Queue is full, dequeuing first element');
+    }
+
+    this.head--;
+    this.elements[this.head] = element;
+    this.updated$.next(true);
+  }
+
   public enqueue(element: T): void {
     if(this.length === this.maxLength) {
       this.dequeue();
@@ -24,7 +44,6 @@ export class Queue<T> {
 
   public dequeue(): T | undefined {
       if (this.length === 0) {
-        console.warn('Queue is empty');
         return undefined;
       }
 
@@ -37,7 +56,6 @@ export class Queue<T> {
 
   public peek(): T | undefined {
     if (this.length === 0) {
-      console.warn('Queue is empty');
       return undefined;
     }
 

@@ -318,10 +318,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onActionQueued$ = this.queue.updated$.pipe(
       observeOn(asyncScheduler),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(() => {
-        if(this.queue.initialized$.value) {
+        let type = this.queue.peek()?.type;
+        if(type === FormActions.InitForm || type === FormActionsInternal.AutoInit) {
+          this.queue.initialized$.next(true);
           while(this.queue.length > 0) {
             this.store.dispatch(this.queue.dequeue()!);
           }

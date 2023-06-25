@@ -93,10 +93,15 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
         return nextState;
 
       } else if (action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
-        queue.initialized$.next(true);
-        nextState = metaReducer(nextState, action);
+        let type = queue.peek()?.type;
 
-        return nextState;
+        if(queue.initialized$.value) {
+          console.warn('Form already initialized.');
+        }
+
+        if (type === FormActionsInternal.AutoInit) { queue.first(action); }
+        else if(type === FormActions.InitForm && action.type === FormActions.InitForm) { queue.first(action); }
+        else { queue.shift(action); }
       }
       else {
         queue.enqueue(action);
