@@ -8,25 +8,22 @@ export const getValue = (obj: any, prop?: string) => {
 
 
 
-export const setValue = (obj: any, prop: string, val: any) => {
+export const setValue = (obj: any, prop: string, val: any): any => {
   const split = prop.split('.');
   const isArray = (split: string[]) => split.length >= 2 && !isNaN(+split[1]);
   const isObject = (split: string[]) => split.length > 1 || isArray(split);
 
-  if(split.length === 0) { obj = val; return obj; }
-  else {
-    let root = Array.isArray(obj)? [...obj]: {...obj};
-    let item = root;
-    while(split.length >= 1) {
-      const key = split[0];
-      item[key] = isArray(split) ? [...(item[key] || [])] : isObject(split) ? {...item[key]} : val;
+  let root = Array.isArray(obj)? [...obj]: {...obj};
+  let item = root;
+  while(split.length >= 1) {
+    const key = split[0];
+    item[key] = isArray(split) ? [...(item[key] || [])] : isObject(split) ? {...item[key]} : val;
 
-      item = item[key];
-      split.shift()
-    }
-
-    return root;
+    item = item[key];
+    split.shift()
   }
+
+  return root;
 };
 
 

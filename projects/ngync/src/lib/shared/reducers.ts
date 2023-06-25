@@ -1,4 +1,5 @@
 import { Action, ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
+import { TypedAction } from '@ngrx/store/src/models';
 import { FormActions, FormActionsInternal } from './actions';
 import { Queue } from './queue';
 import { deepClone, difference, getValue, primitive, setValue } from './utils';
@@ -11,6 +12,7 @@ export interface FormState {
   dirty?: boolean;
   status?: string;
   submitted?: boolean;
+  action?: TypedAction<any>;
 }
 
 
@@ -29,6 +31,7 @@ export const propErrors = (path: string) => `${path}.errors`;
 export const propDirty = (path: string) => `${path}.dirty`;
 export const propStatus = (path: string) => `${path}.status`;
 export const propSubmitted = (path: string) => `${path}.submitted`;
+export const propAction = (path: string) => `${path}.action`;
 
 
 export const actionQueues = new Map<string, Queue<Action>>();
@@ -89,6 +92,7 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
             break;
         }
 
+        nextState = setValue(nextState, propAction(slice), action);
         nextState = logger(logging)(() => nextState)(state, action);
         return nextState;
 
@@ -113,10 +117,10 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
   return metaReducer;
 }
 
-const logger = (logging = true) => (reducer: ActionReducer<any>): any => {
+const logger = (enabled = true) => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
     const result = reducer(state, action);
-    if(!logging || action?.postponed) { return result; }
+    if(!enabled) { return result; }
     console.groupCollapsed(action.type);
     let actionCopy = deepClone(action);
     delete actionCopy.type;
@@ -125,6 +129,8 @@ const logger = (logging = true) => (reducer: ActionReducer<any>): any => {
     let path = actionPath.substring(0, sep === -1 ? actionPath.length : sep).trim();
     delete actionCopy.path;
     console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
+    let previous = path.length > 0 ? deepClone(getValue(state, path)) : state; delete previous?.action;
+    let current = path.length > 0 ? deepClone(getValue(result, path)): result; delete current?.action;
     let diff = path.length > 0 ? difference(getValue(state, path), getValue(result, path)): difference(state, result);
     console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
     console.groupEnd();

@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBind
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { InitForm, UpdateForm, UpdateModel, deepClone, getModel, getSlice } from 'ngync';
-import { Observable, asapScheduler, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
+import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialHero } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
@@ -20,7 +20,6 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Input() caption = '';
 
   profile$!: Observable<any>;
-  initialized = false;
   slice = "hero";
   model = initialHero;
   a: any; b: any;
@@ -28,9 +27,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    if(this.initialized) {
-      this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
-    }
+    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
   }
 
   get collapsed() {
@@ -44,12 +41,9 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
     let state = await firstValueFrom(this.store.select(getModel(this.slice)));
 
     if(!state) {
-      asapScheduler.schedule(() => {
-        this.store.dispatch(InitForm({value: deepClone(initialHero), path: this.slice}))
+        this.store.dispatch(InitForm({value: deepClone(initialHero), path: this.slice}));
         this.model = state ? deepClone(state) : initialHero;
-        this.initialized = true;
         this.collapsed = true;
-      });
     }
 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
@@ -72,9 +66,6 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   onSubmit() {
-    if(this.form?.valid) {
-      alert("Form submitted successfully");
-    }
   }
 
   ngOnDestroy() {

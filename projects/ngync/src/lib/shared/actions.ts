@@ -39,7 +39,7 @@ export const UpdateSubmitted = createAction(
 
 export const ResetForm = createAction(
   FormActions.ResetForm,
-  props<{ path: string; value: 'initial' | 'submitted' | 'empty'}>()
+  props<{ path: string; value: 'initial' | 'submitted' | 'blank'}>()
 );
 
 export const UpdateStatus = createAction(

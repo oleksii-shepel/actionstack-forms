@@ -21,7 +21,6 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Output() messenger = new EventEmitter<boolean>();
 
   profile$!: Observable<any>;
-  initialized = false;
   slice = "model";
   model = initialModel;
 
@@ -30,9 +29,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    if(this.initialized) {
-      this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
-    }
+    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
   }
 
   get collapsed() {
@@ -47,7 +44,6 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
     let state = await firstValueFrom(this.store.select(getModel(this.slice)));
 
     this.model = state ? deepClone(state) : initialModel;
-    this.initialized = true;
     this.collapsed = true;
 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());

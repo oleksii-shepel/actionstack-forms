@@ -14,7 +14,7 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { ActionsSubject, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
@@ -31,6 +31,7 @@ import {
   mergeMap,
   pairwise,
   sampleTime,
+  scan,
   startWith,
   switchMap,
   take,
@@ -44,6 +45,7 @@ import {
   deepEqual,
   findProps,
   getModel,
+  getSlice,
   getValue,
   intersection,
   setValue
@@ -64,7 +66,7 @@ import {
 
 export interface NgyncConfig {
   slice: string;
-  debounce?: number;
+  debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
@@ -79,7 +81,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   slice!: string;
-  debounce!: number;
+  debounceTime!: number;
   resetOnDestroy!: string;
   updateOn!: string;
 
@@ -93,8 +95,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   _submitted$ = new BehaviorSubject<boolean>(false);
   _statusCheck$ = new BehaviorSubject<boolean>(false);
   _initialized$ = new BehaviorSubject<boolean>(false);
-
-  _initDispatched = false;
 
   _subs = {} as any;
 
@@ -118,8 +118,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
     @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef,
     @Inject(Injector) public injector: Injector,
-    @Inject(Store) public store: Store,
-    public actionsSubject: ActionsSubject
+    @Inject(Store) public store: Store
   ) {
   }
 
@@ -136,7 +135,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       this.slice = config.slice;
     }
 
-    this.debounce = config.debounce;
+    this.debounceTime = config.debounceTime;
     this.resetOnDestroy = config.resetOnDestroy;
     this.updateOn = config.updateOn;
 
@@ -148,9 +147,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    let onSubmit$ = this.actionsSubject.pipe(
-      filter((action: any) => action?.path === this.slice),
-      filter((action) => action.type === FormActions.UpdateSubmitted),
+    let onSubmit$ = this.store.select(getSlice(this.slice)).pipe(
+      map(slice => slice?.action),
+      filter((action) => action?.type === FormActions.UpdateSubmitted),
       filter(value => !!value),
       map((action: any) => (UpdateSubmitted({path: this.slice, value: action.value}))),
     );
@@ -185,19 +184,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       })
     );
 
-    this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action?.path === this.slice),
-      tap((action) => { if (action.type === FormActions.InitForm) { this._initDispatched = true; } }),
-      filter((action) => action.type === FormActionsInternal.AutoInit || action.type === FormActions.InitForm || action.type === FormActions.UpdateForm),
+    this.onInitOrUpdate$ = this.store.select(getSlice(this.slice)).pipe(
+      filter(slice => [FormActions.InitForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(slice?.action?.type)),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap((action: any) => {
-
-        this.dir.form.patchValue(intersection(action.value, this.dir.form.value));
+      tap(slice => {
+        let action = slice.action!.type;
+        this.dir.form.patchValue(intersection(slice?.model, this.dir.form.value));
 
         let formValue = this.formValue;
         let equal = true;
 
-        if(action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
+        if(action === FormActions.InitForm || action === FormActionsInternal.AutoInit) {
           this._initialState = formValue;
           this._initialized$.next(true);
 
@@ -209,8 +206,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
 
-        this.store.dispatch(UpdateSubmitted({ path: this.slice, value: this._submittedState ? equal : false }));
-        this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
+        let submitted = this._submittedState ? equal : false;
+        let dirty = !equal;
+
+        slice.submitted !== submitted && this.store.dispatch(UpdateSubmitted({ path: this.slice, value: submitted }));
+        slice.dirty !== dirty && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
 
         this.dir.form.updateValueAndValidity();
         this._statusCheck$.next(true);
@@ -223,8 +223,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter(([input, blur, submitted]) => (input || blur || submitted)),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      sampleTime(this.debounceTime),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      sampleTime(this.debounce),
       tap(([input, blur, submitted]) => {
 
         let form = this.formValue;
@@ -262,12 +262,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         });
       }),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(value => !this._initialized$.value && !this._initDispatched ? this.store.dispatch(AutoInit({ path: this.slice, value: value })) : this._input$.next(true)),
+      tap(value => !this._initialized$.value && this.store.dispatch(AutoInit({ path: this.slice, value: value }))),
+      scan((acc, _) => acc + 1, 0),
+      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue })) } }),
     );
 
-    this.onReset$ = this.actionsSubject.pipe(
-      filter((action: any) => action?.path === this.slice),
-      filter((action: any) => action.type === FormActions.ResetForm),
+    this.onReset$ = this.store.select(getSlice(this.slice)).pipe(
+      map(slice => slice?.action),
+      filter(action => action?.type === FormActions.ResetForm),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
@@ -280,7 +282,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
             case 'submitted':
               this.store.dispatch(UpdateForm({ path: this.slice, value: this._submittedState || {} }));
               break;
-            case 'empty':
+            case 'blank':
               this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset(this.formValue)}));
               break;
           }
@@ -289,7 +291,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     ));
 
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       filter((value) => value !== 'PENDING'),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
@@ -330,7 +331,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   subscribe() {
     this._subs.a = this.onInitOrUpdate$.subscribe();
     this._subs.b = this.onSubmitOrAutoSubmit$.subscribe();
-
     this._subs.c = this.onChanges$.subscribe();
     this._subs.d = this.onControlsChanges$.subscribe();
     this._subs.e = this.onReset$.subscribe();

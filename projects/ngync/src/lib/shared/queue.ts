@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 export class Queue<T> {
   initialized$ = new BehaviorSubject<any>(false);
   updated$ = new BehaviorSubject<any>(false);
+  maxLength = 25;
 
   public constructor(
       private elements: Record<number, T> = {},
@@ -11,12 +12,22 @@ export class Queue<T> {
   ) { }
 
   public enqueue(element: T): void {
-      this.elements[this.tail] = element;
-      this.tail++;
-      this.updated$.next(true);
+    if(this.length === this.maxLength) {
+      this.dequeue();
+      console.warn('Queue is full, dequeuing first element');
+    }
+
+    this.elements[this.tail] = element;
+    this.tail++;
+    this.updated$.next(true);
   }
 
-  public dequeue(): T {
+  public dequeue(): T | undefined {
+      if (this.length === 0) {
+        console.warn('Queue is empty');
+        return undefined;
+      }
+
       const item = this.elements[this.head];
       delete this.elements[this.head];
       this.head++;
@@ -24,8 +35,13 @@ export class Queue<T> {
       return item;
   }
 
-  public peek(): T {
-      return this.elements[this.head];
+  public peek(): T | undefined {
+    if (this.length === 0) {
+      console.warn('Queue is empty');
+      return undefined;
+    }
+
+    return this.elements[this.head];
   }
 
   public get length(): number {

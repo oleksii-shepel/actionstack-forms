@@ -1,10 +1,11 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, NgZone, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateModel, buildForm, deepClone, getModel, getSlice } from 'ngync';
-import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
+import { UpdateModel, buildForm, getSlice } from 'ngync';
+import { Observable, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialProfile, profileOptions } from '../../models/profile';
+
 
 @Component({
   selector: 'reactive-profile-editor',
@@ -17,7 +18,6 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Input() caption = '';
 
   profile$!: Observable<any>;
-  initialized = false;
   slice = "profile";
 
   profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
@@ -36,24 +36,17 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    if(this.initialized) {
-      this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
-    }
+    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
   }
 
   get collapsed() {
     return this._collapsed;
   }
 
-  constructor(private fb: FormBuilder, private store: Store, private elementRef: ElementRef) {
+  constructor(private fb: FormBuilder, private store: Store, private elementRef: ElementRef, private ngZone: NgZone) {
   }
 
-  async ngAfterViewInit() {
-
-    let state = await firstValueFrom(this.store.select(getModel(this.slice)));
-
-    let model = state ? deepClone(state) : initialProfile;
-    this.initialized = true;
+  ngAfterViewInit() {
     this.collapsed = true;
 
     this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());

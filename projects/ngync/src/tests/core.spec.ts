@@ -3,9 +3,9 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
-import { filter, firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom, skip } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSubmitted } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, actionQueues, forms, getModel, getSlice, getSubmitted } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -50,6 +50,8 @@ describe('core', () => {
     });
 
     afterEach(() => {
+      fixture.destroy();
+      actionQueues.clear();
       TestBed.resetTestingModule();
       jest.clearAllTimers();
 
@@ -61,7 +63,7 @@ describe('core', () => {
     it('should create directive', async() => {
       expect(directive.slice).toBe('slice');
       expect(directive.dir instanceof FormGroupDirective).toBeTruthy();
-      expect(directive.debounce).toBe(NGYNC_CONFIG_DEFAULT.debounce);
+      expect(directive.debounceTime).toBe(NGYNC_CONFIG_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
 
@@ -190,6 +192,8 @@ describe('core', () => {
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
       subs.c = directive.onChanges$.subscribe(stub);
       subs.d = directive.onControlsChanges$.subscribe(stub);
+      subs.e = directive.onReset$.subscribe(stub);
+      subs.f = directive.onStatusChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -198,6 +202,7 @@ describe('core', () => {
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
+      directive.store.dispatch(ResetForm({ path:'slice', value: 'blank' }));
 
       directive._input$.next(true);
       directive._blur$.next(true);
@@ -214,7 +219,7 @@ describe('core', () => {
     it('dispatch InitForm before AutoInit action triggered', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.actionsSubject.pipe(filter(action => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
+      subs.a = directive.store.select(getSlice('slice')).pipe(skip(1), filter(slice => slice?.action?.type === FormActionsInternal.AutoInit)).subscribe(auto);
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -433,7 +438,7 @@ describe('core', () => {
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'Helen'});
 
-      directive.store.dispatch(ResetForm({path :'slice', value: 'empty'}));
+      directive.store.dispatch(ResetForm({path :'slice', value: 'blank'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -517,7 +522,7 @@ describe('core', () => {
     it('should create directive', async() => {
       expect(directive.slice).toBe('slice');
       expect(directive.dir instanceof NgForm).toBeTruthy();
-      expect(directive.debounce).toBe(NGYNC_CONFIG_DEFAULT.debounce);
+      expect(directive.debounceTime).toBe(NGYNC_CONFIG_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
 
@@ -646,6 +651,8 @@ describe('core', () => {
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
       subs.c = directive.onChanges$.subscribe(stub);
       subs.d = directive.onControlsChanges$.subscribe(stub);
+      subs.e = directive.onReset$.subscribe(stub);
+      subs.f = directive.onStatusChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -654,6 +661,7 @@ describe('core', () => {
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateSubmitted({ path:'slice', value: true }));
+      directive.store.dispatch(ResetForm({ path:'slice', value: 'blank' }));
 
       directive._input$.next(true);
       directive._blur$.next(true);
@@ -670,7 +678,7 @@ describe('core', () => {
     it('dispatch InitForm before AutoInit action triggered', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.actionsSubject.pipe(filter(action => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
+      subs.a = directive.store.select(getSlice('slice')).pipe(skip(1), filter(slice => slice?.action?.type === FormActionsInternal.AutoInit)).subscribe(auto);
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -889,7 +897,7 @@ describe('core', () => {
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({firstName: 'Helen'});
 
-      directive.store.dispatch(ResetForm({path :'slice', value: 'empty'}));
+      directive.store.dispatch(ResetForm({path :'slice', value: 'blank'}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
