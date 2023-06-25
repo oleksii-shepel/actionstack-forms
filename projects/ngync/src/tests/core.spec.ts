@@ -5,7 +5,7 @@ import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, Reacti
 import { StoreModule } from "@ngrx/store";
 import { filter, firstValueFrom, skip } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSlice, getSubmitted } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, actionQueues, forms, getModel, getSlice, getSubmitted } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -43,6 +43,7 @@ describe('core', () => {
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
       directive.slice = 'slice';
+      actionQueues.clear();
 
       jest.useFakeTimers();
       fixture.detectChanges();
@@ -50,6 +51,9 @@ describe('core', () => {
     });
 
     afterEach(() => {
+      directive.ngOnDestroy();
+      jest.advanceTimersByTime(3000);
+
       TestBed.resetTestingModule();
       jest.clearAllTimers();
 
@@ -501,6 +505,7 @@ describe('core', () => {
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
       directive.slice = 'slice';
+      actionQueues.clear();
 
       jest.useFakeTimers();
       fixture.detectChanges();
@@ -508,6 +513,9 @@ describe('core', () => {
     });
 
     afterEach(() => {
+      directive.ngOnDestroy();
+      jest.advanceTimersByTime(3000);
+
       TestBed.resetTestingModule();
       jest.clearAllTimers();
 
@@ -953,7 +961,7 @@ describe('core', () => {
       fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [ngync]="{slice: 'model', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
+          <form [formGroup]="form" [ngync]="{slice: 'slice', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -965,6 +973,9 @@ describe('core', () => {
       jest.useFakeTimers();
       fixture.detectChanges();
       await fixture.whenStable();
+
+      directive.ngOnDestroy();
+      jest.advanceTimersByTime(3000);
 
       TestBed.resetTestingModule();
       jest.clearAllTimers();
@@ -1010,6 +1021,9 @@ describe('core', () => {
 
       expect(directive.ngOnInit).toThrow(Error);
 
+      directive.ngOnDestroy();
+      jest.advanceTimersByTime(3000);
+
       TestBed.resetTestingModule();
       jest.clearAllTimers();
     }));
@@ -1038,7 +1052,7 @@ describe('core', () => {
       fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [ngync]="model">
+          <form [ngync]="slice">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -1048,6 +1062,9 @@ describe('core', () => {
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
 
       expect(directive.ngOnInit).toThrow(Error);
+
+      directive.ngOnDestroy();
+      jest.advanceTimersByTime(3000);
 
       TestBed.resetTestingModule();
       jest.clearAllTimers();

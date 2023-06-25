@@ -339,7 +339,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   ngOnDestroy() {
     asyncScheduler.schedule(() => {
-      if(this.queue.initialized$.value) {
+      if(this.queue?.initialized$.value) {
         while(this.queue.length > 0) {
           this.store.dispatch(this.queue.dequeue()!);
         }
