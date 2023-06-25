@@ -129,8 +129,8 @@ export function deepCloneJSON(objectToClone: any) {
 
 
 export function intersection(x: any, y: any) {
-  return Object.keys(x).reduce((result, key) => {
-    if (key in y) {
+  return Object.keys(x || {}).reduce((result, key) => {
+    if (key in (y || {})) {
       result[key] = x[key];
     }
     return result;

@@ -14,10 +14,11 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
+  asyncScheduler,
   combineLatest,
   defer,
   delay,
@@ -29,6 +30,7 @@ import {
   map,
   merge,
   mergeMap,
+  observeOn,
   pairwise,
   sampleTime,
   scan,
@@ -42,6 +44,7 @@ import {
   DomObserver,
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
+  actionQueues,
   deepEqual,
   findProps,
   getModel,
@@ -62,6 +65,7 @@ import {
   UpdateStatus,
   UpdateSubmitted
 } from './actions';
+import { Queue } from './queue';
 
 
 export interface NgyncConfig {
@@ -86,6 +90,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   updateOn!: string;
 
   dir!: NgForm | FormGroupDirective;
+  queue!: Queue<Action>;
 
   _initialState: any;
   _submittedState: any;
@@ -113,6 +118,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   onSubmitOrAutoSubmit$!: Observable<any>;
   onReset$!: Observable<any>;
   onStatusChanges$!: Observable<any>;
+  onActionQueued$!: Observable<any>;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -146,6 +152,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     if (!this.dir) {
       throw new Error('Supported form control directive not found');
     }
+
+    actionQueues.has(this.slice) || actionQueues.set(this.slice, new Queue<Action>());
+    this.queue = actionQueues.get(this.slice)!;
 
     let onSubmit$ = this.store.select(getSlice(this.slice)).pipe(
       map(slice => slice?.action),
@@ -262,9 +271,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         });
       }),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(value => !this._initialized$.value && this.store.dispatch(AutoInit({ path: this.slice, value: value }))),
+      tap(value => { if(!this._initialized$.value) { this.store.dispatch(AutoInit({ path: this.slice, value: value })); } }),
       scan((acc, _) => acc + 1, 0),
-      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue })) } }),
+      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue })); } })
     );
 
     this.onReset$ = this.store.select(getSlice(this.slice)).pipe(
@@ -305,6 +314,20 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this.store.dispatch(UpdateErrors({ path: this.slice, errors: value.errors }));
       })
     );
+
+    this.onActionQueued$ = this.queue.updated$.pipe(
+      observeOn(asyncScheduler),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      tap(() => {
+        if(this.queue.initialized$.value) {
+          while(this.queue.length > 0) {
+            this.store.dispatch(this.queue.dequeue()!);
+          }
+        }
+      })
+    );
   }
 
   ngAfterContentInit() {
@@ -315,6 +338,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
+    asyncScheduler.schedule(() => {
+      if(this.queue.initialized$.value) {
+        while(this.queue.length > 0) {
+          this.store.dispatch(this.queue.dequeue()!);
+        }
+      }
+    });
+
     this.store.dispatch(FormDestroyed({ path: this.slice }));
 
     for (const sub of Object.keys(this._subs)) {
@@ -335,6 +366,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._subs.d = this.onControlsChanges$.subscribe();
     this._subs.e = this.onReset$.subscribe();
     this._subs.f = this.onStatusChanges$.subscribe();
+    this._subs.g = this.onActionQueued$.subscribe();
   }
 
   get formValue(): any {

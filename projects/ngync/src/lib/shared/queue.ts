@@ -44,6 +44,12 @@ export class Queue<T> {
     return this.elements[this.head];
   }
 
+  public clear(): void {
+    this.elements = {};
+    this.head = 0;
+    this.tail = 0;
+  }
+
   public get length(): number {
       return this.tail - this.head;
   }

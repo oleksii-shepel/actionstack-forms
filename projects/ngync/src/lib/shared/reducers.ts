@@ -84,10 +84,6 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
             nextState = setValue(state, propSubmitted(slice), true);
             break;
           case FormActionsInternal.FormDestroyed:
-            while(queue.length > 0) {
-              let nextAction = queue.dequeue();
-              nextState = metaReducer(nextState, nextAction);
-            }
             actionQueues.delete(slice);
             break;
         }
@@ -99,11 +95,6 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
       } else if (action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
         queue.initialized$.next(true);
         nextState = metaReducer(nextState, action);
-
-        while(queue.length > 0) {
-          let nextAction = queue.dequeue();
-          nextState = metaReducer(nextState, nextAction);
-        }
 
         return nextState;
       }
@@ -131,7 +122,7 @@ const logger = (enabled = true) => (reducer: ActionReducer<any>): any => {
     console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
     let previous = path.length > 0 ? deepClone(getValue(state, path)) : state; delete previous?.action;
     let current = path.length > 0 ? deepClone(getValue(result, path)): result; delete current?.action;
-    let diff = path.length > 0 ? difference(getValue(state, path), getValue(result, path)): difference(state, result);
+    let diff = difference(previous, current);
     console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
     console.groupEnd();
     return result;

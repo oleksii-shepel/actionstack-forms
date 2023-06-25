@@ -5,7 +5,7 @@ import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, Reacti
 import { StoreModule } from "@ngrx/store";
 import { filter, firstValueFrom, skip } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, actionQueues, forms, getModel, getSlice, getSubmitted } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, forms, getModel, getSlice, getSubmitted } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -50,8 +50,6 @@ describe('core', () => {
     });
 
     afterEach(() => {
-      fixture.destroy();
-      actionQueues.clear();
       TestBed.resetTestingModule();
       jest.clearAllTimers();
 
@@ -511,7 +509,6 @@ describe('core', () => {
 
     afterEach(() => {
       TestBed.resetTestingModule();
-      jest.useRealTimers();
       jest.clearAllTimers();
 
       for (let sub in subs) {
