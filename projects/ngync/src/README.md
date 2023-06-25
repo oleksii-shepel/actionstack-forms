@@ -43,7 +43,7 @@ ngync directive expects from user a string that consists of a sequence of proper
 ```typescript
 export interface NgyncConfig {
   slice: string;
-  debounce?: number;
+  debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
 }
 ```
@@ -68,7 +68,7 @@ import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
     FormsModule,
     SharedModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [logger(), forms(initialState)]
+      metaReducers: [forms(initialState)]
     }),
 
     NgFormsModule
@@ -79,7 +79,7 @@ export class AppModule { }
 ```
 
 <p align="justify">
-Here we are putting into work two meta-reducers: one for form state syncing and one for logging. Forms reducer is mandatory if you want to save state within the store, but the logger is optional. It will come in handy by taking first steps. You can use it in a similar way to the Redux DevTools.*** As could you guess, the order of meta-reducers matters. So, the first one in meta-reducers list will be executed last. 
+Here we are putting into work one forms meta-reducer which is responsible for synchronizing of form state with NgRx store. The previously used logger meta-reducer is not more avaliable. It is still used internally, but now you need to pass true value as the second parameter to the forms function to enable it. This is primarily due to the fact that actions are queued and the order of their execution differs from the sequence of their dispatch.
 </p>
 <p align="justify">
 That's it, all settings are done and your form have to be synchronized with the store, now you can deep into exploration of internal processes.
