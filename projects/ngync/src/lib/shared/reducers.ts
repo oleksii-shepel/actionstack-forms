@@ -102,9 +102,12 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
         if (type === FormActionsInternal.AutoInit) { queue.first(action); }
         else if(type === FormActions.InitForm && action.type === FormActions.InitForm) { queue.first(action); }
         else { queue.shift(action); }
+
+        return nextState;
       }
       else {
         queue.enqueue(action);
+        return nextState;
       }
     }
     return nextState;

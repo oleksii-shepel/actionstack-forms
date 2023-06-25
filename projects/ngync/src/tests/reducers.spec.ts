@@ -1,4 +1,6 @@
+import { Action } from '@ngrx/store';
 import { AutoInit, AutoSubmit, FormDestroyed, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateModel, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
+import { Queue } from '../lib/shared/queue';
 import { actionQueues, forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
@@ -30,7 +32,15 @@ describe('reducer', () => {
     let f = forms(initialState, false);
     let expected = {} as any;
 
-    let newState = f((state: any, action: any) => {})(initialState, InitForm({path: "slice", value: model}));
+    actionQueues.set('slice', new Queue<Action>)
+    actionQueues.get('slice')?.initialized$.next(true);
+
+    let newState = f((state: any, action: any) => {})(initialState, AutoInit({path: "slice", value: model}));
+    delete newState.slice.action;
+    expected = deepClone(initialState); (expected as any)['slice'] = { model };
+    expect(newState).toEqual(expected);
+
+    newState = f((state: any, action: any) => {})(initialState, InitForm({path: "slice", value: model}));
     delete newState.slice.action;
     expected = { slice: { model } };
     expect(newState).toEqual(expected);
@@ -68,11 +78,6 @@ describe('reducer', () => {
     newState = f((state: any, action: any) => {})(initialState, UpdateDirty({path: "slice", dirty: true}));
     delete newState.slice.action;
     expected = deepClone(initialState); (expected as any)['slice'].dirty = true;
-    expect(newState).toEqual(expected);
-
-    newState = f((state: any, action: any) => {})(initialState, AutoInit({path: "slice", value: model}));
-    delete newState.slice.action;
-    expected = deepClone(initialState); (expected as any)['slice'] = { model };
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => {})(initialState, AutoSubmit({path: "slice"}));
