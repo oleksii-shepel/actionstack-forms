@@ -23,7 +23,6 @@ import {
   defer,
   delay,
   distinctUntilChanged,
-  distinctUntilKeyChanged,
   filter,
   from,
   fromEvent,
@@ -159,7 +158,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     let onSubmit$ = this.store.select(getSlice(this.slice)).pipe(
       map(slice => slice?.action),
       filter((action) => action?.type === FormActions.UpdateSubmitted),
-      filter(value => !!value),
       map((action: any) => (UpdateSubmitted({path: this.slice, value: action.value}))),
     );
 
@@ -174,12 +172,22 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action?.path === this.slice),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      distinctUntilKeyChanged('value'),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap((action) => { if(action.type === AutoSubmit.type) { this.store.dispatch(AutoSubmit({ path: this.slice })); } }),
+      map((action) => ({action: action, value: this.formValue})),
+      pairwise(),
+      distinctUntilChanged(([prev, curr]) => {
+        let prevValue = prev.action.type === FormActionsInternal.AutoSubmit ? true : prev.action.value;
+        let currValue = curr.action.type === FormActionsInternal.AutoSubmit ? true : curr.action.value;
+        return prevValue === currValue && deepEqual(prev.value, curr.value);
+      }),
+      map(([_, curr]) => curr.action),
       tap((action) => {
 
-        if(action.value === true) {
+        if(action.type === FormActionsInternal.AutoSubmit) {
+          this.store.dispatch(AutoSubmit({ path: this.slice }));
+        }
+
+        if(action.type === FormActionsInternal.AutoSubmit || action.value === true) {
           this._submittedState = this.formValue;
 
           if (this.dir.form.dirty) {
