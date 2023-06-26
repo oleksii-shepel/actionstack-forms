@@ -32,7 +32,7 @@ describe('reducer', () => {
     let f = forms(initialState, false, false);
     let expected = {} as any;
 
-    actionQueues.set('slice', new Queue<Action>)
+    actionQueues.set('slice', new Queue<Action>());
     actionQueues.get('slice')?.initialized$.next(true);
 
     let newState = f((state: any, action: any) => {})(initialState, AutoInit({path: "slice", value: model}));
