@@ -24,7 +24,7 @@
 Within the vast <a href="https://angular.io/">Angular</a> ecosystem, you'll discover two distinct methodologies for managing user input through forms: reactive forms and template-driven forms. Whether you choose Angular equips you with powerful tools to effectively handle user interactions and effortlessly manage form-related tasks.
 </p>
 <p align="justify">
-Curious about bridging these worlds? Allow me to unveil a remarkable solution: the ingenious <b>ngync</b> library. Prepare to be captivated as I unravel its unique characteristics and how it sets itself apart from other available alternatives. Let me introduce it to you. Application example is available on <a href="https://oleksii-shepel.github.io/angular-ngrx-forms/">Github Pages</a>.</p>
+Curious about bridging these worlds? Allow me to unveil a remarkable solution: the ingenious <b>ngync</b> library. Prepare to be captivated as I unravel its unique characteristics and describe how it sets itself apart from other available alternatives. Let me introduce it to you. Application example is available at <a href="https://oleksii-shepel.github.io/angular-ngrx-forms/">Github Pages</a>.</p>
 <h2>Usage</h2>
 <p align="justify">
 If you know how to work with NgRx, you will also be comfortable using ngync. All you need to do is declare ngync directive on the form and provide it with the store path. This magic spell ensures that your form data finds a safe place throughout your application's execution. Here is an example of common form definition:
@@ -85,7 +85,7 @@ export class AppModule { }
 Behold, we now unveil a formidable forms meta-reducer that works tirelessly to synchronize the form state with the mighty NgRx store. The beloved logger meta-reducer we once cherished is no longer readily available. But it is still used internally, silently serving its purpose. To invoke its power, you need to pass a true value as the second parameter to the forms function. This is due to the fact that actions are queued and the order of their execution differs from the sequence of their dispatch.
 </p>
 <p align="justify">
-That's it, with all the settings in place, your form is now synchronized with the store. It's time to embark on an exciting journey and delve into the intricate realm of internal processes. now you can deep into exploration of internal processes.
+That's it, with all the settings in place, your form is now synchronized with the store. It's time to embark on an exciting journey and delve into the exploration of internal processes.
 </p>
 <p align="justify">
 By default, ngync will generate tracing actions every time user enters the data in the form. They have to be displayed in console of your browser. This behavior can be changed by passing on a special updateOn attribute to the directive. It can take one of three values: 'change', 'blur' or 'submit'. The tracing actions will be generated respectively every time user enters the data, when user leaves one of the form fields or when entire form is submitted or to be submitted.
