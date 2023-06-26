@@ -1,10 +1,10 @@
 import { Action } from '@ngrx/store';
-import { FormState } from 'ngync';
+import { FormCast } from 'ngync';
 import { initialProfile } from '../models/profile';
 
 
 
-export interface ProfileState extends FormState {}
+export interface ProfileState extends FormCast {}
 
 
 

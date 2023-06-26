@@ -5,7 +5,7 @@ import { deepClone, difference, getValue, primitive, setValue } from './utils';
 
 
 
-export interface FormState {
+export interface FormCast {
   value: any;
   errors?: Record<string, string>;
   dirty?: boolean;
@@ -15,7 +15,7 @@ export interface FormState {
 
 
 
-export const selectSlice = (slice: string) => createFeatureSelector<FormState>(slice);
+export const selectSlice = (slice: string) => createFeatureSelector<FormCast>(slice);
 export const selectValue = (slice: string) => createSelector(selectSlice(slice), state => state?.value);
 export const selectErrors = (slice: string) => createSelector(selectSlice(slice), state => state?.errors);
 export const selectDirty = (slice: string) => createSelector(selectSlice(slice), state => state?.dirty);

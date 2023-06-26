@@ -44,7 +44,7 @@ describe('reducer', () => {
     expect(newState.model).toEqual(expected.model);
 
     newState = f((state: any, action: any) => {})(initialState, UpdateForm({path: "slice", value: model}));
-    expected = deepClone(initialState); (expected as any)['slice'].model = model;
+    expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => {})(initialState, UpdateSubmitted({path: "slice", submitted: false}));
@@ -52,7 +52,7 @@ describe('reducer', () => {
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => {})(initialState, UpdateModelProperty({path: "slice", value: model}));
-    expected = deepClone(initialState); (expected as any)['slice'].model = model;
+    expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => {})(initialState, ResetForm({path: "slice", state: 'initial'}));
