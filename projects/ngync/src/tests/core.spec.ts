@@ -3,9 +3,9 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
-import { filter, firstValueFrom, skip } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, actionQueues, forms, getModel, getSlice, getSubmitted } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, UpdateSubmitted, actionQueues, forms, getModel, getSubmitted } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -221,7 +221,7 @@ describe('core', () => {
     it('dispatch InitForm before AutoInit action triggered', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.store.select(getSlice('slice')).pipe(skip(1), filter(slice => slice?.action?.type === FormActionsInternal.AutoInit)).subscribe(auto);
+      subs.a = directive.onInitOrUpdate$.pipe(filter((action) => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -247,21 +247,21 @@ describe('core', () => {
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Helen' } }));
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'John' } }));
 
-      jest.advanceTimersByTime(3000);
+      jest.advanceTimersByTime(5000);
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(3);
+      expect(stub).toHaveBeenCalledTimes(1);
 
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'John' } }));
 
-      jest.advanceTimersByTime(3000);
+      jest.advanceTimersByTime(5000);
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(6);
+      expect(stub).toHaveBeenCalledTimes(4);
     });
     describe('onChanges', () => {
       it('change', async () => {
@@ -683,7 +683,7 @@ describe('core', () => {
     it('dispatch InitForm before AutoInit action triggered', async () => {
       let auto = jest.fn();
 
-      subs.a = directive.store.select(getSlice('slice')).pipe(skip(1), filter(slice => slice?.action?.type === FormActionsInternal.AutoInit)).subscribe(auto);
+      subs.a = directive.onInitOrUpdate$.pipe(filter((action) => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
       directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -713,7 +713,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(3);
+      expect(stub).toHaveBeenCalledTimes(1);
 
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
@@ -723,7 +723,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(getModel('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(6);
+      expect(stub).toHaveBeenCalledTimes(4);
     });
     describe('onChanges', () => {
       it('change', async () => {

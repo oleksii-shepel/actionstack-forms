@@ -14,7 +14,7 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { Action, Store } from '@ngrx/store';
+import { Action, ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
@@ -24,6 +24,7 @@ import {
   delay,
   distinctUntilChanged,
   filter,
+  finalize,
   from,
   fromEvent,
   map,
@@ -85,11 +86,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   slice!: string;
   debounceTime!: number;
-  resetOnDestroy!: string;
   updateOn!: string;
+  queueEnabled: boolean = true;
 
   dir!: NgForm | FormGroupDirective;
-  queue!: Queue<Action>;
 
   _initialState: any;
   _submittedState: any;
@@ -123,7 +123,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
     @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef,
     @Inject(Injector) public injector: Injector,
-    @Inject(Store) public store: Store
+    @Inject(Store) public store: Store,
+    @Inject(ActionsSubject) public actionsSubject: ActionsSubject,
   ) {
   }
 
@@ -141,7 +142,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
 
     this.debounceTime = config.debounceTime;
-    this.resetOnDestroy = config.resetOnDestroy;
     this.updateOn = config.updateOn;
 
     if (!this.slice) {
@@ -152,11 +152,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    actionQueues.has(this.slice) || actionQueues.set(this.slice, new Queue<Action>());
-    this.queue = actionQueues.get(this.slice)!;
-
-    let onSubmit$ = this.store.select(getSlice(this.slice)).pipe(
-      map(slice => slice?.action),
+    let onSubmit$ = this.actionsSubject.pipe(
+      filter((action: any) => action?.deferred === true && action?.path === this.slice),
       filter((action) => action?.type === FormActions.UpdateSubmitted),
       map((action: any) => (UpdateSubmitted({path: this.slice, value: action.value}))),
     );
@@ -201,17 +198,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       })
     );
 
-    this.onInitOrUpdate$ = this.store.select(getSlice(this.slice)).pipe(
-      filter(slice => [FormActions.InitForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(slice?.action?.type)),
+    this.onInitOrUpdate$ = this.actionsSubject.pipe(
+      filter((action: any) => action?.deferred === true && action?.path === this.slice),
+      filter(action => [FormActions.InitForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action?.type)),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(slice => {
-        let action = slice.action!.type;
-        this.dir.form.patchValue(intersection(slice?.model, this.dir.form.value));
+      switchMap((action) => from(this.store.select(getSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
+      tap(({action, slice}) => {
+        this.dir.form.patchValue(intersection(action.value, this.dir.form.value));
 
         let formValue = this.formValue;
         let equal = true;
 
-        if(action === FormActions.InitForm || action === FormActionsInternal.AutoInit) {
+        if(action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
           this._initialState = formValue;
           this._initialized$.next(true);
 
@@ -261,7 +259,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         if(submitted === true) {
           this._submitted$.next(false);
         }
-
       })
     );
 
@@ -284,8 +281,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue })); } })
     );
 
-    this.onReset$ = this.store.select(getSlice(this.slice)).pipe(
-      map(slice => slice?.action),
+    this.onReset$ = this.actionsSubject.pipe(
+      filter((action: any) => action?.deferred === true && action?.path === this.slice),
       filter(action => action?.type === FormActions.ResetForm),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
@@ -323,17 +320,28 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       })
     );
 
-    this.onActionQueued$ = this.queue.updated$.pipe(
+    this.onActionQueued$ = defer(() => {
+      actionQueues.has(this.slice) || actionQueues.set(this.slice, new Queue<Action>());
+      let queue = actionQueues.get(this.slice)!;
+      return queue.updated$
+    }).pipe(
       observeOn(asyncScheduler),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(() => {
-        let type = this.queue.peek()?.type;
-        if(type === FormActions.InitForm || type === FormActionsInternal.AutoInit) {
-          this.queue.initialized$.next(true);
-          while(this.queue.length > 0) {
-            this.store.dispatch(this.queue.dequeue()!);
+      tap((queue) => {
+        if(queue.initialized$.value) {
+          while(queue.length > 0) {
+            this.store.dispatch(queue.dequeue()!);
           }
         }
+      }),
+      finalize(() => {
+        let queue = actionQueues.get(this.slice)!;
+        if(queue?.initialized$.value) {
+          while(queue.length > 0) {
+            this.store.dispatch(queue.dequeue()!);
+          }
+        }
+        actionQueues.delete(this.slice);
       })
     );
   }
@@ -346,14 +354,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
-    asyncScheduler.schedule(() => {
-      if(this.queue?.initialized$.value) {
-        while(this.queue.length > 0) {
-          this.store.dispatch(this.queue.dequeue()!);
-        }
-      }
-    });
-
     this.store.dispatch(FormDestroyed({ path: this.slice }));
 
     for (const sub of Object.keys(this._subs)) {

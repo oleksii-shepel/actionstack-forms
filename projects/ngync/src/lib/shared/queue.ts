@@ -2,7 +2,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export class Queue<T> {
   initialized$ = new BehaviorSubject<any>(false);
-  updated$ = new BehaviorSubject<any>(false);
+  updated$ = new BehaviorSubject<any>(this);
   maxLength = 25;
 
   public constructor(
@@ -16,7 +16,7 @@ export class Queue<T> {
       this.enqueue(element);
     } else {
       this.elements[this.head] = element;
-      this.updated$.next(true);
+      this.updated$.next(this);
     }
   }
 
@@ -28,7 +28,7 @@ export class Queue<T> {
 
     this.head--;
     this.elements[this.head] = element;
-    this.updated$.next(true);
+    this.updated$.next(this);
   }
 
   public enqueue(element: T): void {
@@ -39,7 +39,7 @@ export class Queue<T> {
 
     this.elements[this.tail] = element;
     this.tail++;
-    this.updated$.next(true);
+    this.updated$.next(this);
   }
 
   public dequeue(): T | undefined {

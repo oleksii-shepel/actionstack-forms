@@ -82,7 +82,7 @@ export function deepEqual(x: any, y: any): boolean {
       } else if(x instanceof Set &&  y instanceof Set) {
         equal = x.size === y.size && [...x.entries()].every(([key, value]) => y.has(key));
       } else {
-        equal = Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
+        equal = x === y || Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
       }
     }
   } else {

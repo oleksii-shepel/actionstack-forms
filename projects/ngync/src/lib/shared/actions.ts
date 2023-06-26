@@ -1,4 +1,5 @@
-import { createAction, props } from '@ngrx/store';
+import { Action, createAction, props } from '@ngrx/store';
+import { deepClone } from './utils';
 
 export enum FormActions {
   InitForm = '[Form] Init Form',
@@ -71,3 +72,18 @@ export const FormDestroyed = createAction(
   FormActionsInternal.FormDestroyed,
   props<{ path: string; }>()
 );
+
+export class Deferred implements Action {
+  deferred: boolean = true;
+  type: string = 'Deferred';
+
+  constructor(action: Action) {
+    Object.assign(this, action);
+  }
+
+  toAction(): Action {
+    let action = deepClone(this);
+    delete action.deferred;
+    return action;
+  }
+}

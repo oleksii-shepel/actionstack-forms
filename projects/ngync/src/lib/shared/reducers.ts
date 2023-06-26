@@ -1,6 +1,5 @@
 import { Action, ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
-import { TypedAction } from '@ngrx/store/src/models';
-import { FormActions, FormActionsInternal } from './actions';
+import { Deferred, FormActions, FormActionsInternal } from './actions';
 import { Queue } from './queue';
 import { deepClone, difference, getValue, primitive, setValue } from './utils';
 
@@ -12,7 +11,6 @@ export interface FormState {
   dirty?: boolean;
   status?: string;
   submitted?: boolean;
-  action?: TypedAction<any>;
 }
 
 
@@ -36,23 +34,24 @@ export const propAction = (path: string) => `${path}.action`;
 
 export const actionQueues = new Map<string, Queue<Action>>();
 
-export const forms = (initialState: any = {}, logging = true) => (reducer: ActionReducer<any>): any => {
+export const forms = (initialState: any = {}, logging = true, queueEnabled = true) => (reducer: ActionReducer<any>): any => {
 
   const metaReducer = (state: any, action: any) => {
 
     state = state ?? deepClone(initialState);
-    let nextState = reducer(state, action);
+    let nextState = state;
     let path = action?.path;
 
     if(path) {
       let slice = path.split('::')[0];
-      actionQueues.has(slice) || actionQueues.set(slice, new Queue<Action>());
-      let queue = actionQueues.get(slice)!;
 
-      if(queue.initialized$.value) {
+      if(!queueEnabled || queueEnabled && action?.deferred) {
+
+        nextState = reducer(state, action);
+
         switch(action.type) {
           case FormActions.InitForm:
-            nextState = setValue(state, slice, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(slice)) || {}), action.value) });
+            nextState = setValue(state, slice, { model: action.value });
             break;
           case FormActions.UpdateForm:
             nextState = setValue(state, slice, {...getValue(state, slice), model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(slice)) || {}), action.value) });
@@ -78,7 +77,7 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
             nextState = setValue(state, propDirty(slice), action.dirty);
             break;
           case FormActionsInternal.AutoInit:
-            nextState = setValue(state, slice, { model: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propModel(slice)) || {}), action.value) });
+            nextState = setValue(state, slice, { model: action.value });
             break;
           case FormActionsInternal.AutoSubmit:
             nextState = setValue(state, propSubmitted(slice), true);
@@ -88,28 +87,37 @@ export const forms = (initialState: any = {}, logging = true) => (reducer: Actio
             break;
         }
 
-        nextState = setValue(nextState, propAction(slice), action);
         nextState = logger(logging)(() => nextState)(state, action);
         return nextState;
 
-      } else if (action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
-        let type = queue.peek()?.type;
+      } else if(queueEnabled) {
+        actionQueues.has(slice) || actionQueues.set(slice, new Queue<Action>());
+        let queue = actionQueues.get(slice)!;
 
-        if(queue.initialized$.value) {
-          console.warn('Form already initialized.');
+        if (action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
+          let type = queue.peek()?.type;
+
+          if (type === FormActionsInternal.AutoInit) { queue.first(new Deferred(action)); }
+          else if(type === FormActions.InitForm) { action.type === FormActions.InitForm && queue.first(action); }
+          else { queue.shift(new Deferred(action)); }
+
+          queue.initialized$.next(true);
+          return nextState;
+        }
+        else {
+
+          queue.enqueue(new Deferred(action));
+          return nextState;
         }
 
-        if (type === FormActionsInternal.AutoInit) { queue.first(action); }
-        else if(type === FormActions.InitForm) { action.type === FormActions.InitForm && queue.first(action); }
-        else { queue.shift(action); }
-
-        return nextState;
-      }
-      else {
-        queue.enqueue(action);
+      } else {
+        nextState = reducer(state, action);
+        nextState = logger(logging)(() => nextState)(state, action);
         return nextState;
       }
     }
+
+    nextState = reducer(state, action);
     return nextState;
   }
 
@@ -128,8 +136,8 @@ const logger = (enabled = true) => (reducer: ActionReducer<any>): any => {
     let path = actionPath.substring(0, sep === -1 ? actionPath.length : sep).trim();
     delete actionCopy.path;
     console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
-    let previous = path.length > 0 ? deepClone(getValue(state, path)) : state; delete previous?.action;
-    let current = path.length > 0 ? deepClone(getValue(result, path)): result; delete current?.action;
+    let previous = path.length > 0 ? deepClone(getValue(state, path)) : state;
+    let current = path.length > 0 ? deepClone(getValue(result, path)): result;
     let diff = difference(previous, current);
     console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
     console.groupEnd();
