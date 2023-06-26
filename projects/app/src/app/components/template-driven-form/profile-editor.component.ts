@@ -41,7 +41,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
     let state = await firstValueFrom(this.store.select(selectValue(this.slice)));
 
     if(!state) {
-        this.store.dispatch(InitForm({value: deepClone(initialHero), path: this.slice}));
+        this.store.dispatch(InitForm({value: initialHero, path: this.slice}));
         this.model = state ? deepClone(state) : initialHero;
         this.collapsed = true;
     }
