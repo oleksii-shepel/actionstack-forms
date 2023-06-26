@@ -9,7 +9,7 @@ export interface ModelState extends FormState {}
 
 
 export const initialState: ModelState = {
-  model: initialModel,
+  value: initialModel,
 };
 
 

@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { InitForm, UpdateForm, UpdateModel, deepClone, getModel, getSlice } from 'ngync';
+import { InitForm, UpdateForm, UpdateModelProperty, deepClone, selectSlice, selectValue } from 'ngync';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialHero } from '../../models/profile';
@@ -27,7 +27,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
+    this.store.dispatch(UpdateModelProperty({value: value, path: `${this.slice}::collapsed`}));
   }
 
   get collapsed() {
@@ -38,7 +38,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   async ngAfterViewInit() {
-    let state = await firstValueFrom(this.store.select(getModel(this.slice)));
+    let state = await firstValueFrom(this.store.select(selectValue(this.slice)));
 
     if(!state) {
         this.store.dispatch(InitForm({value: deepClone(initialHero), path: this.slice}));
@@ -46,7 +46,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
         this.collapsed = true;
     }
 
-    this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
+    this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
     let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {

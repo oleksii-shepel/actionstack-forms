@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, NgZone, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateModel, buildForm, getSlice } from 'ngync';
+import { UpdateModelProperty, buildForm, selectSlice } from 'ngync';
 import { Observable, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialProfile, profileOptions } from '../../models/profile';
@@ -36,7 +36,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed: boolean = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateModel({value: value, path: `${this.slice}::collapsed`}));
+    this.store.dispatch(UpdateModelProperty({value: value, path: `${this.slice}::collapsed`}));
   }
 
   get collapsed() {
@@ -49,7 +49,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   ngAfterViewInit() {
     this.collapsed = true;
 
-    this.profile$ = this.store.select(getSlice(this.slice)).pipe(shareReplay());
+    this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
     let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {

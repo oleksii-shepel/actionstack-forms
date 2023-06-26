@@ -9,7 +9,7 @@ export interface ProfileState extends FormState {}
 
 
 export const initialState: ProfileState = {
-  model: initialProfile,
+  value: initialProfile,
 };
 
 

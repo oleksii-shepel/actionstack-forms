@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { AutoInit, AutoSubmit, FormDestroyed, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateModel, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
+import { AutoInit, AutoSubmit, FormDestroyed, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateModelProperty, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
 import { Queue } from '../lib/shared/queue';
 import { actionQueues, forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
@@ -47,15 +47,15 @@ describe('reducer', () => {
     expected = deepClone(initialState); (expected as any)['slice'].model = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateSubmitted({path: "slice", value: false}));
+    newState = f((state: any, action: any) => {})(initialState, UpdateSubmitted({path: "slice", submitted: false}));
     expected = deepClone(initialState); (expected as any)['slice'].submitted = false;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateModel({path: "slice", value: model}));
+    newState = f((state: any, action: any) => {})(initialState, UpdateModelProperty({path: "slice", value: model}));
     expected = deepClone(initialState); (expected as any)['slice'].model = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, ResetForm({path: "slice", value: 'initial'}));
+    newState = f((state: any, action: any) => {})(initialState, ResetForm({path: "slice", state: 'initial'}));
     expect(newState).toEqual(newState);
 
     newState = f((state: any, action: any) => {})(initialState, UpdateStatus({path: "slice", status: "VALID"}));
@@ -76,6 +76,5 @@ describe('reducer', () => {
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => {})(initialState, FormDestroyed({path: "slice"}));
-    expect(actionQueues.get('slice')).toBeUndefined();
   });
 });

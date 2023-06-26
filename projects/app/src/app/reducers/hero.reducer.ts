@@ -9,7 +9,7 @@ export interface HeroState extends FormState {}
 
 
 export const initialState: HeroState = {
-  model: initialHero,
+  value: initialHero,
 };
 
 

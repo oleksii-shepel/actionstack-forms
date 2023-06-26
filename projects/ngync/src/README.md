@@ -1,7 +1,7 @@
 <h1>ngync</h1>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/ngync/src/maskot_funny.svg" alt="ngync" width="250"/>
+  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/ngync/src/maskot.svg" alt="ngync" width="250"/>
 </p>
 
   ![npm version](https://badge.fury.io/js/ngync.svg)
@@ -11,20 +11,23 @@
   ![npm](https://img.shields.io/npm/l/ngync.svg)
 
 <h2>Introduction</h2>
-<p align="justify">
-<b>ngync</b> is a lightweight javascript library that helps to integrate Angular forms into NgRx store easily. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a new approach. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
+<p>
+
 </p>
 <p align="justify">
-<a href="https://ngrx.io/">NgRx</a> is a state management library for Angular applications. It provides a way to manage the state of your application in a predictable way. Also it helps you write applications that behave consistently, run in different environments (client, server, and native), and are easy to test.
+<b>ngync</b> is a lightweight javascript library that helps to integrate Angular forms into NgRx store easily. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a proposed solution. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
 </p>
 <p align="justify">
-<a href="https://angular.io/">Angular</a> in its turn provides two different approaches of handling user input through <a href="https://angular.io/guide/forms-overview">forms</a>: reactive and template-driven. Both capture user input events from the view, validate the user input, create a form model and data model to update, and provide a way to track changes.
+<a href="https://ngrx.io/">NgRx</a> is a state management library tailor-made for Angular applications, granting you the extraordinary ability to fashion software. Inspired by the renowned Redux, NgRx harnesses the power of a single source of truth, empowering you to disentangle concerns and navigate through debugging with unparalleled ease. Prepare to unlock a world of enhanced application development possibilities with NgRx at your side!
 </p>
 <p align="justify">
-How can we unite both the worlds? The answer is simple: With help of <b>ngync</b> library. So, what is it and how it differs from other available solutions? Let me introduce it to you. Application example is available on <a href="https://oleksii-shepel.github.io/angular-ngrx-forms/">Github Pages</a>.</p>
+Within the vast <a href="https://angular.io/">Angular</a> ecosystem, you'll discover two distinct methodologies for managing user input through forms: reactive forms and template-driven forms. Whether you choose Angular equips you with powerful tools to effectively handle user interactions and effortlessly manage form-related tasks.
+</p>
+<p align="justify">
+Curious about bridging these worlds? Allow me to unveil a remarkable solution: the ingenious <b>ngync</b> library. Prepare to be captivated as I unravel its unique characteristics and how it sets itself apart from other available alternatives. Let me introduce it to you. Application example is available on <a href="https://oleksii-shepel.github.io/angular-ngrx-forms/">Github Pages</a>.</p>
 <h2>Usage</h2>
 <p align="justify">
-If you know how to work with NgRx, you will also be comfortable using ngync. All you need to do is declare ngync directive on the form and provide it with the store path. It is an appropriate place where form data will be reliably reside during application execution. Here is an example of common form definition:
+If you know how to work with NgRx, you will also be comfortable using ngync. All you need to do is declare ngync directive on the form and provide it with the store path. This magic spell ensures that your form data finds a safe place throughout your application's execution. Here is an example of common form definition:
 </p>
 
 ```typescript
@@ -49,14 +52,14 @@ export interface NgyncConfig {
 ```
 
 <p align="justify">
-Additionally, you have to import basic parts of ngync to your application. I'm talking about prepared meta-reducers, foundation functions that orchestrate all main functionality of the library. Вefore benefiting from their use, they have to be registered by NgRx store module. Nothing special, just another pint-sized prerequisites. All they do is handling of Redux action set. It is boilerplate functionality that is not more needed to be implemented time after time.
+Additionally, you have to import ngync module to your application and set up meta-reducers. They are core functions that orchestrate all main functionality of the library. Before reaping the benefits of their power, these components must be registered with the NgRx store module. Don't worry, it's just another pint-sized prerequisite. Once registered, they take charge of handling the Redux action set, relieving you from the burden of implementing repetitive boilerplate functionality time and again.
 </p>
 <p align="justify">
 The code snippet of main NgModule shows how the import looks like:
 </p>
 
 ```typescript
-import { NgFormsModule, SharedModule, forms, logger } from 'ngync';
+import { NgFormsModule, SharedModule, forms } from 'ngync';
 
 @NgModule({
   declarations: [
@@ -79,16 +82,16 @@ export class AppModule { }
 ```
 
 <p align="justify">
-Here we are putting into work one forms meta-reducer which is responsible for synchronizing of form state with NgRx store. The previously used logger meta-reducer is not more avaliable. It is still used internally, but now you need to pass true value as the second parameter to the forms function to enable it. This is primarily due to the fact that actions are queued and the order of their execution differs from the sequence of their dispatch.
+Behold, we now unveil a formidable forms meta-reducer that works tirelessly to synchronize the form state with the mighty NgRx store. The beloved logger meta-reducer we once cherished is no longer readily available. But it is still used internally, silently serving its purpose. To invoke its power, you need to pass a true value as the second parameter to the forms function. This is due to the fact that actions are queued and the order of their execution differs from the sequence of their dispatch.
 </p>
 <p align="justify">
-That's it, all settings are done and your form have to be synchronized with the store, now you can deep into exploration of internal processes.
+That's it, with all the settings in place, your form is now synchronized with the store. It's time to embark on an exciting journey and delve into the intricate realm of internal processes. now you can deep into exploration of internal processes.
 </p>
 <p align="justify">
 By default, ngync will generate tracing actions every time user enters the data in the form. They have to be displayed in console of your browser. This behavior can be changed by passing on a special updateOn attribute to the directive. It can take one of three values: 'change', 'blur' or 'submit'. The tracing actions will be generated respectively every time user enters the data, when user leaves one of the form fields or when entire form is submitted or to be submitted.
 </p>
 <p align="justify">
-If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. Directive is pretty smart and can initialize form controls automatically if the state is present and also can notice submitting event. But if you definitely want to do it by yourself, you can do it without hesitation. There are five actions supported by ngync right out of the box. I think, the names are self-descriptive and the parameter list for each of them can be found in the source code of the library. Here is the narrow list of actions (other actions are also available but you need to understand how they work before using them):
+If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. Sync directive is pretty smart and can initialize form controls automatically if the state is present in the store and also it can notice form submitting. However, if you are determined to dispatch actions by yourself, feel free to proceed without any hesitation. There are five actions supported by ngync right out of the box. In my opinion, the names are self-explanatory, and you can find the parameter list for each action in the library's source code. Here is a condensed list of actions (note that there are additional actions available, but it's crucial to understand their functionality before utilizing them):
 </p>
 
 ```typescript
@@ -96,23 +99,23 @@ export enum FormActions {
   InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
   UpdateSubmitted = '[Form] Update Submitted',
-  UpdateModel = '[Form] Update Model',
+  UpdateModelProperty = '[Form] Update Model',
   ResetForm = '[Form] Reset Form'
 }
 ```
 
 <p align="justify">
-As you can see you are completely redeemed from the tedium of implementation of constituent parts of the Redux pattern. In all the cases NgRx has detailed documentation that you may need in your work. This is foreign parish and we have to deal with it with all our passion and devotion.
+As you can see you are freed from the tedious task of implementing the various parts of the Redux pattern. Anyway NgRx offers comprehensive documentation to support you throughout your work. This is foreign parish and we have to deal with it with all our passion and devotion.
 </p>
 <p align="justify">
-I have to admit that there are no other docs of ngync except for this readme. It is probably a matter of time and interest. I stand for the idea that the best documentation is the code itself. Hopefully it is turned out concise and self-descriptive. The library goes along with sample application which will help you orient in the theme. The link to the source repo of the project is <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>. If you have any questions or suggestions, I will respond as soon as possible.
+At present, the readme is the primary source of documentation for ngync, but rest assured that more resources may emerge in the future with growing interest. As an advocate for the belief that the code itself serves as the finest documentation, I have high hopes that it has been crafted to be concise and self-descriptive. To help you grasp the concepts, the library comes with a sample application that serves as a useful reference. You can find the source repository for the project at <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>. If you have any questions or suggestions, I will respond as soon as possible.
 </p>
 <h2>Bonus</h2>
 <p align="justify">
-Of course, there is a bonus stored up together with the library. ngync has extended template-driven approach with missing feature of <b>ngModelArray</b>.
+Indeed, ngync has an exciting bonus in store for you. It extends the template-driven approach by providing a missing feature of <b>ngModelArray</b>.
 </p>
 <p align="justify">
-ngModelArray is a directive that can be used to group ngModel directives together into an array. It is designed to be used as a child of the ngForm directive. It also requires a name attribute so that the control can be registered with the parent ngForm directive under that name. The directive itself resides in <b>NgFormsModule</b>.
+ngModelArray is a powerful directive that allows you to group multiple ngModel directives into an array. It is designed to be used as a child of the ngForm directive. It also requires a name attribute so that the control can be registered with the parent ngForm directive under that name. The directive itself resides in <b>NgFormsModule</b>.
 </p>
 <p align="justify">
 Here is an example of how to combine it with ngModels instances seamlessly:
@@ -132,6 +135,5 @@ Here is an example of how to combine it with ngModels instances seamlessly:
 For more information about ngModelArray, see the <a href="https://angular.io/api/forms/NgModelArray">documentation</a>. Just a jest!
 </p>
 <p align="justify">
-I hope you will enjoy using <b>ngync</b> and it will help you to create more robust and maintainable applications. And remember that the best is yet to come and state management can be easy. Stay tuned!
-</p>
+I sincerely hope that your experience with <b>ngync</b> brings you great joy and empowers you to develop highly robust and maintainable applications. Embrace the knowledge that the journey has just begun, and there are even greater advancements on the horizon. State management can indeed be made effortless. Stay tuned, as there's much more to come!</p>
 

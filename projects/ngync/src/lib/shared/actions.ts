@@ -1,11 +1,10 @@
 import { Action, createAction, props } from '@ngrx/store';
-import { deepClone } from './utils';
 
 export enum FormActions {
   InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
   UpdateSubmitted = '[Form] Update Submitted',
-  UpdateModel = '[Form] Update Model',
+  UpdateModelProperty = '[Form] Update Model',
   ResetForm = '[Form] Reset Form',
 }
 
@@ -28,34 +27,34 @@ export const UpdateForm = createAction(
   props<{ path: string; value: any; }>()
 );
 
-export const UpdateModel = createAction(
-  FormActions.UpdateModel,
+export const UpdateModelProperty = createAction(
+  FormActions.UpdateModelProperty,
   props<{ path: string; value: any; }>()
 );
 
 export const UpdateSubmitted = createAction(
   FormActions.UpdateSubmitted,
-  props<{ path: string; value: boolean; }>()
+  props<{ path: string; submitted: boolean; }>()
 );
 
 export const ResetForm = createAction(
   FormActions.ResetForm,
-  props<{ path: string; value: 'initial' | 'submitted' | 'blank'}>()
+  props<{ path: string; state: 'initial' | 'submitted' | 'blank'}>()
 );
 
 export const UpdateStatus = createAction(
   FormActionsInternal.UpdateStatus,
-  props<{ path: string; status: string | null; }>()
+  props<{ path: string; status: string; }>()
 );
 
 export const UpdateDirty = createAction(
   FormActionsInternal.UpdateDirty,
-  props<{ path: string; dirty: boolean | null; }>()
+  props<{ path: string; dirty: boolean; }>()
 );
 
 export const UpdateErrors = createAction(
   FormActionsInternal.UpdateErrors,
-  props<{ path: string; errors: { [k: string]: string } | null; }>()
+  props<{ path: string; errors: Record<string, string>; }>()
 );
 
 export const AutoInit = createAction(
@@ -74,16 +73,10 @@ export const FormDestroyed = createAction(
 );
 
 export class Deferred implements Action {
+  type!: string;
   deferred: boolean = true;
-  type: string = 'Deferred';
 
   constructor(action: Action) {
     Object.assign(this, action);
-  }
-
-  toAction(): Action {
-    let action = deepClone(this);
-    delete action.deferred;
-    return action;
   }
 }

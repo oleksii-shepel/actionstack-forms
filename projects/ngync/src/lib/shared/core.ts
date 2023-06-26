@@ -47,10 +47,10 @@ import {
   actionQueues,
   deepEqual,
   findProps,
-  getModel,
-  getSlice,
   getValue,
   intersection,
+  selectSlice,
+  selectValue,
   setValue
 } from '.';
 import {
@@ -155,7 +155,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     let onSubmit$ = this.actionsSubject.pipe(
       filter((action: any) => action?.deferred === true && action?.path === this.slice),
       filter((action) => action?.type === FormActions.UpdateSubmitted),
-      map((action: any) => (UpdateSubmitted({path: this.slice, value: action.value}))),
+      map((action: any) => (UpdateSubmitted({path: this.slice, submitted: action.submitted}))),
     );
 
     let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
@@ -173,8 +173,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       map((action) => ({action: action, value: this.formValue})),
       pairwise(),
       distinctUntilChanged(([prev, curr]) => {
-        let prevValue = prev.action.type === FormActionsInternal.AutoSubmit ? true : prev.action.value;
-        let currValue = curr.action.type === FormActionsInternal.AutoSubmit ? true : curr.action.value;
+        let prevValue = prev.action.type === FormActionsInternal.AutoSubmit ? true : prev.action.submitted;
+        let currValue = curr.action.type === FormActionsInternal.AutoSubmit ? true : curr.action.submitted;
         return prevValue === currValue && deepEqual(prev.value, curr.value);
       }),
       map(([_, curr]) => curr.action),
@@ -184,7 +184,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this.store.dispatch(AutoSubmit({ path: this.slice }));
         }
 
-        if(action.type === FormActionsInternal.AutoSubmit || action.value === true) {
+        if(action.type === FormActionsInternal.AutoSubmit || action.submitted === true) {
           this._submittedState = this.formValue;
 
           if (this.dir.form.dirty) {
@@ -202,7 +202,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action?.deferred === true && action?.path === this.slice),
       filter(action => [FormActions.InitForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action?.type)),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      switchMap((action) => from(this.store.select(getSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
+      switchMap((action) => from(this.store.select(selectSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
       tap(({action, slice}) => {
         this.dir.form.patchValue(intersection(action.value, this.dir.form.value));
 
@@ -224,7 +224,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         let submitted = this._submittedState ? equal : false;
         let dirty = !equal;
 
-        slice.submitted !== submitted && this.store.dispatch(UpdateSubmitted({ path: this.slice, value: submitted }));
+        slice.submitted !== submitted && this.store.dispatch(UpdateSubmitted({ path: this.slice, submitted: submitted }));
         slice.dirty !== dirty && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
 
         this.dir.form.updateValueAndValidity();
@@ -265,7 +265,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
       delay(0),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      switchMap(() => from(this.store.select(getModel(this.slice))).pipe(take(1))),
+      switchMap(() => from(this.store.select(selectValue(this.slice))).pipe(take(1))),
       map((value) => value ?? this.formValue),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
@@ -288,8 +288,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap((action: any) => {
-        if(action.value){
-          switch(action.value) {
+        if(action.state){
+          switch(action.state) {
             case 'initial':
               this.store.dispatch(UpdateForm({ path: this.slice, value: this._initialState || {} }));
               break;
