@@ -74,8 +74,8 @@ export function findProps(obj: any): string[] {
 
 export function deepEqual(x: any, y: any): boolean {
   let equal = false;
-  if(x && y && typeof x === 'object' && typeof y === 'object') {
-    equal = x === y;
+  if(x ! == null && y !== null && typeof x === 'object' && typeof y === 'object') {
+    equal = x === y || x?.valueOf() === y?.valueOf();
     if(!equal) {
       if(x instanceof Map &&  y instanceof Map) {
         equal = x.size === y.size && [...x.entries()].every(([key, value]) => (y.has(key) && deepEqual(y.get(key), value)));
@@ -86,15 +86,15 @@ export function deepEqual(x: any, y: any): boolean {
       }
     }
   } else {
-    equal = x === y || x?.valueOf() === y?.valueOf();
+    equal = x === y;
   }
   return equal;
 }
 
 
 
-export const boxed = (value: any) => !!value && value.valueOf() !== value;
-export const primitive = (value: any) => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'symbol' || typeof value === 'bigint' || typeof value === 'undefined' || value === null;
+export const boxed = (value: any) => value !== undefined && value !== null && value.valueOf() !== value;
+export const primitive = (value: any) => value === undefined || value === null || typeof value !== 'object';
 
 
 
