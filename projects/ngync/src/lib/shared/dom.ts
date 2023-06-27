@@ -8,8 +8,6 @@ export class DomObserver implements OnDestroy {
   _observers = new Set<MutationObserver>();
   _elementsUnderObservation = new Map();
 
-  constructor() {}
-
   unmounted(element: HTMLElement): Observable<boolean> {
     let record = this._elementsUnderObservation.get(element);
 
@@ -17,7 +15,7 @@ export class DomObserver implements OnDestroy {
       return record?.unmounted;
     }
 
-    let event = new Subject<boolean>();
+    const event = new Subject<boolean>();
     record = {...record, unmounted: event};
     this._elementsUnderObservation.set(element, record);
 
@@ -54,7 +52,7 @@ export class DomObserver implements OnDestroy {
       return record?.children;
     }
 
-    let event = new Subject<number>();
+    const event = new Subject<number>();
 
     record = {...record, children: event};
     this._elementsUnderObservation.set(element, record);

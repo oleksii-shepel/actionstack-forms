@@ -17,13 +17,13 @@ export class BaseControlValueAccessor {
    * element.
    * @nodoc
    */
-  onChange = (_: any) => {};
+  onChange = (_: any) => { Function.prototype };
 
   /**
    * The registered callback function called when a blur event occurs on the input element.
    * @nodoc
    */
-  onTouched = () => {};
+  onTouched = () => { Function.prototype };
 
   constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {}
 

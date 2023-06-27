@@ -87,7 +87,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   slice!: string;
   debounceTime!: number;
   updateOn!: string;
-  queueEnabled: boolean = true;
+  queueEnabled = true;
 
   dir!: NgForm | FormGroupDirective;
 
@@ -152,14 +152,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    let onSubmit$ = this.actionsSubject.pipe(
+    const onSubmit$ = this.actionsSubject.pipe(
       filter((action: any) => action?.deferred === true && action?.path === this.slice),
       filter((action) => action?.type === FormActions.UpdateSubmitted),
       map((action: any) => (UpdateSubmitted({path: this.slice, submitted: action.submitted}))),
     );
 
-    let submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
-    let onAutoSubmit$ = fromEvent(submit, 'click').pipe(
+    const submit = this.elRef.nativeElement.querySelector('button[type="submit"],input[type="submit"]')
+    const onAutoSubmit$ = fromEvent(submit, 'click').pipe(
       delay(0),
       filter(() => this.dir.form.valid),
       map(() => (AutoSubmit({path: this.slice})))
@@ -173,8 +173,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       map((action) => ({action: action, value: this.formValue})),
       pairwise(),
       distinctUntilChanged(([prev, curr]) => {
-        let prevValue = prev.action.type === FormActionsInternal.AutoSubmit ? true : prev.action.submitted;
-        let currValue = curr.action.type === FormActionsInternal.AutoSubmit ? true : curr.action.submitted;
+        const prevValue = prev.action.type === FormActionsInternal.AutoSubmit ? true : prev.action.submitted;
+        const currValue = curr.action.type === FormActionsInternal.AutoSubmit ? true : curr.action.submitted;
         return prevValue === currValue && deepEqual(prev.value, curr.value);
       }),
       map(([_, curr]) => curr.action),
@@ -206,7 +206,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(({action, slice}) => {
         this.dir.form.patchValue(intersection(action.value, this.dir.form.value));
 
-        let formValue = this.formValue;
+        const formValue = this.formValue;
         let equal = true;
 
         if(action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
@@ -221,8 +221,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
 
-        let submitted = this._submittedState ? equal : false;
-        let dirty = !equal;
+        const submitted = this._submittedState ? equal : false;
+        const dirty = !equal;
 
         slice.submitted !== submitted && this.store.dispatch(UpdateSubmitted({ path: this.slice, submitted: submitted }));
         slice.dirty !== dirty && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
@@ -242,7 +242,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(([input, blur, submitted]) => {
 
-        let form = this.formValue;
+        const form = this.formValue;
 
         if (submitted === true || this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) {
           this.store.dispatch(UpdateForm({ path: this.slice, value: form }));
@@ -322,7 +322,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onActionQueued$ = defer(() => {
       actionQueues.has(this.slice) || actionQueues.set(this.slice, new Queue<Action>());
-      let queue = actionQueues.get(this.slice)!;
+      const queue = actionQueues.get(this.slice)!;
       return queue.updated$
     }).pipe(
       observeOn(asyncScheduler),
@@ -335,7 +335,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
       }),
       finalize(() => {
-        let queue = actionQueues.get(this.slice)!;
+        const queue = actionQueues.get(this.slice)!;
         if(queue?.initialized$.value) {
           while(queue.length > 0) {
             this.store.dispatch(queue.dequeue()!);
@@ -347,7 +347,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    let timer = setTimeout(() => {
+    const timer = setTimeout(() => {
       this.subscribe();
       clearTimeout(timer);
     }, 0);
@@ -393,8 +393,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   reset(target: any, source?: any): any {
     if(!source) { source = target; }
-    for(let prop of findProps(source)) {
-      let value = getValue(source, prop);
+    for(const prop of findProps(source)) {
+      const value = getValue(source, prop);
       if(typeof value === 'string') {
         target = setValue(target, prop, '');
       } else if (typeof value === 'number') {

@@ -16,7 +16,7 @@ export const moduleFactory = () => {
   return new Promise((resolve) => {
 
     Object.assign(NgModel.prototype, {
-      _checkParentType() {}
+      _checkParentType() { Function.prototype }
     });
 
     resolve(true);

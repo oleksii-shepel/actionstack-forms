@@ -74,7 +74,7 @@ export const FormDestroyed = createAction(
 
 export class Deferred implements Action {
   type!: string;
-  deferred: boolean = true;
+  deferred = true;
 
   constructor(action: Action) {
     Object.assign(this, action);

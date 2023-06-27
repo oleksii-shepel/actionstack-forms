@@ -39,10 +39,10 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
 
     state = state ?? deepClone(initialState);
     let nextState = state;
-    let path = action?.path;
+    const path = action?.path;
 
     if(path) {
-      let slice = path.split('::')[0];
+      const slice = path.split('::')[0];
 
       if(!queueEnabled || queueEnabled && action?.deferred) {
 
@@ -58,13 +58,13 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
           case FormActions.UpdateSubmitted:
             nextState = setValue(state, propSubmitted(slice), action.submitted);
             break;
-          case FormActions.UpdateModelProperty:
-            let paths = path.split('::');
-            let property = paths.length === 2 ? `${propValue(paths[0])}.${paths[1]}` : propValue(paths[0]);
+          case FormActions.UpdateModelProperty: {
+            const paths = path.split('::');
+            const property = paths.length === 2 ? `${propValue(paths[0])}.${paths[1]}` : propValue(paths[0]);
             nextState = primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propValue(paths[0])) || {}), action.value));
             break;
+          }
           case FormActions.ResetForm:
-            nextState = nextState;
             break;
           case FormActionsInternal.UpdateStatus:
             nextState = setValue(state, propStatus(slice), action.status);
@@ -90,10 +90,10 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
 
       } else if(queueEnabled) {
         actionQueues.has(slice) || actionQueues.set(slice, new Queue<Action>());
-        let queue = actionQueues.get(slice)!;
+        const queue = actionQueues.get(slice)!;
 
         if (action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
-          let type = queue.peek()?.type;
+          const type = queue.peek()?.type;
 
           if (type === FormActionsInternal.AutoInit) { queue.first(new Deferred(action)); }
           else if(type === FormActions.InitForm) { action.type === FormActions.InitForm && queue.first(action); }
@@ -127,16 +127,16 @@ const logger = (enabled = true) => (reducer: ActionReducer<any>): any => {
     const result = reducer(state, action);
     if(!enabled) { return result; }
     console.groupCollapsed(action.type);
-    let actionCopy = deepClone(action);
+    const actionCopy = deepClone(action);
     delete actionCopy.type;
-    let actionPath = actionCopy?.path ?? '';
-    let sep = actionPath.indexOf('::');
-    let path = actionPath.substring(0, sep === -1 ? actionPath.length : sep).trim();
+    const actionPath = actionCopy?.path ?? '';
+    const sep = actionPath.indexOf('::');
+    const path = actionPath.substring(0, sep === -1 ? actionPath.length : sep).trim();
     delete actionCopy.path;
     console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
-    let previous = path.length > 0 ? deepClone(getValue(state, path)) : state;
-    let current = path.length > 0 ? deepClone(getValue(result, path)): result;
-    let diff = difference(previous, current);
+    const previous = path.length > 0 ? deepClone(getValue(state, path)) : state;
+    const current = path.length > 0 ? deepClone(getValue(result, path)): result;
+    const diff = difference(previous, current);
     console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
     console.groupEnd();
     return result;
