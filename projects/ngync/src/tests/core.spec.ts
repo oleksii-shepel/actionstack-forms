@@ -252,7 +252,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(1);
+      expect(stub).toHaveBeenCalledTimes(3);
     });
     describe('onChanges', () => {
       it('change', async () => {
@@ -709,7 +709,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(1);
+      expect(stub).toHaveBeenCalledTimes(3);
     });
     describe('onChanges', () => {
       it('change', async () => {

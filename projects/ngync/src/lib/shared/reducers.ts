@@ -33,7 +33,7 @@ export const propSubmitted = (path: string) => `${path}.submitted`;
 
 export const actionQueues = new Map<string, Queue<Action>>();
 
-export const forms = (initialState: any = {}, logging = true, queueEnabled = true) => (reducer: ActionReducer<any>): any => {
+export const forms = (initialState: any = {}, enableLogging = true, enableQueue = true) => (reducer: ActionReducer<any>): any => {
 
   const metaReducer = (state: any, action: any) => {
 
@@ -44,7 +44,7 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
     if(path) {
       const slice = path.split('::')[0];
 
-      if(!queueEnabled || queueEnabled && action?.deferred) {
+      if(!enableQueue || enableQueue && action?.deferred) {
 
         nextState = reducer(state, action);
 
@@ -79,32 +79,34 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
             break;
         }
 
-        nextState = logger(logging)(() => nextState)(state, action);
+        nextState = logger(enableLogging)(() => nextState)(state, action);
         return nextState;
 
-      } else if(queueEnabled) {
+      } else if(enableQueue) {
         actionQueues.has(slice) || actionQueues.set(slice, new Queue<Action>());
         const queue = actionQueues.get(slice) as Queue<Action>;
+        const type = queue.peek()?.type;
 
-        if (action.type === FormActions.UpdateForm || action.type === FormActionsInternal.AutoInit) {
-          const type = queue.peek()?.type;
-
-          if (type === FormActionsInternal.AutoInit) { queue.first(new Deferred(action)); }
-          else if(type === FormActions.UpdateForm) { action.type === FormActions.UpdateForm && queue.first(action); }
-          else { queue.shift(new Deferred(action)); }
-
-          queue.initialized$.next(true);
-          return nextState;
-        }
-        else {
-
+        if(!queue.initialized$.value) {
+         if(action.type === FormActionsInternal.AutoInit && type !== FormActionsInternal.AutoInit) {
+            queue.shift(new Deferred(action));
+            queue.initialized$.next(true);
+            return nextState;
+          } else if (type === FormActionsInternal.AutoInit) {
+            queue.first(new Deferred(action));
+            queue.initialized$.next(true);
+            return nextState;
+          } else {
+            queue.enqueue(new Deferred(action));
+            return nextState;
+          }
+        } else {
           queue.enqueue(new Deferred(action));
           return nextState;
         }
-
       } else {
         nextState = reducer(state, action);
-        nextState = logger(logging)(() => nextState)(state, action);
+        nextState = logger(enableLogging)(() => nextState)(state, action);
         return nextState;
       }
     }
@@ -116,10 +118,10 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
   return metaReducer;
 }
 
-const logger = (enabled = true) => (reducer: ActionReducer<any>): any => {
+const logger = (enable = true) => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
     const result = reducer(state, action);
-    if(!enabled) { return result; }
+    if(!enable) { return result; }
     console.groupCollapsed(action.type);
     const actionCopy = deepClone(action);
     delete actionCopy.type;
