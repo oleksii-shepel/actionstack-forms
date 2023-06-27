@@ -5,7 +5,7 @@ import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, Reacti
 import { StoreModule } from "@ngrx/store";
 import { filter, firstValueFrom } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, InitForm, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectSubmitted, selectValue } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectSubmitted, selectValue } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -110,7 +110,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      subs.b = directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      subs.b = directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -203,7 +203,7 @@ describe('core', () => {
 
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(ResetForm({ path:'slice', state: 'blank' }));
 
@@ -223,7 +223,7 @@ describe('core', () => {
       const auto = jest.fn();
 
       subs.a = directive.onInitOrUpdate$.pipe(filter((action) => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -244,9 +244,9 @@ describe('core', () => {
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
 
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Helen' } }));
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'John' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(5000);
       await fixture.whenStable();
@@ -577,7 +577,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -670,7 +670,7 @@ describe('core', () => {
 
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(ResetForm({ path:'slice', state: 'blank' }));
 
@@ -690,7 +690,7 @@ describe('core', () => {
       const auto = jest.fn();
 
       subs.a = directive.onInitOrUpdate$.pipe(filter((action) => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -711,9 +711,9 @@ describe('core', () => {
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
 
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'Helen' } }));
-      directive.store.dispatch(InitForm({ path:'slice', value: { firstName: 'John' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'John' } }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();

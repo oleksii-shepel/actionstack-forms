@@ -172,7 +172,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
       filter((action: any) => action?.deferred === true && action?.path === this.slice),
-      filter(action => [FormActions.InitForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action?.type)),
+      filter(action => [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action?.type)),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       switchMap((action) => from(this.store.select(selectSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
       tap(({action, slice}) => {

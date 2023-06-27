@@ -1,7 +1,6 @@
 import { Action, createAction, props } from '@ngrx/store';
 
 export enum FormActions {
-  InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
   UpdateProperty = '[Form] Update Property',
   ResetForm = '[Form] Reset Form',
@@ -15,11 +14,6 @@ export enum FormActionsInternal {
   AutoSubmit = '[Form] Auto Submit',
   FormDestroyed = '[Form] Form Destroyed',
 }
-
-export const InitForm = createAction(
-  FormActions.InitForm,
-  props<{ path: string; value: any; }>()
-);
 
 export const UpdateForm = createAction(
   FormActions.UpdateForm,

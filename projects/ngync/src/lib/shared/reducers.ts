@@ -49,9 +49,6 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
         nextState = reducer(state, action);
 
         switch(action.type) {
-          case FormActions.InitForm:
-            nextState = setValue(state, slice, { value: action.value });
-            break;
           case FormActions.UpdateForm:
             nextState = setValue(state, slice, {...getValue(state, slice), value: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value) });
             break;
@@ -87,13 +84,13 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
 
       } else if(queueEnabled) {
         actionQueues.has(slice) || actionQueues.set(slice, new Queue<Action>());
-        const queue = actionQueues.get(slice)!;
+        const queue = actionQueues.get(slice) as Queue<Action>;
 
-        if (action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
+        if (action.type === FormActions.UpdateForm || action.type === FormActionsInternal.AutoInit) {
           const type = queue.peek()?.type;
 
           if (type === FormActionsInternal.AutoInit) { queue.first(new Deferred(action)); }
-          else if(type === FormActions.InitForm) { action.type === FormActions.InitForm && queue.first(action); }
+          else if(type === FormActions.UpdateForm) { action.type === FormActions.UpdateForm && queue.first(action); }
           else { queue.shift(new Deferred(action)); }
 
           queue.initialized$.next(true);

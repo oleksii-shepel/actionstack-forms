@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { InitForm, UpdateForm, UpdateProperty, deepClone, selectSlice, selectValue } from 'ngync';
+import { UpdateForm, UpdateProperty, deepClone, selectSlice, selectValue } from 'ngync';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialHero } from '../../models/profile';
@@ -41,7 +41,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
     let state = await firstValueFrom(this.store.select(selectValue(this.slice)));
 
     if(!state) {
-        this.store.dispatch(InitForm({value: initialHero, path: this.slice}));
+        this.store.dispatch(UpdateForm({value: initialHero, path: this.slice}));
         this.model = state ? deepClone(state) : initialHero;
         this.collapsed = true;
     }
