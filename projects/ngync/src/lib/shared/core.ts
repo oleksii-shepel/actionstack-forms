@@ -208,7 +208,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         const formValue = this.formValue;
         let equal = true;
 
-        if(action.type === FormActions.InitForm || action.type === FormActionsInternal.AutoInit) {
+        if(!this._initialized$.value) {
           this._initialState = formValue;
           this._initialized$.next(true);
 
@@ -220,10 +220,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
 
-        const submitted = this._submittedState ? equal : false;
         const dirty = !equal;
-
-        slice.submitted !== submitted && this.store.dispatch(UpdateSubmitted({ path: this.slice, submitted: submitted }));
         slice.dirty !== dirty && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
 
         this.dir.form.updateValueAndValidity();
