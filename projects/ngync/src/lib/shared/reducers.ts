@@ -58,7 +58,7 @@ export const forms = (initialState: any = {}, logging = true, queueEnabled = tru
           case FormActions.UpdateSubmitted:
             nextState = setValue(state, propSubmitted(slice), action.submitted);
             break;
-          case FormActions.UpdateModelProperty: {
+          case FormActions.UpdateProperty: {
             const paths = path.split('::');
             const property = paths.length === 2 ? `${propValue(paths[0])}.${paths[1]}` : propValue(paths[0]);
             nextState = primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propValue(paths[0])) || {}), action.value));

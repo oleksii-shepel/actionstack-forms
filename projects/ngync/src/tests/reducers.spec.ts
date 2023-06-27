@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { AutoInit, AutoSubmit, FormDestroyed, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateModelProperty, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
+import { AutoInit, AutoSubmit, FormDestroyed, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateProperty, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
 import { Queue } from '../lib/shared/queue';
 import { actionQueues, forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
@@ -51,7 +51,7 @@ describe('reducer', () => {
     expected = deepClone(initialState); (expected as any)['slice'].submitted = false;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateModelProperty({path: "slice", value: model}));
+    newState = f((state: any, action: any) => {})(initialState, UpdateProperty({path: "slice", value: model}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 

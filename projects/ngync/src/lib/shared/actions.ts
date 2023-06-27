@@ -4,7 +4,7 @@ export enum FormActions {
   InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
   UpdateSubmitted = '[Form] Update Submitted',
-  UpdateModelProperty = '[Form] Update Model',
+  UpdateProperty = '[Form] Update Property',
   ResetForm = '[Form] Reset Form',
 }
 
@@ -27,8 +27,8 @@ export const UpdateForm = createAction(
   props<{ path: string; value: any; }>()
 );
 
-export const UpdateModelProperty = createAction(
-  FormActions.UpdateModelProperty,
+export const UpdateProperty = createAction(
+  FormActions.UpdateProperty,
   props<{ path: string; value: any; }>()
 );
 
