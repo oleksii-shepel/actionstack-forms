@@ -74,13 +74,13 @@ export function findProps(obj: any): string[] {
 
 export function deepEqual(x: any, y: any): boolean {
   let equal = false;
-  if(x ! == null && y !== null && typeof x === 'object' && typeof y === 'object') {
+  if(x !== null && y !== null && typeof x === 'object' && typeof y === 'object') {
     equal = x === y || x?.valueOf() === y?.valueOf();
     if(!equal) {
       if(x instanceof Map &&  y instanceof Map) {
         equal = x.size === y.size && [...x.entries()].every(([key, value]) => (y.has(key) && deepEqual(y.get(key), value)));
       } else if(x instanceof Set &&  y instanceof Set) {
-        equal = x.size === y.size && [...x.entries()].every(([key, value]) => y.has(key));
+        equal = x.size === y.size && [...x.entries()].every(([key,]) => y.has(key));
       } else {
         equal = Object.keys(x).length === Object.keys(y).length && Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
       }
