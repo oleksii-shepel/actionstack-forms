@@ -3,7 +3,6 @@ import { Action, createAction, props } from '@ngrx/store';
 export enum FormActions {
   InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
-  UpdateSubmitted = '[Form] Update Submitted',
   UpdateProperty = '[Form] Update Property',
   ResetForm = '[Form] Reset Form',
 }
@@ -30,11 +29,6 @@ export const UpdateForm = createAction(
 export const UpdateProperty = createAction(
   FormActions.UpdateProperty,
   props<{ path: string; value: any; }>()
-);
-
-export const UpdateSubmitted = createAction(
-  FormActions.UpdateSubmitted,
-  props<{ path: string; submitted: boolean; }>()
 );
 
 export const ResetForm = createAction(

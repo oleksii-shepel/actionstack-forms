@@ -28,7 +28,6 @@ import {
   from,
   fromEvent,
   map,
-  merge,
   mergeMap,
   observeOn,
   pairwise,
@@ -62,8 +61,7 @@ import {
   UpdateDirty,
   UpdateErrors,
   UpdateForm,
-  UpdateStatus,
-  UpdateSubmitted
+  UpdateStatus
 } from './actions';
 import { Queue } from './queue';
 
@@ -87,7 +85,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   slice!: string;
   debounceTime!: number;
   updateOn!: string;
-  queueEnabled = true;
 
   dir!: NgForm | FormGroupDirective;
 
@@ -114,7 +111,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   onInitOrUpdate$!: Observable<any>;
   onChanges$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
-  onSubmitOrAutoSubmit$!: Observable<any>;
+  onSubmit$!: Observable<any>;
   onReset$!: Observable<any>;
   onStatusChanges$!: Observable<any>;
   onActionQueued$!: Observable<any>;
@@ -152,47 +149,23 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    const onSubmit$ = this.actionsSubject.pipe(
-      filter((action: any) => action?.deferred === true && action?.path === this.slice),
-      filter((action) => action?.type === FormActions.UpdateSubmitted),
-      map((action: any) => (UpdateSubmitted({path: this.slice, submitted: action.submitted}))),
-    );
-
-    const onAutoSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
-      delay(0),
+    this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.dir.form.valid),
-      map(() => (AutoSubmit({path: this.slice})))
-    )
-
-    this.onSubmitOrAutoSubmit$ = merge(onSubmit$, onAutoSubmit$).pipe(
+      map(() => (AutoSubmit({path: this.slice}))),
       filter((action: any) => action?.path === this.slice),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      map((action) => ({action: action, value: this.formValue})),
-      pairwise(),
-      distinctUntilChanged(([prev, curr]) => {
-        const prevValue = prev.action.type === FormActionsInternal.AutoSubmit ? true : prev.action.submitted;
-        const currValue = curr.action.type === FormActionsInternal.AutoSubmit ? true : curr.action.submitted;
-        return prevValue === currValue && deepEqual(prev.value, curr.value);
-      }),
-      map(([_, curr]) => curr.action),
-      tap((action) => {
+      tap(() => {
 
-        if(action.type === FormActionsInternal.AutoSubmit) {
-          this.store.dispatch(AutoSubmit({ path: this.slice }));
-        }
+        this.store.dispatch(AutoSubmit({ path: this.slice }));
 
-        if(action.type === FormActionsInternal.AutoSubmit || action.submitted === true) {
-          this._submittedState = this.formValue;
+        this._submittedState = this.formValue;
 
-          if (this.dir.form.dirty) {
-            this.dir.form.markAsPristine();
-            this.cdr.markForCheck();
-            this._submitted$.next(true);
-          }
-        } else {
-          this._submitted$.next(false);
+        if (this.dir.form.dirty) {
+          this.dir.form.markAsPristine();
+          this.cdr.markForCheck();
+          this._submitted$.next(true);
         }
       })
     );
@@ -365,7 +338,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   subscribe() {
     this._subs.a = this.onInitOrUpdate$.subscribe();
-    this._subs.b = this.onSubmitOrAutoSubmit$.subscribe();
+    this._subs.b = this.onSubmit$.subscribe();
     this._subs.c = this.onChanges$.subscribe();
     this._subs.d = this.onControlsChanges$.subscribe();
     this._subs.e = this.onReset$.subscribe();

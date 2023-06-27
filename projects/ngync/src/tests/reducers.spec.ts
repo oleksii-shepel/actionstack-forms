@@ -1,12 +1,12 @@
 import { Action } from '@ngrx/store';
-import { AutoInit, AutoSubmit, FormDestroyed, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateProperty, UpdateStatus, UpdateSubmitted } from '../lib/shared/actions';
+import { AutoInit, AutoSubmit, FormDestroyed, InitForm, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateProperty, UpdateStatus } from '../lib/shared/actions';
 import { Queue } from '../lib/shared/queue';
 import { actionQueues, forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
 describe('reducer', () => {
   it('should handle actions', () => {
-    let model = {
+    const model = {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@contoso.com',
@@ -19,7 +19,7 @@ describe('reducer', () => {
       aliases: ['Johny', 'Johnny'],
     };
 
-    let initialState = {
+    const initialState = {
       slice: {
         model: model,
         submitted: false,
@@ -29,7 +29,7 @@ describe('reducer', () => {
       }
     };
 
-    let f = forms(initialState, false, false);
+    const f = forms(initialState, false, false);
     let expected = {} as any;
 
     actionQueues.set('slice', new Queue<Action>());
@@ -47,10 +47,6 @@ describe('reducer', () => {
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateSubmitted({path: "slice", submitted: false}));
-    expected = deepClone(initialState); (expected as any)['slice'].submitted = false;
-    expect(newState).toEqual(expected);
-
     newState = f((state: any, action: any) => {})(initialState, UpdateProperty({path: "slice", value: model}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
@@ -62,7 +58,7 @@ describe('reducer', () => {
     expected = deepClone(initialState); (expected as any)['slice'].status = "VALID";
     expect(newState).toEqual(expected);
 
-    let errors = {required: "Field is required", email: "Email is invalid"};
+    const errors = {required: "Field is required", email: "Email is invalid"};
     newState = f((state: any, action: any) => {})(initialState, UpdateErrors({path: "slice", errors: errors}));
     expected = deepClone(initialState); (expected as any)['slice'].errors = errors;
     expect(newState).toEqual(expected);
