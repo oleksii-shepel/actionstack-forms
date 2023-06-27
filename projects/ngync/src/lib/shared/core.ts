@@ -96,15 +96,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   _submitted$ = new BehaviorSubject<boolean>(false);
   _statusCheck$ = new BehaviorSubject<boolean>(false);
   _initialized$ = new BehaviorSubject<boolean>(false);
+  _control$ = new BehaviorSubject<NgControl | null>(null);
 
   _subs = {} as any;
 
-  _blurCallback = (control: NgControl) => (value : any) => {
+  _blurCallback = (control: NgControl) => (value: any) => {
+    this._control$.value !== control && this._control$.next(control);
     this._blur$.next(true);
   };
 
   _inputCallback = (control: NgControl) => (value : any) => {
-    control.control!.setValue(value);
+    this._control$.value !== control && this._control$.next(control);
+    control.control?.setValue(value);
     this._input$.next(true)
   };
 
@@ -291,7 +294,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onActionQueued$ = defer(() => {
       actionQueues.has(this.slice) || actionQueues.set(this.slice, new Queue<Action>());
-      const queue = actionQueues.get(this.slice)!;
+      const queue = actionQueues.get(this.slice) as Queue<Action>;
       return queue.updated$
     }).pipe(
       observeOn(asyncScheduler),
@@ -299,15 +302,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((queue) => {
         if(queue.initialized$.value) {
           while(queue.length > 0) {
-            this.store.dispatch(queue.dequeue()!);
+            this.store.dispatch(queue.dequeue());
           }
         }
       }),
       finalize(() => {
-        const queue = actionQueues.get(this.slice)!;
-        if(queue?.initialized$.value) {
+        const queue = actionQueues.get(this.slice) as Queue<Action>;
+        if(queue.initialized$.value) {
           while(queue.length > 0) {
-            this.store.dispatch(queue.dequeue()!);
+            this.store.dispatch(queue.dequeue() as Action);
           }
         }
         actionQueues.delete(this.slice);
@@ -334,6 +337,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this._submitted$.complete();
     this._statusCheck$.complete();
     this._initialized$.complete();
+    this._control$.complete();
   }
 
   subscribe() {
@@ -351,7 +355,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     let value = {};
     for (const control of this.controls.toArray()) {
-      value = setValue(value, control.path!.join('.'), control.value);
+      if(control.path) {
+        value = setValue(value, control.path.join('.'), control.value);
+      }
     }
     return value;
   }

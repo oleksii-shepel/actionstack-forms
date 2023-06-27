@@ -78,7 +78,10 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   }
 
   override get path(): string[] {
-    return [...this._parent.path!, this.name!.toString()];
+    if(this._parent.path == null || this.name == null) {
+      throw new Error('Control path or name is null');
+    }
+    return [...this._parent.path, this.name.toString()];
   }
 
   get ngForm(): any {

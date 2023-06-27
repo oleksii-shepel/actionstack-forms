@@ -91,15 +91,13 @@ That's it, with all the settings in place, your form is now synchronized with th
 By default, ngync will generate tracing actions every time user enters the data in the form. They have to be displayed in console of your browser. This behavior can be changed by passing on a special updateOn attribute to the directive. It can take one of three values: 'change', 'blur' or 'submit'. The tracing actions will be generated respectively every time user enters the data, when user leaves one of the form fields or when entire form is submitted or to be submitted.
 </p>
 <p align="justify">
-If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. Sync directive is pretty smart and can initialize form controls automatically if the state is present in the store and also it can notice form submitting. However, if you are determined to dispatch actions by yourself, feel free to proceed without any hesitation. There are five actions supported by ngync right out of the box. In my opinion, the names are self-explanatory, and you can find the parameter list for each action in the library's source code. Here is a condensed list of actions (note that there are additional actions available, but it's crucial to understand their functionality before utilizing them):
+If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. Sync directive is pretty smart and can initialize form controls automatically if the state is present in the store and also it can notice form submitting event. However, if you are determined to dispatch actions by yourself, feel free to proceed without any hesitation. There are three actions supported by ngync right out of the box. Their names are self-explanatory, and you can find the parameter list for each action in the library's source code. Here is a condensed list of actions (note that there are additional actions available, but it's crucial to understand their influence before utilizing them):
 </p>
 
 ```typescript
 export enum FormActions {
-  InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
-  UpdateSubmitted = '[Form] Update Submitted',
-  UpdateModelProperty = '[Form] Update Model',
+  UpdateProperty = '[Form] Update Property',
   ResetForm = '[Form] Reset Form'
 }
 ```
