@@ -1,4 +1,4 @@
-import { boxed, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/shared/utils';
+import { boxed, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, reset, setValue } from '../lib/shared/utils';
 describe('utils', () => {
   it('should get value', () => {
     const obj1 = { a: { b: { c: 1 } } };
@@ -61,12 +61,12 @@ describe('utils', () => {
     const obj5 = 'string';
     const obj6 = [1, {a: 1}, {a: {b: 1}}];
 
-    expect(findProps(obj)).toEqual(['a', 'b', 'c', 'd.a', 'd.b.0', 'd.b.1', 'd.b.2', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'q', 'r.a']);
-    expect(findProps(obj2)).toEqual(['s', 't', 'o', 'p.0', 'p.1', 'p.2']);
+    expect(findProps(obj)).toEqual(['a', 'b', 'c', 'd.a', 'd.b', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'q', 'r.a']);
+    expect(findProps(obj2)).toEqual(['s', 't', 'o', 'p']);
     expect(findProps(obj3)).toEqual([]);
     expect(findProps(obj4)).toEqual([]);
     expect(findProps(obj5)).toEqual([]);
-    expect(findProps(obj6)).toEqual(['0', '1.a', '2.a.b']);
+    expect(findProps(obj6)).toEqual(["0", "1.a", "2.a.b"]);
   });
 
   it('should deep equal', () => {
@@ -149,7 +149,25 @@ describe('utils', () => {
     const obj2 = { a: 1, b: 2, c: 3, e: [1, 2]};
     const obj3 = { a: 1, b: 2, c: 3, e: [2, 2]};
 
-    expect(difference(obj1, obj2)).toEqual({"added": {"c": 3,  "e": [undefined, 2]}, "changed": {"a": 1, "b": 2 }, "removed": {"d": 7}} );
-    expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, undefined]}});
+    expect(difference(obj1, obj2)).toEqual({"added": {"c": 3}, "changed": {"a": 1, "b": 2, "e": [1, 2]}, "removed": {"d": 7}} );
+    expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, 2]}});
   });
+  it('should reset object to blank', (async () => {
+    const formValue = {
+      firstName: 'John',
+      lastName: 'Doe',
+      address: {
+        street: '123 Main St',
+        city: 'New York',
+        state: 'NY',
+        zip: '10001',
+      },
+      date: new Date(),
+      phone: '212-555-1234',
+      emails: ['john.doe@contoso.com', 'john.doe@works.hard']
+    };
+
+    const result = reset(formValue);
+    expect(result).toEqual({ firstName: '', lastName: '', address: { street: '', city: '', state: '', zip: ''}, date: result.date, phone: '', emails: [] });
+  }))
 });

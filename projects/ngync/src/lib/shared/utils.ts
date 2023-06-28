@@ -13,11 +13,11 @@ export const setValue = (obj: any, prop: string, val: any): any => {
   const isArray = (split: string[]) => split.length >= 2 && !isNaN(+split[1]);
   const isObject = (split: string[]) => split.length > 1 || isArray(split);
 
-  const root = Array.isArray(obj)? [...obj]: {...obj};
+  const root = Array.isArray(obj)? obj : {...obj};
   let item = root;
   while(split.length >= 1) {
     const key = split[0];
-    item[key] = isArray(split) ? [...(item[key] || [])] : isObject(split) ? {...item[key]} : val;
+    item[key] = isArray(split) ? item[key] || [] : isObject(split) ? {...item[key]} : val;
 
     item = item[key];
     split.shift()
@@ -57,7 +57,7 @@ export function findProps(obj: any): string[] {
   const findKeys = (obj: any, prefix = '') => {
     for (const prop in obj) {
       const sub = obj[prop];
-      if(primitive(sub) || boxed(sub) || Object.keys(sub).length === 0) {
+      if(primitive(sub) || boxed(sub) || Object.keys(sub).length === 0 || Array.isArray(sub)) {
         result.push(`${prefix}${prop}`)
       }
       else {
@@ -193,4 +193,31 @@ export function difference(x: any, y: any) : Difference {
   }
 
   return diff;
+}
+
+
+
+export function reset(target: any, source?: any): any {
+  if(!source) { source = target; }
+  const date = new Date();
+  for(const prop of findProps(source)) {
+
+    const value = getValue(source, prop);
+    if(typeof value === 'string') {
+      target = setValue(target, prop, '');
+    } else if (typeof value === 'number') {
+      target = setValue(target, prop, 0);
+    } else if (typeof value === 'boolean') {
+      target = setValue(target, prop, false);
+    } else if (typeof value === 'bigint') {
+      target = setValue(target, prop, BigInt(0));
+    } else if(Array.isArray(value)) {
+      target = setValue(target, prop, []);
+    } else if(value instanceof Date) {
+      target = setValue(target, prop, date);
+    } else if(typeof value === 'object') {
+      target = setValue(target, prop, new value.constructor());
+    }
+  }
+  return target;
 }

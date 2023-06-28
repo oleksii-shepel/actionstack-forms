@@ -43,8 +43,7 @@ import {
   NGYNC_CONFIG_TOKEN,
   actionQueues,
   deepEqual,
-  findProps,
-  getValue,
+  reset,
   selectSlice,
   selectValue,
   setValue
@@ -232,7 +231,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
               this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState || {} }));
               break;
             case 'blank':
-              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset(this.formValue)}));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: reset(this.formValue)}));
               break;
           }
         }
@@ -308,6 +307,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.subs.f = this.onActionQueued$.subscribe();
   }
 
+  get activeControl(): NgControl | undefined {
+    const activeElement = document.activeElement;
+    if(activeElement) {
+      return this.controls.find((control: NgControl) => {
+        return (control.valueAccessor as any)?._elementRef?.nativeElement === activeElement;
+      });
+    } else {
+      return undefined;
+    }
+  }
+
   get formValue(): any {
     if(!this.controls) { return {}; }
 
@@ -322,22 +332,5 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   get formStatus(): FormControlStatus {
     return this.dir.form.status;
-  }
-
-  reset(target: any, source?: any): any {
-    if(!source) { source = target; }
-    for(const prop of findProps(source)) {
-      const value = getValue(source, prop);
-      if(typeof value === 'string') {
-        target = setValue(target, prop, '');
-      } else if (typeof value === 'number') {
-        target = setValue(target, prop, 0);
-      } else if (typeof value === 'boolean') {
-        target = setValue(target, prop, false);
-      } else if (typeof value === 'bigint') {
-        target = setValue(target, prop, BigInt(0));
-      }
-    }
-    return target;
   }
 }

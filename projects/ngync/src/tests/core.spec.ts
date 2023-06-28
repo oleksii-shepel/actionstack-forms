@@ -676,6 +676,57 @@ describe('core', () => {
   });
 
   describe('shared', () => {
+    it('should return active control if it is selected', (async () => {
+      @Component({
+        selector: 'test-component',
+        template: ``
+      })
+      class TestComponent {
+        form = new FormGroup({
+          firstName: new FormControl('John')
+        });
+      }
+
+      let subs = {} as any;
+
+      TestBed.configureTestingModule({
+        declarations: [TestComponent],
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+          metaReducers: [forms({'slice': {}}, false)]
+        }), SharedModule]
+      });
+
+      const fixture = TestBed.overrideComponent(TestComponent, {
+        set: {
+          template: `
+          <form [formGroup]="form" [ngync]="'slice'">
+            <input type="text" formControlName="firstName"/>
+            <button type="submit">Submit</button>
+          </form>`
+        }
+      }).createComponent(TestComponent);
+
+      const directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+      const inputElement = directive.elRef.nativeElement.querySelector('input') as HTMLInputElement;
+
+      jest.useFakeTimers();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      inputElement.focus();
+      expect(directive.activeControl).toEqual(directive.controls.first);
+
+      inputElement.blur();
+      expect(directive.activeControl).toEqual(undefined);
+
+      TestBed.resetTestingModule();
+      jest.clearAllTimers();
+
+      for (const sub in subs) {
+        subs[sub]?.unsubscribe();
+      }
+      subs = {};
+    }));
     it("should init directive with Ngync instance", (async () => {
       @Component({
         selector: 'test-component',
@@ -687,8 +738,6 @@ describe('core', () => {
         });
       }
 
-      let fixture: ComponentFixture<TestComponent>;
-      let directive: SyncDirective;
       let subs = {} as any;
 
       TestBed.configureTestingModule({
@@ -698,7 +747,7 @@ describe('core', () => {
         }), SharedModule]
       });
 
-      fixture = TestBed.overrideComponent(TestComponent, {
+      const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
           <form [formGroup]="form" [ngync]="{slice: 'slice', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
@@ -708,7 +757,7 @@ describe('core', () => {
         }
       }).createComponent(TestComponent);
 
-      directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+      const directive = fixture.debugElement.children[0].injector.get(SyncDirective);
 
       jest.useFakeTimers();
       fixture.detectChanges();
@@ -737,9 +786,6 @@ describe('core', () => {
         });
       }
 
-      let fixture: ComponentFixture<TestComponent>;
-      let directive: SyncDirective;
-
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
@@ -747,7 +793,7 @@ describe('core', () => {
         }), SharedModule]
       });
 
-      fixture = TestBed.overrideComponent(TestComponent, {
+      const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
           <form [formGroup]="form" [ngync]="{}">
@@ -757,7 +803,7 @@ describe('core', () => {
         }
       }).createComponent(TestComponent);
 
-      directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+      const directive = fixture.debugElement.children[0].injector.get(SyncDirective);
 
       expect(directive.ngOnInit).toThrow(Error);
 
@@ -779,9 +825,6 @@ describe('core', () => {
         });
       }
 
-      let fixture: ComponentFixture<TestComponent>;
-      let directive: SyncDirective;
-
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
@@ -789,7 +832,7 @@ describe('core', () => {
         }), SharedModule]
       });
 
-      fixture = TestBed.overrideComponent(TestComponent, {
+      const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
           <form [ngync]="slice">
@@ -799,7 +842,7 @@ describe('core', () => {
         }
       }).createComponent(TestComponent);
 
-      directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+      const directive = fixture.debugElement.children[0].injector.get(SyncDirective);
 
       expect(directive.ngOnInit).toThrow(Error);
 
