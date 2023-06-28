@@ -81,6 +81,8 @@ export function deepEqual(x: any, y: any): boolean {
         equal = x.size === y.size && [...x.entries()].every(([key, value]) => (y.has(key) && deepEqual(y.get(key), value)));
       } else if(x instanceof Set &&  y instanceof Set) {
         equal = x.size === y.size && [...x.entries()].every(([key,]) => y.has(key));
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        equal = x.length === y.length && x.reduce<boolean>((isEqual, value, index) => isEqual && deepEqual(value, y[index]), true);
       } else {
         equal = Object.keys(x).length === Object.keys(y).length && Object.keys(x).reduce<boolean>((isEqual, key) => isEqual && deepEqual(x[key], y[key]), true)
       }
@@ -152,8 +154,8 @@ export function difference(x: any, y: any) : Difference {
   x = x ?? {};
   y = y ?? {};
 
-  const xProps = findProps(x);
-  const yProps = findProps(y);
+  const xProps = Object.keys(x);
+  const yProps = Object.keys(y);
 
   const xIntersection = xProps.filter(value => yProps.includes(value));
   const yIntersection = yProps.filter(value => xProps.includes(value));
@@ -164,8 +166,8 @@ export function difference(x: any, y: any) : Difference {
     for(const prop of yIntersection) {
       const prevValue = getValue(x, prop);
       const currValue = getValue(y, prop);
-      if(prevValue !== currValue) {
-        diff.changed = setValue(diff.changed, prop, currValue);
+      if(!deepEqual(prevValue, currValue)) {
+        diff.changed[prop] = currValue;
       }
     }
 

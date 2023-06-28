@@ -1,4 +1,4 @@
-import { boxed, deepClone, deepCloneJSON, deepEqual, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/shared/utils';
+import { boxed, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/shared/utils';
 describe('utils', () => {
   it('should get value', () => {
     const obj1 = { a: { b: { c: 1 } } };
@@ -144,4 +144,10 @@ describe('utils', () => {
     expect(intersection(obj1, obj2)).toEqual({ a: 1, b: 2, e: [1, 2] });
   });
 
+  it('should return the difference', () => {
+    const obj1 = { a: 4, b: 5, d: 7, e: [1] };
+    const obj2 = { a: 1, b: 2, c: 3, e: [1, 2]};
+
+    expect(difference(obj1, obj2)).toEqual({"added": {"c": 3}, "changed": {"a": 1, "b": 2, "e": [1, 2]}, "removed": {"d": 7}} );
+  });
 });
