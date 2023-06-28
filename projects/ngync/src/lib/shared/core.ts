@@ -19,7 +19,6 @@ import {
   BehaviorSubject,
   Observable,
   asyncScheduler,
-  combineLatest,
   defer,
   delay,
   distinctUntilChanged,
@@ -31,7 +30,6 @@ import {
   mergeMap,
   observeOn,
   pairwise,
-  sampleTime,
   scan,
   startWith,
   switchMap,
@@ -47,7 +45,6 @@ import {
   deepEqual,
   findProps,
   getValue,
-  intersection,
   selectSlice,
   selectValue,
   setValue
@@ -91,9 +88,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   _initialState: any;
   _submittedState: any;
 
-  _blur$ = new BehaviorSubject<boolean>(false);
-  _input$ = new BehaviorSubject<boolean>(false);
-  _submitted$ = new BehaviorSubject<boolean>(false);
   _statusCheck$ = new BehaviorSubject<boolean>(false);
   _initialized$ = new BehaviorSubject<boolean>(false);
   _control$ = new BehaviorSubject<NgControl | null>(null);
@@ -102,17 +96,22 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   _blurCallback = (control: NgControl) => (value: any) => {
     this._control$.value !== control && this._control$.next(control);
-    this._blur$.next(true);
+
+    if(this.updateOn === 'blur') {
+      this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
+    }
   };
 
   _inputCallback = (control: NgControl) => (value : any) => {
     this._control$.value !== control && this._control$.next(control);
     control.control?.setValue(value);
-    this._input$.next(true)
+
+    if(this.updateOn === 'change') {
+      this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
+    }
   };
 
   onInitOrUpdate$!: Observable<any>;
-  onChanges$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
   onSubmit$!: Observable<any>;
   onReset$!: Observable<any>;
@@ -161,6 +160,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       tap(() => {
 
+        if(this.updateOn === 'submit') {
+          this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
+        }
+
         this.store.dispatch(AutoSubmit({ path: this.slice }));
 
         this._submittedState = this.formValue;
@@ -168,7 +171,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         if (this.dir.form.dirty) {
           this.dir.form.markAsPristine();
           this.cdr.markForCheck();
-          this._submitted$.next(true);
         }
       })
     );
@@ -179,58 +181,31 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       switchMap((action) => from(this.store.select(selectSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
       tap(({action, slice}) => {
-        this.dir.form.patchValue(intersection(action.value, this.dir.form.value));
 
-        const formValue = this.formValue;
+        this.dir.form.patchValue(action?.value, {emitEvent: false});
+
         let equal = true;
 
         if(!this._initialized$.value) {
-          this._initialState = formValue;
+          this._initialState = action?.value;
           this._initialized$.next(true);
 
           this.dir.form.markAsPristine();
         } else {
-          equal = deepEqual(formValue, this._submittedState ?? this._initialState);
+          equal = deepEqual(action?.value, this._submittedState ?? this._initialState);
           if(equal) {
             this.dir.form.markAsPristine();
+          } else {
+            this.dir.form.markAsDirty();
           }
         }
 
-        const dirty = !equal;
-        slice.dirty !== dirty && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
+        slice.dirty !== !equal && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
 
         this.dir.form.updateValueAndValidity();
         this._statusCheck$.next(true);
 
         this.cdr.markForCheck();
-      })
-    );
-
-    this.onChanges$ = combineLatest([this._input$, this._blur$, this._submitted$]).pipe(
-      filter(([input, blur, submitted]) => (input || blur || submitted)),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      sampleTime(this.debounceTime),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
-      tap(([input, blur, submitted]) => {
-
-        const form = this.formValue;
-
-        if (submitted === true || this.updateOn === 'change' && input === true || this.updateOn === 'blur' && blur === true) {
-          this.store.dispatch(UpdateForm({ path: this.slice, value: form }));
-        }
-
-        if(input === true) {
-          this._input$.next(false);
-        }
-
-        if(blur === true) {
-          this._blur$.next(false);
-        }
-
-        if(submitted === true) {
-          this._submitted$.next(false);
-        }
       })
     );
 
@@ -332,9 +307,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       this._subs[sub].unsubscribe();
     }
 
-    this._blur$.complete();
-    this._input$.complete();
-    this._submitted$.complete();
     this._statusCheck$.complete();
     this._initialized$.complete();
     this._control$.complete();
@@ -343,11 +315,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   subscribe() {
     this._subs.a = this.onInitOrUpdate$.subscribe();
     this._subs.b = this.onSubmit$.subscribe();
-    this._subs.c = this.onChanges$.subscribe();
-    this._subs.d = this.onControlsChanges$.subscribe();
-    this._subs.e = this.onReset$.subscribe();
-    this._subs.f = this.onStatusChanges$.subscribe();
-    this._subs.g = this.onActionQueued$.subscribe();
+    this._subs.c = this.onControlsChanges$.subscribe();
+    this._subs.d = this.onReset$.subscribe();
+    this._subs.e = this.onStatusChanges$.subscribe();
+    this._subs.f = this.onActionQueued$.subscribe();
   }
 
   get formValue(): any {

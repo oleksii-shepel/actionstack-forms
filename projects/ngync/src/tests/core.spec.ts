@@ -5,7 +5,7 @@ import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, Reacti
 import { StoreModule } from "@ngrx/store";
 import { filter, firstValueFrom } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectSubmitted, selectValue } from "../public-api";
+import { AutoInit, AutoSubmit, FormActionsInternal, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectValue } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -194,10 +194,9 @@ describe('core', () => {
 
       subs.a = directive.onSubmit$.subscribe(stub);
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      subs.c = directive.onChanges$.subscribe(stub);
-      subs.d = directive.onControlsChanges$.subscribe(stub);
-      subs.e = directive.onReset$.subscribe(stub);
-      subs.f = directive.onStatusChanges$.subscribe(stub);
+      subs.c = directive.onControlsChanges$.subscribe(stub);
+      subs.d = directive.onReset$.subscribe(stub);
+      subs.e = directive.onStatusChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -206,10 +205,6 @@ describe('core', () => {
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(ResetForm({ path:'slice', state: 'blank' }));
-
-      directive._input$.next(true);
-      directive._blur$.next(true);
-      directive._submitted$.next(true);
 
       fixture.detectChanges();
 
@@ -254,150 +249,6 @@ describe('core', () => {
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
       expect(stub).toHaveBeenCalledTimes(3);
     });
-    describe('onChanges', () => {
-      it('change', async () => {
-        const auto = jest.fn();
-
-        subs.a = directive.onControlsChanges$.subscribe(auto);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        expect(auto).toHaveBeenCalled();
-
-        directive.dir.form.setValue({ firstName: 'Jane' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Jane' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        directive.dir.form.setValue({ firstName: 'Helen' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        const button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
-        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectSubmitted('slice')))).resolves.toBe(true);
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(false);
-      });
-      it('blur', async () => {
-        directive.updateOn = 'blur';
-
-        const auto = jest.fn();
-        subs.a = directive.onControlsChanges$.subscribe(auto);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        expect(auto).toHaveBeenCalled();
-
-        directive.dir.form.setValue({ firstName: 'Jane' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Jane' });
-
-        directive.dir.form.setValue({ firstName: 'Helen' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        const button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
-        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectSubmitted('slice')))).resolves.toBe(true);
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(false);
-      });
-      it('submitted', async () => {
-        directive.updateOn = 'submitted';
-
-        const auto = jest.fn();
-        subs.a = directive.onControlsChanges$.subscribe(auto);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        expect(auto).toHaveBeenCalled();
-
-        directive.dir.form.setValue({ firstName: 'Jane' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-
-        directive.dir.form.setValue({ firstName: 'Helen' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        const button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
-        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectSubmitted('slice')))).resolves.toBe(true);
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(false);
-
-      });
-    });
     it('ngOnDestroy', async () => {
       const auto = jest.fn();
 
@@ -408,9 +259,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.dir.form.setValue({ firstName: 'Helen' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
+      directive.store.dispatch(UpdateForm({ path: 'slice', value: { firstName: 'Helen' }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -452,9 +301,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.dir.form.setValue({ firstName: 'Jane' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
+      directive.store.dispatch(UpdateForm({ path: 'slice', value: { firstName: 'Jane' }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -651,10 +498,9 @@ describe('core', () => {
 
       subs.a = directive.onSubmit$.subscribe(stub);
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      subs.c = directive.onChanges$.subscribe(stub);
-      subs.d = directive.onControlsChanges$.subscribe(stub);
-      subs.e = directive.onReset$.subscribe(stub);
-      subs.f = directive.onStatusChanges$.subscribe(stub);
+      subs.c = directive.onControlsChanges$.subscribe(stub);
+      subs.d = directive.onReset$.subscribe(stub);
+      subs.e = directive.onStatusChanges$.subscribe(stub);
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -663,10 +509,6 @@ describe('core', () => {
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(ResetForm({ path:'slice', state: 'blank' }));
-
-      directive._input$.next(true);
-      directive._blur$.next(true);
-      directive._submitted$.next(true);
 
       fixture.detectChanges();
 
@@ -711,150 +553,6 @@ describe('core', () => {
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
       expect(stub).toHaveBeenCalledTimes(3);
     });
-    describe('onChanges', () => {
-      it('change', async () => {
-        const auto = jest.fn();
-
-        subs.a = directive.onControlsChanges$.subscribe(auto);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        expect(auto).toHaveBeenCalled();
-
-        directive.dir.form.setValue({ firstName: 'Jane' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Jane' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        directive.dir.form.setValue({ firstName: 'Helen' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        const button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
-        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectSubmitted('slice')))).resolves.toBe(true);
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(false);
-      });
-      it('blur', async () => {
-        directive.updateOn = 'blur';
-
-        const auto = jest.fn();
-        subs.a = directive.onControlsChanges$.subscribe(auto);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        expect(auto).toHaveBeenCalled();
-
-        directive.dir.form.setValue({ firstName: 'Jane' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Jane' });
-
-        directive.dir.form.setValue({ firstName: 'Helen' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        const button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
-        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectSubmitted('slice')))).resolves.toBe(true);
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(false);
-      });
-      it('submitted', async () => {
-        directive.updateOn = 'submitted';
-
-        const auto = jest.fn();
-        subs.a = directive.onControlsChanges$.subscribe(auto);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        expect(auto).toHaveBeenCalled();
-
-        directive.dir.form.setValue({ firstName: 'Jane' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-
-        directive.dir.form.setValue({ firstName: 'Helen' });
-        directive.dir.form.markAsDirty();
-        directive._input$.next(true);
-        directive._blur$.next(true);
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(true);
-
-        const button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
-        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-
-        jest.advanceTimersByTime(3000);
-        await fixture.whenStable();
-
-        await expect(firstValueFrom(directive.store.select(selectSubmitted('slice')))).resolves.toBe(true);
-        expect(directive.dir.form.value).toEqual({ firstName: 'Helen' });
-        expect(directive.dir.form.dirty).toBe(false);
-
-      });
-    });
     it('ngOnDestroy', async () => {
       const auto = jest.fn();
 
@@ -865,9 +563,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.dir.form.setValue({ firstName: 'Helen' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
+      directive.store.dispatch(UpdateForm({ path: 'slice', value: { firstName: 'Helen' }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -909,9 +605,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.dir.form.setValue({ firstName: 'Jane' });
-      directive.dir.form.markAsDirty();
-      directive._input$.next(true);
+      directive.store.dispatch(UpdateForm({ path: 'slice', value: { firstName: 'Jane' }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
