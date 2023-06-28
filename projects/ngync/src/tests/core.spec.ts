@@ -68,11 +68,39 @@ describe('core', () => {
       expect(directive.debounceTime).toBe(NGYNC_CONFIG_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
+    it('should dispatch check status after AutoInit action', async() => {
+      const auto = jest.fn();
+      subs.a = directive.initialized$.subscribe(auto);
 
+      const stub = jest.fn();
+      subs.b = directive.onStatusChanges$.subscribe(stub);
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      expect(stub).toHaveBeenCalledTimes(1);
+      expect(directive.dir.form.value).toEqual({ firstName: 'John' });
+    });
+
+    it('should dispatch check status after UpdateForm action', async() => {
+      const auto = jest.fn();
+      subs.a = directive.initialized$.subscribe(auto);
+
+      const stub = jest.fn();
+      subs.b = directive.onStatusChanges$.subscribe(stub);
+
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      expect(stub).toHaveBeenCalledTimes(2);
+      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+    });
     it('should dispatch AutoInit action', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -84,7 +112,7 @@ describe('core', () => {
     it('should dispatch AutoSubmit action', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -122,7 +150,7 @@ describe('core', () => {
     it('should call subscription when UpdateForm action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -142,7 +170,7 @@ describe('core', () => {
     it('should call subscription when AutoSubmit action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -166,7 +194,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -182,7 +210,7 @@ describe('core', () => {
     it('should not call subscriptions when component removed from the DOM', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -228,7 +256,7 @@ describe('core', () => {
     it('onInitOrUpdate', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -252,7 +280,7 @@ describe('core', () => {
     it('ngOnDestroy', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -294,7 +322,7 @@ describe('core', () => {
     it('formStatus and formValue', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -372,11 +400,39 @@ describe('core', () => {
       expect(directive.debounceTime).toBe(NGYNC_CONFIG_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
+    it('should dispatch check status after AutoInit action', async() => {
+      const auto = jest.fn();
+      subs.a = directive.initialized$.subscribe(auto);
 
+      const stub = jest.fn();
+      subs.b = directive.onStatusChanges$.subscribe(stub);
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      expect(stub).toHaveBeenCalledTimes(1);
+      expect(directive.dir.form.value).toEqual({ firstName: 'John' });
+    });
+
+    it('should dispatch check status after UpdateForm action', async() => {
+      const auto = jest.fn();
+      subs.a = directive.initialized$.subscribe(auto);
+
+      const stub = jest.fn();
+      subs.b = directive.onStatusChanges$.subscribe(stub);
+
+      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      expect(stub).toHaveBeenCalledTimes(2);
+      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+    });
     it('should dispatch AutoInit action', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -388,7 +444,7 @@ describe('core', () => {
     it('should dispatch AutoSubmit action', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -426,7 +482,7 @@ describe('core', () => {
     it('should call subscription when UpdateForm action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -446,7 +502,7 @@ describe('core', () => {
     it('should call subscription when AutoSubmit action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -470,7 +526,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      subs.a = directive.onControlsChanges$.subscribe(stub);
+      subs.a = directive.initialized$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -486,7 +542,7 @@ describe('core', () => {
     it('should not call subscriptions when component removed from the DOM', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -532,7 +588,7 @@ describe('core', () => {
     it('onInitOrUpdate', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -556,7 +612,7 @@ describe('core', () => {
     it('ngOnDestroy', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -598,7 +654,7 @@ describe('core', () => {
     it('formStatus and formValue', async () => {
       const auto = jest.fn();
 
-      subs.a = directive.onControlsChanges$.subscribe(auto);
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();

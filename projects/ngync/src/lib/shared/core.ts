@@ -85,25 +85,21 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   dir!: NgForm | FormGroupDirective;
 
-  _initialState: any;
-  _submittedState: any;
+  initialState: any;
+  submittedState: any;
 
-  _statusCheck$ = new BehaviorSubject<boolean>(false);
-  _initialized$ = new BehaviorSubject<boolean>(false);
-  _control$ = new BehaviorSubject<NgControl | null>(null);
+  checkStatus$ = new BehaviorSubject<boolean>(false);
+  initialized$ = new BehaviorSubject<boolean>(false);
 
-  _subs = {} as any;
+  subs = {} as any;
 
-  _blurCallback = (control: NgControl) => (value: any) => {
-    this._control$.value !== control && this._control$.next(control);
-
+  blurCallback = (control: NgControl) => (value: any) => {
     if(this.updateOn === 'blur') {
       this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
     }
   };
 
-  _inputCallback = (control: NgControl) => (value : any) => {
-    this._control$.value !== control && this._control$.next(control);
+  inputCallback = (control: NgControl) => (value : any) => {
     control.control?.setValue(value);
 
     if(this.updateOn === 'change') {
@@ -153,14 +149,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.dir.form.valid),
-      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap(() => {
 
         if(this.updateOn === 'submit') {
           this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
         }
 
-        this._submittedState = this.formValue;
+        this.submittedState = this.formValue;
 
         if (this.dir.form.dirty) {
           this.dir.form.markAsPristine();
@@ -180,13 +176,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this.dir.form.patchValue(action?.value, {emitEvent: false});
         let equal = true;
 
-        if(!this._initialized$.value) {
-          this._initialState = action?.value;
-          this._initialized$.next(true);
+        if(!this.initialized$.value) {
+          this.initialState = action?.value;
+          this.initialized$.next(true);
 
           this.dir.form.markAsPristine();
         } else {
-          equal = deepEqual(action?.value, this._submittedState ?? this._initialState);
+          equal = deepEqual(action?.value, this.submittedState ?? this.initialState);
           if(equal) {
             this.dir.form.markAsPristine();
           } else {
@@ -197,7 +193,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         slice.dirty !== !equal && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
 
         this.dir.form.updateValueAndValidity();
-        this._statusCheck$.next(true);
+        this.checkStatus$.next(true);
 
         this.cdr.markForCheck();
       }),
@@ -211,12 +207,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(() => {
         this.controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
-            control.valueAccessor.registerOnChange(this._inputCallback(control));
-            control.valueAccessor.registerOnTouched(this._blurCallback(control));
+            control.valueAccessor.registerOnChange(this.inputCallback(control));
+            control.valueAccessor.registerOnTouched(this.blurCallback(control));
           }
         });
       }),
-      tap(value => { if(!this._initialized$.value) { this.store.dispatch(AutoInit({ path: this.slice, value: value })); } }),
+      tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ path: this.slice, value: value })); } }),
       scan((acc, _) => acc + 1, 0),
       tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue })); } }),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
@@ -225,15 +221,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onReset$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.ResetForm),
       filter((action) => (!actionQueues.has(this.slice) || action.deferred)),
-      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         if(action.state){
           switch(action.state) {
             case 'initial':
-              this.store.dispatch(UpdateForm({ path: this.slice, value: this._initialState || {} }));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.initialState || {} }));
               break;
             case 'submitted':
-              this.store.dispatch(UpdateForm({ path: this.slice, value: this._submittedState || {} }));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState || {} }));
               break;
             case 'blank':
               this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset(this.formValue)}));
@@ -244,13 +240,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)));
 
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
+      startWith(undefined),
       filter((value) => value !== 'PENDING'),
-      mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      map((value) => ({ status: value, errors: this.dir.form.errors})),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      map((value) => ({ status: value, errors: this.dir.form.errors as any})),
+      mergeMap((value) => from(this.checkStatus$).pipe(filter(value => value), take(1), map(() => value), tap(() => this.checkStatus$.next(false)))),
       pairwise(),
       distinctUntilChanged(([prev, curr]: [any, any]) => prev.status === curr.status && deepEqual(prev.errors, curr.errors)),
       map(([_, curr]) => curr),
-      mergeMap((value) => from(this._statusCheck$).pipe(filter(value => value), take(1), map(() => value), tap(() => this._statusCheck$.next(false)))),
       tap((value) => {
         this.store.dispatch(UpdateStatus({ path: this.slice, status: value.status }));
         this.store.dispatch(UpdateErrors({ path: this.slice, errors: value.errors }));
@@ -294,22 +291,21 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ngOnDestroy() {
     this.store.dispatch(FormDestroyed({ path: this.slice }));
 
-    for (const sub of Object.keys(this._subs)) {
-      this._subs[sub].unsubscribe();
+    for (const sub of Object.keys(this.subs)) {
+      this.subs[sub].unsubscribe();
     }
 
-    this._statusCheck$.complete();
-    this._initialized$.complete();
-    this._control$.complete();
+    this.checkStatus$.complete();
+    this.initialized$.complete();
   }
 
   subscribe() {
-    this._subs.a = this.onInitOrUpdate$.subscribe();
-    this._subs.b = this.onSubmit$.subscribe();
-    this._subs.c = this.onControlsChanges$.subscribe();
-    this._subs.d = this.onReset$.subscribe();
-    this._subs.e = this.onStatusChanges$.subscribe();
-    this._subs.f = this.onActionQueued$.subscribe();
+    this.subs.a = this.onInitOrUpdate$.subscribe();
+    this.subs.b = this.onSubmit$.subscribe();
+    this.subs.c = this.onControlsChanges$.subscribe();
+    this.subs.d = this.onReset$.subscribe();
+    this.subs.e = this.onStatusChanges$.subscribe();
+    this.subs.f = this.onActionQueued$.subscribe();
   }
 
   get formValue(): any {
