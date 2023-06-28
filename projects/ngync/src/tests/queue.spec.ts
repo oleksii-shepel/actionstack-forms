@@ -2,7 +2,7 @@ import { Queue } from '../lib/shared/queue';
 
 describe('Queue', () => {
   it('should enqueue and dequeue', () => {
-    let queue = new Queue<string>();
+    const queue = new Queue<string>();
     queue.enqueue('a');
     queue.enqueue('b');
     queue.enqueue('c');
@@ -20,7 +20,7 @@ describe('Queue', () => {
   })
 
   it('should dequeue in order after dequeue', () => {
-    let queue = new Queue<string>();
+    const queue = new Queue<string>();
     expect(queue.isEmpty).toBe(true);
     queue.enqueue('a');
     queue.enqueue('b');
@@ -35,7 +35,7 @@ describe('Queue', () => {
   });
 
   it('should dequeue in order after dequeue and enqueue', () => {
-    let queue = new Queue<string>();
+    const queue = new Queue<string>();
     queue.enqueue('a');
     queue.enqueue('b');
     queue.enqueue('c');
@@ -47,4 +47,20 @@ describe('Queue', () => {
     expect(queue.dequeue()).toBe('d');
     expect(queue.dequeue()).toBe('e');
   });
+
+  it('should update first element', () => {
+    const queue = new Queue<string>();
+    queue.enqueue('a');
+    queue.enqueue('b');
+    queue.enqueue('c');
+    queue.first('d');
+
+    expect(queue.peek()).toBe('d');
+    expect(queue.dequeue()).toBe('d');
+    expect(queue.dequeue()).toBe('b');
+    expect(queue.dequeue()).toBe('c');
+
+    queue.first('a');
+    expect(queue.dequeue()).toBe('a');
+  })
 });
