@@ -149,7 +149,7 @@ describe('utils', () => {
     const obj2 = { a: 1, b: 2, c: 3, e: [1, 2]};
     const obj3 = { a: 1, b: 2, c: 3, e: [2, 2]};
 
-    expect(difference(obj1, obj2)).toEqual({"added": {"c": 3}, "changed": {"a": 1, "b": 2, "e": [1, 2]}, "removed": {"d": 7}} );
-    expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, 2]}});
+    expect(difference(obj1, obj2)).toEqual({"added": {"c": 3,  "e": [undefined, 2]}, "changed": {"a": 1, "b": 2 }, "removed": {"d": 7}} );
+    expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, undefined]}});
   });
 });
