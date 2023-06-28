@@ -176,8 +176,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action?.deferred === true && action?.path === this.slice),
-      filter(action => [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action?.type)),
+      filter((action: any) => action && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
+      filter((action) => (!actionQueues.has(this.slice) || action.deferred)),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       switchMap((action) => from(this.store.select(selectSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
       tap(({action, slice}) => {
@@ -230,8 +230,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onReset$ = this.actionsSubject.pipe(
-      filter((action: any) => action?.deferred === true && action?.path === this.slice),
-      filter(action => action?.type === FormActions.ResetForm),
+      filter((action: any) => action && action.path === this.slice && action.type === FormActions.ResetForm),
+      filter((action) => (!actionQueues.has(this.slice) || action.deferred)),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
       mergeMap((value) => from(this._initialized$).pipe(filter(value => value), take(1), map(() => value))),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
