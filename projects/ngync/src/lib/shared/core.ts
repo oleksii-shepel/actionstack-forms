@@ -183,6 +183,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(({action, slice}) => {
 
         this.dir.form.patchValue(action?.value, {emitEvent: false});
+        this.dir.form.value;
 
         let equal = true;
 
@@ -322,15 +323,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   get formValue(): any {
-    if(!this.controls) { return {}; }
-
-    let value = {};
-    for (const control of this.controls.toArray()) {
-      if(control.path) {
-        value = setValue(value, control.path.join('.'), control.value);
-      }
-    }
-    return value;
+    return this.dir.form.value;
   }
 
   get formStatus(): FormControlStatus {
