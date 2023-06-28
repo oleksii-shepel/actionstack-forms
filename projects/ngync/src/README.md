@@ -15,7 +15,7 @@
 
 </p>
 <p align="justify">
-<b>ngync</b> is a lightweight javascript library that helps to integrate Angular forms into NgRx store easily. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a proposed solution. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
+<b>ngync</b> is a lightweight JavaScript library designed to facilitate the integration of Angular forms with the NgRx store. It aims to simplify the developing process by taking care of keeping states in sync what can be challenging when done manually. One of the key benefits of using ngync is that it enables form binding with the store effortlessly. This means that you don't have to go through the usual hassle of dispatching actions, writing reducers, or creating selectors. The library takes care of these tasks for you, eliminating the need for additional code and reducing the effort required. The library allows you to leverage your existing knowledge of working with Angular forms, no additional knowledge required.
 </p>
 <p align="justify">
 <a href="https://ngrx.io/">NgRx</a> is a state management library tailor-made for Angular applications, granting you the extraordinary ability to fashion software. Inspired by the renowned Redux, NgRx harnesses the power of a single source of truth, empowering you to disentangle concerns and navigate through debugging with unparalleled ease. Prepare to unlock a world of enhanced application development possibilities with NgRx at your side!
