@@ -36,13 +36,13 @@ export class JsonEditorComponent implements OnChanges {
 
     if (diff.removed) {
       changedProperties += "Removed: ";
-      Object.keys(diff.removed).forEach(x => changedProperties += `<b>${x}</b>, `);
+      findProps(diff.removed).forEach(x => changedProperties += `<b>${x}</b>, `);
       changedProperties = changedProperties.replace(/, $/, "<br/>");
     }
 
     if(diff.added) {
       changedProperties += "Added: ";
-      Object.keys(diff.added).forEach(x => changedProperties += `<b>${x}</b>, `);
+      findProps(diff.added).forEach(x => changedProperties += `<b>${x}</b>, `);
       changedProperties = changedProperties.replace(/, $/, "<br/>");
     }
 
