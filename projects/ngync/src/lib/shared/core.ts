@@ -29,6 +29,7 @@ import {
   map,
   mergeMap,
   observeOn,
+  of,
   sampleTime,
   scan,
   skip,
@@ -66,6 +67,7 @@ import { actionQueues } from './reducers';
 export interface NgyncConfig {
   slice: string;
   debounceTime?: number;
+  enableQueue?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
@@ -81,6 +83,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   slice!: string;
   debounceTime!: number;
+  enableQueue!: boolean;
   updateOn!: string;
 
   dir!: NgForm | FormGroupDirective;
@@ -139,6 +142,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       this.slice = config.slice;
     }
 
+    this.enableQueue = config.enableQueue;
     this.debounceTime = config.debounceTime;
     this.updateOn = config.updateOn;
 
@@ -148,6 +152,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     if (!this.dir) {
       throw new Error('Supported form control directive not found');
+    }
+
+    if(this.enableQueue) {
+      actionQueues.set(this.slice, new Queue());
     }
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
@@ -260,11 +268,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
     );
 
-    this.onActionQueued$ = defer(() => {
-      actionQueues.has(this.slice) || actionQueues.set(this.slice, new Queue<Action>());
-      const queue = actionQueues.get(this.slice) as Queue<Action>;
-      return queue.updated$
-    }).pipe(
+    this.onActionQueued$ = of(this.enableQueue).pipe(
+      filter((value) => value),
+      switchMap(() => actionQueues.get(this.slice)?.updated$ || of(null)),
+      filter((value) => value !== null),
       observeOn(asyncScheduler),
       tap((queue) => {
         if(queue.initialized$.value) {
@@ -305,12 +312,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   subscribe() {
-    this.subs.a = this.onInitOrUpdate$.subscribe();
-    this.subs.b = this.onSubmit$.subscribe();
-    this.subs.c = this.onControlsChanges$.subscribe();
-    this.subs.d = this.onReset$.subscribe();
-    this.subs.e = this.onStatusChanges$.subscribe();
-    this.subs.f = this.onActionQueued$.subscribe();
+    this.subs.a = this.onActionQueued$.subscribe();
+    this.subs.b = this.onStatusChanges$.subscribe();
+    this.subs.c = this.onInitOrUpdate$.subscribe();
+    this.subs.d = this.onSubmit$.subscribe();
+    this.subs.e = this.onReset$.subscribe();
+    this.subs.f = this.onControlsChanges$.subscribe();
   }
 
   get activeControl(): NgControl | undefined {

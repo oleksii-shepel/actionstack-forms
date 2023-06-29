@@ -1,7 +1,5 @@
-import { Action } from '@ngrx/store';
 import { AutoInit, AutoSubmit, FormDestroyed, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateProperty, UpdateStatus } from '../lib/shared/actions';
-import { Queue } from '../lib/shared/queue';
-import { actionQueues, forms } from '../lib/shared/reducers';
+import { forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
 describe('reducer', () => {
@@ -29,44 +27,41 @@ describe('reducer', () => {
       }
     };
 
-    const f = forms(initialState, false, false);
+    const f = forms(initialState, false);
     let expected = {} as any;
 
-    actionQueues.set('slice', new Queue<Action>());
-    actionQueues.get('slice')?.initialized$.next(true);
-
-    let newState = f((state: any, action: any) => {})(initialState, AutoInit({path: "slice", value: model}));
+    let newState = f((state: any, action: any) => { Function.prototype })(initialState, AutoInit({path: "slice", value: model}));
     expected = { slice: { model } };
     expect(newState.model).toEqual(expected.model);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateForm({path: "slice", value: model}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateForm({path: "slice", value: model}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateProperty({path: "slice", value: model}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateProperty({path: "slice", value: model}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, ResetForm({path: "slice", state: 'initial'}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, ResetForm({path: "slice", state: 'initial'}));
     expect(newState).toEqual(newState);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateStatus({path: "slice", status: "VALID"}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateStatus({path: "slice", status: "VALID"}));
     expected = deepClone(initialState); (expected as any)['slice'].status = "VALID";
     expect(newState).toEqual(expected);
 
     const errors = {required: "Field is required", email: "Email is invalid"};
-    newState = f((state: any, action: any) => {})(initialState, UpdateErrors({path: "slice", errors: errors}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateErrors({path: "slice", errors: errors}));
     expected = deepClone(initialState); (expected as any)['slice'].errors = errors;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, UpdateDirty({path: "slice", dirty: true}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateDirty({path: "slice", dirty: true}));
     expected = deepClone(initialState); (expected as any)['slice'].dirty = true;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, AutoSubmit({path: "slice"}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, AutoSubmit({path: "slice"}));
     expected = deepClone(initialState); (expected as any)['slice'].submitted = true;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => {})(initialState, FormDestroyed({path: "slice"}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, FormDestroyed({path: "slice"}));
   });
 });

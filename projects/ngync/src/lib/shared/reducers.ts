@@ -33,7 +33,7 @@ export const propSubmitted = (path: string) => `${path}.submitted`;
 
 export const actionQueues = new Map<string, Queue<Action>>();
 
-export const forms = (initialState: any = {}, enableLogging = true, enableQueue = true) => (reducer: ActionReducer<any>): any => {
+export const forms = (initialState: any = {}, enableLogging = true) => (reducer: ActionReducer<any>): any => {
 
   const metaReducer = (state: any, action: any) => {
 
@@ -44,7 +44,7 @@ export const forms = (initialState: any = {}, enableLogging = true, enableQueue 
     if(path) {
       const slice = path.split('::')[0];
 
-      if(!enableQueue || enableQueue && action?.deferred) {
+      if(!actionQueues.has(slice) || action?.deferred) {
 
         nextState = reducer(state, action);
 
@@ -82,8 +82,7 @@ export const forms = (initialState: any = {}, enableLogging = true, enableQueue 
         nextState = logger(enableLogging)(() => nextState)(state, action);
         return nextState;
 
-      } else if(enableQueue) {
-        actionQueues.has(slice) || actionQueues.set(slice, new Queue<Action>());
+      } else {
         const queue = actionQueues.get(slice) as Queue<Action>;
         const type = queue.peek()?.type;
 
@@ -104,10 +103,6 @@ export const forms = (initialState: any = {}, enableLogging = true, enableQueue 
           queue.enqueue(new Deferred(action));
           return nextState;
         }
-      } else {
-        nextState = reducer(state, action);
-        nextState = logger(enableLogging)(() => nextState)(state, action);
-        return nextState;
       }
     }
 
