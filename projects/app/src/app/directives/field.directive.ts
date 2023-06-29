@@ -21,7 +21,7 @@ const formControlBinding: Provider = {
   [{provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true}]
 ], exportAs: 'ngField'})
 export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgControl {
-  @Input("ngField") override name: string = '';
+  @Input("ngField") override name = '';
   @Output('ngFieldChange') override update = new EventEmitter();
 
   override control: FormControl<string | null>;
@@ -62,6 +62,12 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this.control.setAsyncValidators(this._composedAsyncValidator);
 
     this.control.setParent(this.formDirective.control);
+
+    Object.assign(this, {
+      _checkForErrors: () => { Function.prototype },
+      _checkParentType: () => { Function.prototype },
+      _checkName: () => { Function.prototype }
+    })
   }
 
   onChange(value: any) {
@@ -90,7 +96,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
       takeUntil(this._destroyed$),
       map(state => selectValue(this._ngStore.slice)(state)))
     .subscribe((model: any) => {
-      let value = getValue(model, this.path.join('.'));
+      const value = getValue(model, this.path.join('.'));
       this.valueAccessor?.writeValue(value);
       this.control.setValue(value);
     });
