@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
 import { filter, firstValueFrom } from 'rxjs';
-import { NGYNC_CONFIG_DEFAULT, SharedModule } from "../lib/shared/module";
+import { NGYNC_CONFIG_DEFAULT, NgFormsModule } from "../lib/shared/module";
 import { AutoInit, AutoSubmit, FormActionsInternal, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectValue } from "../public-api";
 
 describe('core', () => {
@@ -28,7 +28,7 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
           metaReducers: [forms({'slice': {}}, false)]
-        }), SharedModule]
+        }), NgFormsModule]
       });
 
       fixture = TestBed.overrideComponent(TestComponent, {
@@ -94,7 +94,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      expect(stub).toHaveBeenCalledTimes(2);
+      expect(stub).toHaveBeenCalledTimes(1);
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
     });
     it('should dispatch AutoInit action', async() => {
@@ -275,7 +275,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(3);
+      expect(stub).toHaveBeenCalledTimes(1);
     });
     it('ngOnDestroy', async () => {
       const auto = jest.fn();
@@ -360,7 +360,7 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
           metaReducers: [forms({'slice': {}}, false)]
-        }), SharedModule]
+        }), NgFormsModule]
       });
 
       fixture = TestBed.overrideComponent(TestComponent, {
@@ -426,7 +426,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      expect(stub).toHaveBeenCalledTimes(2);
+      expect(stub).toHaveBeenCalledTimes(1);
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
     });
     it('should dispatch AutoInit action', async() => {
@@ -607,7 +607,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(3);
+      expect(stub).toHaveBeenCalledTimes(1);
     });
     it('ngOnDestroy', async () => {
       const auto = jest.fn();
@@ -693,7 +693,7 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
           metaReducers: [forms({'slice': {}}, false)]
-        }), SharedModule]
+        }), NgFormsModule]
       });
 
       const fixture = TestBed.overrideComponent(TestComponent, {
@@ -744,7 +744,7 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
           metaReducers: [forms({'slice': {}}, false)]
-        }), SharedModule]
+        }), NgFormsModule]
       });
 
       const fixture = TestBed.overrideComponent(TestComponent, {
@@ -790,7 +790,7 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
           metaReducers: [forms({'slice': {}}, false)]
-        }), SharedModule]
+        }), NgFormsModule]
       });
 
       const fixture = TestBed.overrideComponent(TestComponent, {
@@ -829,7 +829,7 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
           metaReducers: [forms({'slice': {}}, false)]
-        }), SharedModule]
+        }), NgFormsModule]
       });
 
       const fixture = TestBed.overrideComponent(TestComponent, {

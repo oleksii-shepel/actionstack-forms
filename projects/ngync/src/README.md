@@ -59,7 +59,7 @@ The code snippet of main NgModule shows how the import looks like:
 </p>
 
 ```typescript
-import { NgFormsModule, SharedModule, forms } from 'ngync';
+import { NgFormsModule, NgModelArrayModule, forms } from 'ngync';
 
 @NgModule({
   declarations: [
@@ -69,7 +69,8 @@ import { NgFormsModule, SharedModule, forms } from 'ngync';
     BrowserModule,
     ReactiveFormsModule,
     FormsModule,
-    SharedModule,
+    NgFormsModule,
+    NgModelArrayModule,
     StoreModule.forRoot(reducer, {
       metaReducers: [forms(initialState)]
     }),

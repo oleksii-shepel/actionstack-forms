@@ -17,8 +17,8 @@ export class JsonEditorComponent implements OnChanges {
   @Output() collapsedChange = new EventEmitter<boolean>();
 
   ngOnChanges(changes: SimpleChanges) {
-    const previousValue = changes['data']?.previousValue;
-    const currentValue = changes['data']?.currentValue;
+    const previousValue = changes['data']?.previousValue ?? {};
+    const currentValue = changes['data']?.currentValue ?? {};
 
     if(deepEqual(previousValue, currentValue)) { return; }
 

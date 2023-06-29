@@ -3,7 +3,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgModelArray } from "../lib/template-driven-forms/ngmodelarray";
-import { NgFormsModule } from "../public-api";
+import { NgFormsModule, NgModelArrayModule } from "../public-api";
 import { FormGroupMixin } from './../lib/template-driven-forms/mixin';
 
 @Component({
@@ -23,7 +23,7 @@ describe('core', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       declarations: [TestComponent],
-      imports: [CommonModule, ReactiveFormsModule, FormsModule, NgFormsModule],
+      imports: [CommonModule, ReactiveFormsModule, FormsModule, NgFormsModule, NgModelArrayModule],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     });
 

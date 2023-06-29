@@ -13,4 +13,4 @@ export const NGYNC_CONFIG_DEFAULT: Omit<NgyncConfig, 'slice'> = { debounceTime: 
   exports: [SyncDirective],
   providers: [SyncDirective]
 })
-export class SharedModule {}
+export class NgFormsModule {}

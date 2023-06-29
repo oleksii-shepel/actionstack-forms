@@ -30,6 +30,7 @@ import {
   mergeMap,
   observeOn,
   pairwise,
+  sampleTime,
   scan,
   startWith,
   switchMap,
@@ -169,6 +170,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
       filter((action: any) => action && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!actionQueues.has(this.slice) || action.deferred)),
+      sampleTime(this.debounceTime),
       switchMap((action) => from(this.store.select(selectSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
       tap(({action, slice}) => {
 
@@ -242,11 +244,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       startWith(undefined),
       filter((value) => value !== 'PENDING'),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      map((value) => ({ status: value, errors: this.dir.form.errors as any})),
-      mergeMap((value) => from(this.checkStatus$).pipe(filter(value => value), take(1), map(() => value), tap(() => this.checkStatus$.next(false)))),
+      map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
       pairwise(),
       distinctUntilChanged(([prev, curr]: [any, any]) => prev.status === curr.status && deepEqual(prev.errors, curr.errors)),
       map(([_, curr]) => curr),
+      mergeMap((value) => from(this.checkStatus$).pipe(filter(value => value), take(1), map(() => value), tap(() => this.checkStatus$.next(false)))),
       tap((value) => {
         this.store.dispatch(UpdateStatus({ path: this.slice, status: value.status }));
         this.store.dispatch(UpdateErrors({ path: this.slice, errors: value.errors }));
