@@ -29,9 +29,9 @@ import {
   map,
   mergeMap,
   observeOn,
-  pairwise,
   sampleTime,
   scan,
+  skip,
   startWith,
   switchMap,
   take,
@@ -42,7 +42,6 @@ import {
   DomObserver,
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
-  actionQueues,
   deepEqual,
   reset,
   selectSlice,
@@ -61,6 +60,7 @@ import {
   UpdateStatus
 } from './actions';
 import { Queue } from './queue';
+import { actionQueues } from './reducers';
 
 
 export interface NgyncConfig {
@@ -192,8 +192,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
 
         slice.dirty !== !equal && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
-
-        this.dir.form.updateValueAndValidity();
+        this.activeControl?.control?.updateValueAndValidity();
         this.checkStatus$.next(true);
 
         this.cdr.markForCheck();
@@ -240,18 +239,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       }),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)));
 
-    this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
-      startWith(undefined),
-      filter((value) => value !== 'PENDING'),
+    this.onStatusChanges$ = from(this.checkStatus$).pipe(
+      skip(1),
+      map(() => this.dir.form.status),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
-      pairwise(),
-      distinctUntilChanged(([prev, curr]: [any, any]) => prev.status === curr.status && deepEqual(prev.errors, curr.errors)),
-      map(([_, curr]) => curr),
-      mergeMap((value) => from(this.checkStatus$).pipe(filter(value => value), take(1), map(() => value), tap(() => this.checkStatus$.next(false)))),
+      distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
       tap((value) => {
-        this.store.dispatch(UpdateStatus({ path: this.slice, status: value.status }));
-        this.store.dispatch(UpdateErrors({ path: this.slice, errors: value.errors }));
+        if(value.status !== 'PENDING') {
+          this.store.dispatch(UpdateStatus({ path: this.slice, status: value.status }));
+          this.store.dispatch(UpdateErrors({ path: this.slice, errors: value.errors }));
+        }
       }),
       takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
     );

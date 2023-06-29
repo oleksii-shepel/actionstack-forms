@@ -75,7 +75,7 @@ const productionReducer: ActionReducer<ApplicationState> = combineReducers(reduc
 export function reducer(state = initialState, action: any) {
   if (environment.production) {
     // suppress console output
-    console.log = function () {};
+    console.log = function () { Function.prototype };
     return productionReducer(state, action);
   } else {
     return developmentReducer(state, action);
