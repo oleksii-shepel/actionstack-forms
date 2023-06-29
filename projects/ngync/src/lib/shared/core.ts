@@ -87,8 +87,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   dir!: NgForm | FormGroupDirective;
 
-  initialState: any;
-  submittedState: any;
+  initialState: any = undefined;
+  submittedState: any = undefined;
+  destoyed = false;
 
   checkStatus$ = new BehaviorSubject<boolean>(false);
   initialized$ = new BehaviorSubject<boolean>(false);
@@ -174,7 +175,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ path: this.slice })))),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement))
+      takeWhile(() => !this.destoyed)
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
@@ -210,7 +211,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
         this.cdr.markForCheck();
       }),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement))
+      takeWhile(() => !this.destoyed)
     );
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
@@ -227,7 +228,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ path: this.slice, value: value })); } }),
       scan((acc, _) => acc + 1, 0),
       tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue })); } }),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      takeWhile(() => !this.destoyed),
     );
 
     this.onReset$ = this.actionsSubject.pipe(
@@ -249,7 +250,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
       }),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)));
+      takeWhile(() => !this.destoyed));
 
     this.onStatusChanges$ = from(this.checkStatus$).pipe(
       skip(1),
@@ -263,7 +264,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this.store.dispatch(UpdateErrors({ path: this.slice, errors: value.errors }));
         }
       }),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      takeWhile(() => !this.destoyed),
     );
 
     this.onActionQueued$ = of(this.enableQueue).pipe(
@@ -307,6 +308,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.checkStatus$.complete();
     this.initialized$.complete();
+    this.destoyed = true;
   }
 
   subscribe() {

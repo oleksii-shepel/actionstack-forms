@@ -208,7 +208,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
     });
-    it('should not call subscriptions when component removed from the DOM', async () => {
+    it('should not call subscriptions when component destroyed', async () => {
       const auto = jest.fn();
 
       subs.a = directive.initialized$.subscribe(auto);
@@ -229,8 +229,8 @@ describe('core', () => {
       subs.f = directive.onControlsChanges$.subscribe(stub);
 
       const numberOfCalls = stub.mock.calls.length;
-
       document.body.removeChild(fixture.debugElement.nativeElement);
+      directive.ngOnDestroy();
 
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
@@ -543,7 +543,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
     });
-    it('should not call subscriptions when component removed from the DOM', async () => {
+    it('should not call subscriptions when component destroyed', async () => {
       const auto = jest.fn();
 
       subs.a = directive.initialized$.subscribe(auto);
@@ -566,6 +566,7 @@ describe('core', () => {
       const numberOfCalls = stub.mock.calls.length;
 
       document.body.removeChild(fixture.debugElement.nativeElement);
+      directive.ngOnDestroy();
 
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
