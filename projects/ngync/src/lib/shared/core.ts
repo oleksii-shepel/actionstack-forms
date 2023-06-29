@@ -20,7 +20,6 @@ import {
   Observable,
   asyncScheduler,
   defer,
-  delay,
   distinctUntilChanged,
   filter,
   finalize,
@@ -215,7 +214,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      delay(0),
       switchMap(() => from(this.store.select(selectValue(this.slice))).pipe(take(1))),
       map((value) => value ?? this.formValue),
       tap(() => {

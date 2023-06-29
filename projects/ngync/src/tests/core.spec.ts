@@ -43,6 +43,7 @@ describe('core', () => {
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
       directive.slice = 'slice';
+      directive.enableQueue = false;
       actionQueues.clear();
 
       jest.useFakeTimers();
@@ -220,11 +221,14 @@ describe('core', () => {
       fixture.detectChanges();
       const stub = jest.fn();
 
-      subs.a = directive.onSubmit$.subscribe(stub);
-      subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      subs.c = directive.onControlsChanges$.subscribe(stub);
-      subs.d = directive.onReset$.subscribe(stub);
-      subs.e = directive.onStatusChanges$.subscribe(stub);
+      subs.a = directive.onActionQueued$.subscribe(stub);
+      subs.b = directive.onStatusChanges$.subscribe(stub);
+      subs.c = directive.onInitOrUpdate$.subscribe(stub);
+      subs.d = directive.onSubmit$.subscribe(stub);
+      subs.e = directive.onReset$.subscribe(stub);
+      subs.f = directive.onControlsChanges$.subscribe(stub);
+
+      const numberOfCalls = stub.mock.calls.length;
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -239,7 +243,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      expect(stub).not.toHaveBeenCalled();
+      expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
     it('dispatch InitForm before AutoInit action triggered', async () => {
@@ -552,11 +556,14 @@ describe('core', () => {
       fixture.detectChanges();
       const stub = jest.fn();
 
-      subs.a = directive.onSubmit$.subscribe(stub);
-      subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      subs.c = directive.onControlsChanges$.subscribe(stub);
-      subs.d = directive.onReset$.subscribe(stub);
-      subs.e = directive.onStatusChanges$.subscribe(stub);
+      subs.a = directive.onActionQueued$.subscribe(stub);
+      subs.b = directive.onStatusChanges$.subscribe(stub);
+      subs.c = directive.onInitOrUpdate$.subscribe(stub);
+      subs.d = directive.onSubmit$.subscribe(stub);
+      subs.e = directive.onReset$.subscribe(stub);
+      subs.f = directive.onControlsChanges$.subscribe(stub);
+
+      const numberOfCalls = stub.mock.calls.length;
 
       document.body.removeChild(fixture.debugElement.nativeElement);
 
@@ -571,7 +578,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      expect(stub).not.toHaveBeenCalled();
+      expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
     it('dispatch InitForm before AutoInit action triggered', async () => {
