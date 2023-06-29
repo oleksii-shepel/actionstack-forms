@@ -93,6 +93,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   subs = {} as any;
 
+  updatedControl: NgControl | undefined = undefined;
+
   blurCallback = (control: NgControl) => (value: any) => {
     if(this.updateOn === 'blur') {
       this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
@@ -101,6 +103,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   inputCallback = (control: NgControl) => (value : any) => {
     control.control?.setValue(value);
+    this.updatedControl = control;
 
     if(this.updateOn === 'change') {
       this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
@@ -192,7 +195,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
 
         slice.dirty !== !equal && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
-        this.activeControl?.control?.updateValueAndValidity();
+
+        if(this.updatedControl) { this.updatedControl.control?.updateValueAndValidity(); }
+        else { this.dir.form.updateValueAndValidity(); }
+
         this.checkStatus$.next(true);
 
         this.cdr.markForCheck();
