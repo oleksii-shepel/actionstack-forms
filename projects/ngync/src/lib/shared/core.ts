@@ -43,6 +43,7 @@ import {
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
   deepEqual,
+  intersection,
   reset,
   selectValue,
   setValue
@@ -185,29 +186,24 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((action) => {
 
         this.dir.form.patchValue(action?.value, {emitEvent: false});
-        let equal = true;
 
-        if(!this.initialized$.value) {
+        const initialized = this.initialized$.value;
+        const dirty = !initialized ? false : !deepEqual(action?.value, this.submittedState ?? this.initialState);
+
+        if(!initialized) {
           this.initialState = action?.value;
           this.initialized$.next(true);
-
-          this.dir.form.markAsPristine();
-        } else {
-          equal = deepEqual(action?.value, this.submittedState ?? this.initialState);
-          if(equal) {
-            this.dir.form.markAsPristine();
-          } else {
-            this.dir.form.markAsDirty();
-          }
         }
 
-        this.dir.form.dirty !== !equal && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
+        if(this.dir.form.dirty !== dirty || !initialized) {
+          dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
+        }
 
         if(this.updatedControl) { this.updatedControl.control?.updateValueAndValidity(); }
         else { this.dir.form.updateValueAndValidity(); }
 
         this.checkStatus$.next(true);
-
         this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
@@ -215,7 +211,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
       switchMap(() => from(this.store.select(selectValue(this.slice))).pipe(take(1))),
-      map((value) => value ?? this.formValue),
+      map((value) => value ? intersection(value, this.formValue) : this.formValue),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
