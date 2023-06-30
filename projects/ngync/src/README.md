@@ -86,7 +86,7 @@ export class AppModule { }
 ```
 
 <p align="justify">
-Behold, we now unveil a formidable forms meta-reducer that works tirelessly to synchronize the form state with the mighty NgRx store. The beloved logger meta-reducer we once cherished is no longer readily available. But it is still used internally, silently serving its purpose. To invoke its power, you need to pass a true value as the second parameter to the forms function. This is due to the fact that actions are queued and the order of their execution differs from the sequence of their dispatch.
+Behold, we now unveil a formidable forms meta-reducer that works tirelessly to synchronize the form state with the mighty NgRx store. The beloved logger meta-reducer we once cherished is turned to life. It is extended with the new action filters and is fully ready for serving its purpose.
 </p>
 <p align="justify">
 That's it, with all the settings in place, your form is now synchronized with the store. It's time to embark on an exciting journey and delve into the exploration of internal processes.
