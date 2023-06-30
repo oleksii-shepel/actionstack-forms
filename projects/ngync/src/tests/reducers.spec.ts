@@ -2,7 +2,7 @@ import { AutoInit, AutoSubmit, FormDestroyed, ResetForm, UpdateDirty, UpdateErro
 import { forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
-describe('reducer', () => {
+describe('reducers', () => {
   it('should handle actions', () => {
     const model = {
       firstName: 'John',

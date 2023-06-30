@@ -48,9 +48,12 @@ export interface NgyncConfig {
   slice: string;
   debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
+  enableQueue?: boolean;
 }
 ```
-
+<p align="justify">
+<i>*** I highly recommend you to enable the action queue as it is made by default. It is a new feature of ngync that will save you a lot of time and efforts by developing. The option is appropriate not only for setting the correct initialization order, it also fixes an issue related to action dispatching internals. I mean the dispatching of actions from an incorrect context. For some reason ActionsSubject instance within NgRx store does not propagate such actions to their subscribers, even if reducer handles them as usual. The issue itself has a solution, but it is not emphasized.</i>
+</p>
 <p align="justify">
 Additionally, you have to import ngync module to your application and set up meta-reducers. They are core functions that orchestrate all main functionality of the library. Before reaping the benefits of their power, these components must be registered with the NgRx store module. Don't worry, it's just another pint-sized prerequisite. Once registered, they take charge of handling the Redux action set, relieving you from the burden of implementing repetitive boilerplate functionality time and again.
 </p>
@@ -59,7 +62,7 @@ The code snippet of main NgModule shows how the import looks like:
 </p>
 
 ```typescript
-import { NgFormsModule, NgModelArrayModule, forms } from 'ngync';
+import { NgFormsModule, NgModelArrayModule, forms, logger } from 'ngync';
 
 @NgModule({
   declarations: [
@@ -72,7 +75,7 @@ import { NgFormsModule, NgModelArrayModule, forms } from 'ngync';
     NgFormsModule,
     NgModelArrayModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [forms(initialState)]
+      metaReducers: [logger({showOnlyModifiers: true}), forms(initialState)]
     }),
 
     NgFormsModule
