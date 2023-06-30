@@ -22,7 +22,7 @@ header {
     justify-content: flex-start;
     overflow: hidden;
 
-    & span {
+    ::ng-deep & span {
       text-overflow: ellipsis;
       overflow: hidden;
     }

@@ -26,7 +26,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   a: any; b: any;
 
-  _collapsed: boolean = true;
+  _collapsed = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
     this.store.dispatch(UpdateProperty({value: value, path: `${this.slice}::collapsed`}));
@@ -41,14 +41,14 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   async ngAfterViewInit() {
 
-    let state = await firstValueFrom(this.store.select(selectValue(this.slice)));
+    const state = await firstValueFrom(this.store.select(selectValue(this.slice)));
 
     this.model = state ? deepClone(state) : initialModel;
     this.collapsed = true;
 
     this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
-    let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
+    const scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     });

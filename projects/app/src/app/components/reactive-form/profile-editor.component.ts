@@ -33,7 +33,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
     return (this.profileForm.get('aliases') as FormArray)!.controls;
   }
 
-  _collapsed: boolean = true;
+  _collapsed = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
     this.store.dispatch(UpdateProperty({value: value, path: `${this.slice}::collapsed`}));
@@ -51,7 +51,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
 
     this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
-    let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
+    const scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     });
@@ -64,7 +64,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   addToBookmark(target: EventTarget | null) {
-    let element = target as HTMLInputElement;
+    const element = target as HTMLInputElement;
     element.checked = !element.checked;
 
     const value = element.checked;

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { deepEqual, difference, findProps, getValue } from 'ngync';
+import { BehaviorSubject, sampleTime } from 'rxjs';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
 
@@ -11,6 +12,8 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 export class JsonEditorComponent implements OnChanges {
   JSON = JSON;
   changes = "";
+  changes$ = new BehaviorSubject<string>(this.changes);
+  changesWithDelay$ = this.changes$.pipe(sampleTime(150));
 
   @Input() data: any = {};
   @Input() collapsed = true;
@@ -50,6 +53,7 @@ export class JsonEditorComponent implements OnChanges {
 
     this.changes = `<span>${changedProperties}</span>`;
     this.data = changes['data'].currentValue;
+    this.changes$.next(this.changes);
   }
 
   toggle(collapsed: boolean) {
