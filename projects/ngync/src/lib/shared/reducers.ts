@@ -112,22 +112,46 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
   return metaReducer;
 }
 
-export const logger = () => (reducer: ActionReducer<any>): any => {
+export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean}) => (reducer: ActionReducer<any>): any => {
+  settings = Object.assign({showAll: false, showRegular: false, showDeferred: false, showOnlyModifiers: true}, settings);
+
+  function filter(action: any, difference: any): boolean {
+    let show = false;
+    if(settings.showRegular && !action.deferred) {
+      show = true;
+    }
+    if(settings.showDeferred && action.deferred) {
+      show = true;
+    }
+    if(settings.showOnlyModifiers && Object.keys(difference).length > 0) {
+      show = true;
+    }
+    if(settings.showAll) {
+      show = true;
+    }
+    return show;
+  }
+
   return (state: any, action: any) => {
     const result = reducer(state, action);
-    console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
     const actionCopy = deepClone(action);
     delete actionCopy.type;
+
     const actionPath = actionCopy?.path ?? '';
     const sep = actionPath.indexOf('::');
     const path = actionPath.substring(0, sep === -1 ? actionPath.length : sep).trim();
     delete actionCopy.path;
-    console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
+
     const previous = path.length > 0 ? deepClone(getValue(state, path)) : state;
     const current = path.length > 0 ? deepClone(getValue(result, path)): result;
     const diff = difference(previous, current);
-    console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
-    console.groupEnd();
+
+    if(filter(action, diff)) {
+      console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
+      console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
+      console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
+      console.groupEnd();
+    }
     return result;
   };
 }
