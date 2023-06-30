@@ -27,7 +27,7 @@ describe('reducer', () => {
       }
     };
 
-    const f = forms(initialState, false);
+    const f = forms(initialState);
     let expected = {} as any;
 
     let newState = f((state: any, action: any) => { Function.prototype })(initialState, AutoInit({path: "slice", value: model}));

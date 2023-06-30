@@ -33,7 +33,7 @@ export const propSubmitted = (path: string) => `${path}.submitted`;
 
 export const actionQueues = new Map<string, Queue<Action>>();
 
-export const forms = (initialState: any = {}, enableLogging = true) => (reducer: ActionReducer<any>): any => {
+export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
 
   const metaReducer = (state: any, action: any) => {
 
@@ -44,7 +44,7 @@ export const forms = (initialState: any = {}, enableLogging = true) => (reducer:
     if(path) {
       const slice = path.split('::')[0];
 
-      if(!actionQueues.has(slice) || action?.deferred) {
+      if(!actionQueues.has(slice) || action.deferred) {
 
         nextState = reducer(state, action);
 
@@ -79,7 +79,6 @@ export const forms = (initialState: any = {}, enableLogging = true) => (reducer:
             break;
         }
 
-        nextState = logger(enableLogging)(() => nextState)(state, action);
         return nextState;
 
       } else {
@@ -113,11 +112,10 @@ export const forms = (initialState: any = {}, enableLogging = true) => (reducer:
   return metaReducer;
 }
 
-const logger = (enable = true) => (reducer: ActionReducer<any>): any => {
+export const logger = () => (reducer: ActionReducer<any>): any => {
   return (state: any, action: any) => {
     const result = reducer(state, action);
-    if(!enable) { return result; }
-    console.groupCollapsed(action.type);
+    console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
     const actionCopy = deepClone(action);
     delete actionCopy.type;
     const actionPath = actionCopy?.path ?? '';

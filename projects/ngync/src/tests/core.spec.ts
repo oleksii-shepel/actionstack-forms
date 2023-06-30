@@ -27,7 +27,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}}, false)]
+          metaReducers: [forms({'slice': {}})]
         }), NgFormsModule]
       });
 
@@ -84,11 +84,14 @@ describe('core', () => {
     });
 
     it('should dispatch check status after UpdateForm action', async() => {
+      const stub = jest.fn();
+      subs.b = directive.onStatusChanges$.subscribe(stub);
+
       const auto = jest.fn();
       subs.a = directive.initialized$.subscribe(auto);
 
-      const stub = jest.fn();
-      subs.b = directive.onStatusChanges$.subscribe(stub);
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
 
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
@@ -363,7 +366,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}}, false)]
+          metaReducers: [forms({'slice': {}})]
         }), NgFormsModule]
       });
 
@@ -700,7 +703,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}}, false)]
+          metaReducers: [forms({'slice': {}})]
         }), NgFormsModule]
       });
 
@@ -751,7 +754,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}}, false)]
+          metaReducers: [forms({'slice': {}})]
         }), NgFormsModule]
       });
 
@@ -797,7 +800,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}}, false)]
+          metaReducers: [forms({'slice': {}})]
         }), NgFormsModule]
       });
 
@@ -836,7 +839,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}}, false)]
+          metaReducers: [forms({'slice': {}})]
         }), NgFormsModule]
       });
 

@@ -44,13 +44,13 @@ import {
   NGYNC_CONFIG_TOKEN,
   deepEqual,
   reset,
-  selectSlice,
   selectValue,
   setValue
 } from '.';
 import {
   AutoInit,
   AutoSubmit,
+  Deferred,
   FormActions,
   FormActionsInternal,
   FormDestroyed,
@@ -182,8 +182,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!actionQueues.has(this.slice) || action.deferred)),
       sampleTime(this.debounceTime),
-      switchMap((action) => from(this.store.select(selectSlice(this.slice))).pipe(take(1), map((value) => ({action, slice: value})))),
-      tap(({action, slice}) => {
+      tap((action) => {
 
         this.dir.form.patchValue(action?.value, {emitEvent: false});
         let equal = true;
@@ -202,7 +201,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
 
-        slice.dirty !== !equal && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
+        this.dir.form.dirty !== !equal && this.store.dispatch(UpdateDirty({ path: this.slice, dirty: !equal }));
 
         if(this.updatedControl) { this.updatedControl.control?.updateValueAndValidity(); }
         else { this.dir.form.updateValueAndValidity(); }
@@ -286,6 +285,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           while(queue.length > 0) {
             this.store.dispatch(queue.dequeue() as Action);
           }
+          this.store.dispatch(new Deferred(FormDestroyed({ path: this.slice })));
         }
         actionQueues.delete(this.slice);
       }),
@@ -300,7 +300,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
-    this.store.dispatch(FormDestroyed({ path: this.slice }));
+    if(!this.enableQueue) {
+      this.store.dispatch(FormDestroyed({ path: this.slice }));
+    }
 
     for (const sub of Object.keys(this.subs)) {
       this.subs[sub].unsubscribe();
@@ -308,6 +310,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.checkStatus$.complete();
     this.initialized$.complete();
+
     this.destoyed = true;
   }
 
