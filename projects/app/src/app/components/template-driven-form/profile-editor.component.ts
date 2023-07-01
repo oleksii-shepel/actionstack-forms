@@ -1,11 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateForm, UpdateProperty, deepClone, selectSlice, selectValue } from 'ngync';
+import { UpdateForm, deepClone, selectFormCast } from 'ngync';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
-import { initialHero } from '../../models/profile';
-import { ApplicationState } from '../../reducers';
+import { initialHeroPage } from '../../models/profile';
+import { ApplicationState, UpdateProperty, selectSlice } from '../../reducers';
 
 @Component({
   selector: 'template-profile-editor',
@@ -21,13 +21,14 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   profile$!: Observable<any>;
   slice = "hero";
-  model = initialHero;
+  formSlice = "hero.form";
+  model = initialHeroPage.form.value;
   a: any; b: any;
 
   _collapsed = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateProperty({value: value, path: `${this.slice}::collapsed`}));
+    this.store.dispatch(UpdateProperty({value: value, path: this.slice, property: 'collapsed'}));
   }
 
   get collapsed() {
@@ -38,14 +39,14 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   async ngAfterViewInit() {
-    const state = await firstValueFrom(this.store.select(selectValue(this.slice)));
+    const state: any = await firstValueFrom(this.store.select(selectFormCast(`${this.slice}.form`)));
 
     if(!state) {
-      this.store.dispatch(UpdateForm({value: initialHero, path: this.slice}));
-      this.model = state ? deepClone(state) : initialHero;
+      this.store.dispatch(UpdateForm({value: initialHeroPage.form.value, path: `${this.slice}.form.value`}));
       this.collapsed = true;
     }
 
+    this.model = state ? deepClone(state.value) : initialHeroPage.form.value;
     this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
     const scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
@@ -58,7 +59,6 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   addAlias() {
     this.model.aliases.push('');
-    this.store.dispatch(UpdateForm({value: this.model, path: "hero"}));
   }
 
   trackById(index: number, obj: string): any {
@@ -66,9 +66,10 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   onSubmit() {
+    Function.prototype
   }
 
   ngOnDestroy() {
-    this.b.unsubscribe();
+    Function.prototype
   }
 }

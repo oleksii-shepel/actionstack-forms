@@ -4,7 +4,7 @@
     <main>
       <pre *ngIf="!collapsed" [@occurence]>{{profile$ | async | json}}</pre>
 
-      <form [formGroup]="profileForm" autocomplete="off" [ngync]="this.slice">
+      <form [formGroup]="profileForm" autocomplete="off" [ngync]="formSlice">
         <h2>{{caption}}</h2>
         <div class="bookmark">
           <a (click)="addToBookmark(bookmark)">
@@ -41,7 +41,7 @@
 
           <label for="books">Books: </label>
           <select id="books" formControlName="selected" (change)="onSelectChange($event)">
-            <option *ngFor="let book of books; let i=index;" [value]="i">{{book.value}}</option>
+            <option *ngFor="let book of books; let i=index;" [value]="i">{{book}}</option>
           </select>
         </div>
 

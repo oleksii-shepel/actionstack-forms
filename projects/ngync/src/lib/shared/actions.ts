@@ -2,7 +2,7 @@ import { Action, createAction, props } from '@ngrx/store';
 
 export enum FormActions {
   UpdateForm = '[Form] Update Form',
-  UpdateProperty = '[Form] Update Property',
+  UpdateField = '[Form] Update Form Field',
   ResetForm = '[Form] Reset Form',
 }
 
@@ -20,9 +20,9 @@ export const UpdateForm = createAction(
   props<{ path: string; value: any; }>()
 );
 
-export const UpdateProperty = createAction(
-  FormActions.UpdateProperty,
-  props<{ path: string; value: any; }>()
+export const UpdateField = createAction(
+  FormActions.UpdateField,
+  props<{ path: string; property: string; value: any; }>()
 );
 
 export const ResetForm = createAction(

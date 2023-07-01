@@ -1,10 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, NgZone, OnDestroy } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateProperty, buildForm, selectSlice } from 'ngync';
+import { buildForm } from 'ngync';
 import { Observable, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
-import { initialProfile, profileOptions } from '../../models/profile';
+import { initialProfilePage, profileOptions } from '../../models/profile';
+import { UpdateProperty, selectSlice } from '../../reducers';
 
 
 @Component({
@@ -19,24 +20,24 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   profile$!: Observable<any>;
   slice = "profile";
-
-  profileForm = buildForm(initialProfile, profileOptions) as FormGroup;
+  formSlice = "profile.form";
+  profileForm = buildForm(initialProfilePage.form.value, profileOptions) as FormGroup;
   form = this.profileForm;
 
   a: any; b: any;
 
   get books() {
-    return (this.profileForm.get('books') as FormArray)!.controls;
+    return initialProfilePage.books;
   }
 
   get aliases() {
-    return (this.profileForm.get('aliases') as FormArray)!.controls;
+    return (this.profileForm.controls['aliases'] as FormArray).controls;
   }
 
   _collapsed = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateProperty({value: value, path: `${this.slice}::collapsed`}));
+    this.store.dispatch(UpdateProperty({value: value, path: this.slice, property: 'collapsed'}));
   }
 
   get collapsed() {
@@ -60,7 +61,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   addAlias() {
-    this.aliases.push(this.fb.control('', Validators.required));
+    this.aliases.push(this.fb.control(''));
   }
 
   addToBookmark(target: EventTarget | null) {

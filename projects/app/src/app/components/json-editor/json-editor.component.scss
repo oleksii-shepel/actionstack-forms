@@ -24,20 +24,19 @@ header {
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: visible;
 
     ::ng-deep > span {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100px;
+      height: 100%;
       padding: 0;
       margin: 0;
       display:block;
       text-align: start;
       overflow: visible;
-      background: -webkit-linear-gradient(45deg, #09009f, #1d7707 50%, #ff3300 100%);
+      background: -webkit-linear-gradient(45deg, #09009f, #226112 50%, #ff3300 100%);
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }

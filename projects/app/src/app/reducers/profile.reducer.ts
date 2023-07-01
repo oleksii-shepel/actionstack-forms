@@ -1,20 +1,9 @@
 import { Action } from '@ngrx/store';
-import { FormCast } from 'ngync';
-import { initialProfile } from '../models/profile';
+import { ProfilePage, initialProfilePage } from '../models/profile';
 
 
 
-export interface ProfileState extends FormCast {}
-
-
-
-export const initialState: ProfileState = {
-  value: initialProfile,
-};
-
-
-
-export function profileReducer(state = initialState, action: Action): ProfileState {
+export function profileReducer(state = initialProfilePage, action: Action): ProfilePage {
   switch (action.type) {
     default: {
       return state;

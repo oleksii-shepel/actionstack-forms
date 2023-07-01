@@ -1,6 +1,6 @@
-import { ModelOptions } from "ngync";
+import { FormCast, ModelOptions as FormOptions } from "ngync";
 
-export interface Profile {
+export interface ProfileForm {
   bookmark: boolean;
   firstName: string;
   lastName: string;
@@ -11,23 +11,37 @@ export interface Profile {
     zip: string;
   };
   selected: number;
-  books: string[];
   quotes: string;
   aliases: string[];
+}
+export interface ProfilePage {
+  form: FormCast<ProfileForm>;
+  books: string[];
   collapsed: boolean;
 }
 
-export const initialProfile: Profile = {
-  bookmark: false,
-  firstName: 'Ian',
-  lastName: 'Fleming',
-  address: {
-    street: 'Mayfair',
-    city: 'London',
-    state: 'England',
-    zip: 'W1J'
+export const initialProfilePage: ProfilePage = {
+  form: {
+    value : {
+      bookmark: false,
+      firstName: 'Ian',
+      lastName: 'Fleming',
+      address: {
+        street: 'Mayfair',
+        city: 'London',
+        state: 'England',
+        zip: 'W1J'
+      },
+      selected: 0,
+      quotes:
+  `❝ Never say 'no' to adventures. Always say 'yes,' otherwise, you'll lead a very dull life.
+  ❝ The distance between insanity and genius is measured only by success.
+  ❝ A woman can put up with almost anything; anything but indifference.
+  ❝ I think it's the same with all the relationships between a man and a woman. They can survive anything so long as some kind of basic humanity exists between the two people. When all kindness has gone, when one person obviously and sincerely doesn't care if the other is alive or dead, then it's just no good.
+  ❝ Everyone has the revolver of resignation in his pocket.`,
+      aliases: [''],
+    }
   },
-  selected: 0,
   books: [
     'Casino Royale',
     'Live and Let Die',
@@ -42,17 +56,10 @@ export const initialProfile: Profile = {
     'On Her Majesty\'s Secret Service',
     'You Only Live Twice',
   ],
-  quotes:
-`❝ Never say 'no' to adventures. Always say 'yes,' otherwise, you'll lead a very dull life.
-❝ The distance between insanity and genius is measured only by success.
-❝ A woman can put up with almost anything; anything but indifference.
-❝ I think it's the same with all the relationships between a man and a woman. They can survive anything so long as some kind of basic humanity exists between the two people. When all kindness has gone, when one person obviously and sincerely doesn't care if the other is alive or dead, then it's just no good.
-❝ Everyone has the revolver of resignation in his pocket.`,
-  aliases: [''],
   collapsed: true
 }
 
-export const profileOptions: ModelOptions<Profile> = {
+export const profileOptions: FormOptions<ProfileForm> = {
   bookmark: {},
   firstName: {},
   lastName: {},
@@ -63,13 +70,11 @@ export const profileOptions: ModelOptions<Profile> = {
     zip: {},
   },
   selected: {},
-  books: {},
   quotes: {},
-  aliases: {},
-  collapsed: {}
+  aliases: {}
 }
 
-export interface Hero {
+export interface HeroForm {
   firstName: string;
   lastName: string;
   address: {
@@ -79,23 +84,31 @@ export interface Hero {
     zip: string;
   };
   aliases: string[];
+}
+
+export interface HeroPage {
+  form: FormCast<HeroForm>;
   collapsed: boolean;
 }
 
-export const initialHero: Hero = {
-  firstName: 'James',
-  lastName: 'Bond',
-  address: {
-    street: '',
-    city: 'Ao Phang Nga National Park',
-    state: 'Phangnga',
-    zip: '82130'
+export const initialHeroPage: HeroPage = {
+  form: {
+    value: {
+      firstName: 'James',
+      lastName: 'Bond',
+      address: {
+        street: '',
+        city: 'Ao Phang Nga National Park',
+        state: 'Phangnga',
+        zip: '82130'
+      },
+      aliases: ['Mr Fisher', 'Robert Sterling', 'St. John Smyth'],
+    }
   },
-  aliases: ['Mr Fisher', 'Robert Sterling', 'St. John Smyth'],
   collapsed: true
 }
 
-export const heroOptions: ModelOptions<Profile> = {
+export const heroOptions: FormOptions<HeroForm> = {
   firstName: {},
   lastName: {},
   address: {
@@ -104,11 +117,10 @@ export const heroOptions: ModelOptions<Profile> = {
     state: {},
     zip: {},
   },
-  aliases: {},
-  collapsed: {}
+  aliases: {}
 }
 
-export interface Model {
+export interface ModelForm {
   firstName: string;
   lastName: string;
   address: {
@@ -118,23 +130,30 @@ export interface Model {
     zip: string;
   };
   aliases: string[];
+}
+export interface ModelPage {
+  form: FormCast<ModelForm>;
   collapsed: boolean;
 }
 
-export const initialModel: Model = {
-  firstName: 'Dominique',
-  lastName: 'Derval',
-  address: {
-    street: '',
-    city: 'Nassau',
-    state: 'The Bahamas, New Providence Island',
-    zip: '00000'
+export const initialModelPage: ModelPage = {
+  form: {
+    value: {
+      firstName: 'Dominique',
+      lastName: 'Derval',
+      address: {
+        street: '',
+        city: 'Nassau',
+        state: 'The Bahamas, New Providence Island',
+        zip: '00000'
+      },
+      aliases: ['Domino'],
+    }
   },
-  aliases: ['Domino'],
   collapsed: true
 }
 
-export const modelOptions: ModelOptions<Model> = {
+export const modelOptions: FormOptions<ModelForm> = {
   firstName: {},
   lastName: {},
   address: {
@@ -143,7 +162,6 @@ export const modelOptions: ModelOptions<Model> = {
     state: {},
     zip: {},
   },
-  aliases: {},
-  collapsed: {}
+  aliases: {}
 }
 

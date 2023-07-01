@@ -13,11 +13,11 @@ export const setValue = (obj: any, prop: string, val: any): any => {
   const isArray = (split: string[]) => split.length >= 2 && !isNaN(+split[1]);
   const isObject = (split: string[]) => split.length > 1 || isArray(split);
 
-  const root = Array.isArray(obj)? obj : {...obj};
+  const root = Array.isArray(obj)? [...obj] : {...obj};
   let item = root;
   while(split.length >= 1) {
     const key = split[0];
-    item[key] = isArray(split) ? item[key] || [] : isObject(split) ? {...item[key]} : val;
+    item[key] = isArray(split) ? [...item[key] || []] : isObject(split) ? {...item[key]} : val;
 
     item = item[key];
     split.shift()
@@ -193,6 +193,16 @@ export function difference(x: any, y: any) : Difference {
   }
 
   return diff;
+}
+
+
+
+export function debounce(fn: any, time: number) {
+  let timeout: any;
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), time);
+  }
 }
 
 

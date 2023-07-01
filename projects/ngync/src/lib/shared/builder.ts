@@ -1,4 +1,4 @@
-import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { ModelOptions, primitive } from '.';
 
 
@@ -31,24 +31,3 @@ export function buildForm<T>(model: T, options: ModelOptions<T> = {} as any): Ab
 
   return obj;
 }
-
-
-export function checkForm<T>(form: any, model: T): boolean {
-  if(primitive(model)) return !!form;
-  if (!form || !form.controls) return false;
-
-  let ready = true;
-
-  for (const key in model) {
-    const value = model[key];
-    const control = form.controls[key];
-    ready = Array.isArray(value) ? Array.isArray(control?.controls) && control.controls.every((item: any, index: number) => {
-      return !(item instanceof FormControl) ? checkForm(item, (value as any)[index]) : true;
-    }) : !(control instanceof FormControl) ? checkForm(control, value) : !!control;
-
-    if(ready === false) break;
-  }
-
-  return ready;
-}
-

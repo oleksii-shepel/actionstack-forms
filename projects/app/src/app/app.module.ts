@@ -34,7 +34,7 @@ import { initialState, reducer } from './reducers';
     BrowserAnimationsModule,
     NgFormsModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [logger({showOnlyModifiers: true}),forms(initialState)]
+      metaReducers: [logger({showOnlyModifiers: true}), forms(initialState)]
     }),
 
     NgFormsModule

@@ -1,12 +1,12 @@
-import { Action, ActionReducer, createFeatureSelector, createSelector } from '@ngrx/store';
+import { Action, ActionReducer, createSelector } from '@ngrx/store';
 import { Deferred, FormActions, FormActionsInternal } from './actions';
 import { Queue } from './queue';
 import { deepClone, difference, getValue, primitive, setValue } from './utils';
 
 
 
-export interface FormCast {
-  value: any;
+export interface FormCast<T> {
+  value: T;
   errors?: Record<string, string>;
   dirty?: boolean;
   status?: string;
@@ -15,12 +15,12 @@ export interface FormCast {
 
 
 
-export const selectSlice = (slice: string) => createFeatureSelector<FormCast>(slice);
-export const selectValue = (slice: string) => createSelector(selectSlice(slice), state => state?.value);
-export const selectErrors = (slice: string) => createSelector(selectSlice(slice), state => state?.errors);
-export const selectDirty = (slice: string) => createSelector(selectSlice(slice), state => state?.dirty);
-export const selectStatus = (slice: string) => createSelector(selectSlice(slice), state => state?.status);
-export const selectSubmitted = (slice: string) => createSelector(selectSlice(slice), state => state?.submitted);
+export const selectFormCast = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
+export const selectValue = (slice: string) => createSelector(selectFormCast(slice), state => state?.value);
+export const selectErrors = (slice: string) => createSelector(selectFormCast(slice), state => state?.errors);
+export const selectDirty = (slice: string) => createSelector(selectFormCast(slice), state => state?.dirty);
+export const selectStatus = (slice: string) => createSelector(selectFormCast(slice), state => state?.status);
+export const selectSubmitted = (slice: string) => createSelector(selectFormCast(slice), state => state?.submitted);
 
 
 
@@ -39,10 +39,9 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
     state = state ?? deepClone(initialState);
     let nextState = state;
-    const path = action?.path;
+    const slice = action?.path;
 
-    if(path) {
-      const slice = path.split('::')[0];
+    if(slice) {
 
       if(!actionQueues.has(slice) || action.deferred) {
 
@@ -52,10 +51,9 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
           case FormActions.UpdateForm:
             nextState = setValue(state, slice, {...getValue(state, slice), value: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value) });
             break;
-          case FormActions.UpdateProperty: {
-            const paths = path.split('::');
-            const property = paths.length === 2 ? `${propValue(paths[0])}.${paths[1]}` : propValue(paths[0]);
-            nextState = primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propValue(paths[0])) || {}), action.value));
+          case FormActions.UpdateField: {
+            const property = `${propValue(slice)}.${action.property}`;
+            nextState = primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value));
             break;
           }
           case FormActions.ResetForm:
@@ -70,7 +68,7 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
             nextState = setValue(state, propDirty(slice), action.dirty);
             break;
           case FormActionsInternal.AutoInit:
-            nextState = setValue(state, slice, { value: action.value });
+            nextState = setValue(state, slice, { value: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value) });
             break;
           case FormActionsInternal.AutoSubmit:
             nextState = setValue(state, propSubmitted(slice), true);
