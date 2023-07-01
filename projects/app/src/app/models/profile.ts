@@ -1,4 +1,4 @@
-import { FormCast, ModelOptions as FormOptions } from "ngync";
+import { FormCast, FormOptions } from "ngync";
 
 export interface ProfileForm {
   bookmark: boolean;

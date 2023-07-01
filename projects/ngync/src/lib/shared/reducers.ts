@@ -51,11 +51,9 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
           case FormActions.UpdateForm:
             nextState = setValue(state, slice, {...getValue(state, slice), value: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value) });
             break;
-          case FormActions.UpdateField: {
-            const property = `${propValue(slice)}.${action.property}`;
-            nextState = primitive(action.value) ? setValue(state, property, action.value) : setValue(state, property, Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value));
+          case FormActions.UpdateField:
+            nextState = setValue(state, `${propValue(slice)}.${action.property}`, action.value);
             break;
-          }
           case FormActions.ResetForm:
             break;
           case FormActionsInternal.UpdateStatus:

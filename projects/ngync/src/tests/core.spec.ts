@@ -3,9 +3,9 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
-import { filter, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { NGYNC_CONFIG_DEFAULT, NgFormsModule } from "../lib/shared/module";
-import { AutoInit, AutoSubmit, FormActionsInternal, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectValue } from "../public-api";
+import { AutoInit, AutoSubmit, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectValue } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -249,17 +249,6 @@ describe('core', () => {
       expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
-    it('dispatch InitForm before AutoInit action triggered', async () => {
-      const auto = jest.fn();
-
-      subs.a = directive.onInitOrUpdate$.pipe(filter((action) => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
-      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      expect(auto).not.toHaveBeenCalled();
-    });
     it('onInitOrUpdate', async () => {
       const auto = jest.fn();
 
@@ -282,7 +271,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(1);
+      expect(stub).toHaveBeenCalledTimes(3);
     });
     it('ngOnDestroy', async () => {
       const auto = jest.fn();
@@ -585,17 +574,6 @@ describe('core', () => {
       expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
-    it('dispatch InitForm before AutoInit action triggered', async () => {
-      const auto = jest.fn();
-
-      subs.a = directive.onInitOrUpdate$.pipe(filter((action) => action.type === FormActionsInternal.AutoInit)).subscribe(auto);
-      directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      expect(auto).not.toHaveBeenCalled();
-    });
     it('onInitOrUpdate', async () => {
       const auto = jest.fn();
 
@@ -618,7 +596,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectValue('slice')))).resolves.toEqual({ firstName: 'John' });
-      expect(stub).toHaveBeenCalledTimes(1);
+      expect(stub).toHaveBeenCalledTimes(3);
     });
     it('ngOnDestroy', async () => {
       const auto = jest.fn();

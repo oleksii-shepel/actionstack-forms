@@ -202,7 +202,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
         this.checkStatus$.next(true);
         this.cdr.markForCheck();
-      })
+      }),
+      takeWhile(() => !this.destoyed)
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(

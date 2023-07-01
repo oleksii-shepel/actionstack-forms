@@ -1,5 +1,5 @@
 import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import { ModelOptions, primitive } from '.';
+import { FormOptions, primitive } from '.';
 
 
 
@@ -7,7 +7,7 @@ export const fb = new FormBuilder();
 
 
 
-export function buildForm<T>(model: T, options: ModelOptions<T> = {} as any): AbstractControl {
+export function buildForm<T>(model: T, options: FormOptions<T> = {} as any): AbstractControl {
   if (primitive(model)) return fb.control(model, options as AbstractControlOptions);
 
   const obj = Array.isArray(model) ? fb.array([], ((options as any)["__group"] || {}) as AbstractControlOptions) :

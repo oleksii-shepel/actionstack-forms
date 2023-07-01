@@ -1,4 +1,4 @@
-import { AutoInit, AutoSubmit, FormDestroyed, ResetForm, UpdateDirty, UpdateErrors, UpdateForm, UpdateProperty, UpdateStatus } from '../lib/shared/actions';
+import { AutoInit, AutoSubmit, FormDestroyed, ResetForm, UpdateDirty, UpdateErrors, UpdateField, UpdateForm, UpdateStatus } from '../lib/shared/actions';
 import { forms } from '../lib/shared/reducers';
 import { deepClone } from '../public-api';
 
@@ -19,7 +19,7 @@ describe('reducers', () => {
 
     const initialState = {
       slice: {
-        model: model,
+        value: model,
         submitted: false,
         status: 'INVALID',
         errors: {maxLength: "Field is too long"},
@@ -38,7 +38,7 @@ describe('reducers', () => {
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateProperty({path: "slice", value: model}));
+    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateField({path: "slice", property: "email", value: model.email}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
