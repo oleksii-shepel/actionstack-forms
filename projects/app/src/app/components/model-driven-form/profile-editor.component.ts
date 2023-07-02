@@ -22,7 +22,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   profile$!: Observable<any>;
   slice = "model";
-  formSlice = "model.form";
+  formCast = "model.form";
   model = initialModelPage.form.value;
 
   a: any; b: any;
@@ -42,7 +42,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   async ngAfterViewInit() {
 
-    const state = await firstValueFrom(this.store.select(selectFormCast(`${this.slice}.form`)));
+    const state = await firstValueFrom(this.store.select(selectFormCast(this.formCast)));
 
     this.model = state ? deepClone(state.value) : initialModelPage.form.value;
     this.collapsed = true;

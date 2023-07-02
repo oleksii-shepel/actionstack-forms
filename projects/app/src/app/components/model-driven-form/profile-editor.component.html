@@ -4,7 +4,7 @@
     <main>
       <pre *ngIf="!collapsed" [@occurence]>{{profile$ | async | json}}</pre>
 
-      <form #modelForm="ngForm" autocomplete="off" [ngync]="formSlice">
+      <form #modelForm="ngForm" autocomplete="off" [ngync]="formCast">
         <h2>{{caption}}</h2>
         <label for="firstName">First Name: </label>
         <input id="firstName" type="text" [(ngModel)]="model.firstName" name="firstName">

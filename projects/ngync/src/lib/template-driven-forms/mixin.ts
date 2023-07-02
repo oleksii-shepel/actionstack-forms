@@ -3,7 +3,7 @@ import { AbstractControl, FormArray } from "@angular/forms";
 export const FormGroupMixin = (self: FormArray) => ({
   registerControl: (name: string, control: any): AbstractControl => {
     control.setParent(self);
-    self.push(control);
+    self.setControl(+name, control);
 
     control._registerOnCollectionChange((self as any)._onCollectionChange);
     return control;

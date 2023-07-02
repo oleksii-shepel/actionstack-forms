@@ -3,7 +3,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { NgFormsModule, forms, logger } from 'ngync';
+import { NgFormsModule, NgModelArrayModule, forms, logger } from 'ngync';
 import { AppComponent } from './components/app/app.component';
 import { JsonEditorComponent } from './components/json-editor/json-editor.component';
 import { MessengerComponent } from './components/messenger/messenger.component';
@@ -37,7 +37,7 @@ import { global, initialState, reducer } from './reducers';
       metaReducers: [logger({showOnlyModifiers: true}), forms(initialState), global()]
     }),
 
-    NgFormsModule
+    NgModelArrayModule
   ],
   bootstrap: [AppComponent]
 })

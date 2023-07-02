@@ -1,7 +1,7 @@
 import { Action, ActionReducer, createSelector } from '@ngrx/store';
 import { Deferred, FormActions, FormActionsInternal } from './actions';
 import { Queue } from './queue';
-import { deepClone, difference, getValue, primitive, setValue } from './utils';
+import { deepClone, difference, getValue, setValue } from './utils';
 
 
 
@@ -24,14 +24,17 @@ export const selectSubmitted = (slice: string) => createSelector(selectFormCast(
 
 
 
-export const propValue = (path: string) => `${path}.value`;
-export const propErrors = (path: string) => `${path}.errors`;
-export const propDirty = (path: string) => `${path}.dirty`;
-export const propStatus = (path: string) => `${path}.status`;
-export const propSubmitted = (path: string) => `${path}.submitted`;
+export const propValue = 'value';
+export const propErrors = 'errors';
+export const propDirty = 'dirty';
+export const propStatus = 'status';
+export const propSubmitted = 'submitted';
+
 
 
 export const actionQueues = new Map<string, Queue<Action>>();
+
+
 
 export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
 
@@ -46,37 +49,38 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
       if(!actionQueues.has(slice) || action.deferred) {
 
         nextState = reducer(state, action);
+        let feature = getValue(nextState, slice);
 
         switch(action.type) {
           case FormActions.UpdateForm:
-            nextState = setValue(state, slice, {...getValue(state, slice), value: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value) });
+            feature = setValue(feature, propValue, action.value);
             break;
           case FormActions.UpdateField:
-            nextState = setValue(state, `${propValue(slice)}.${action.property}`, action.value);
+            feature = setValue(feature,`${propValue}.${action.property}`, action.value);
             break;
           case FormActions.ResetForm:
             break;
           case FormActionsInternal.UpdateStatus:
-            nextState = setValue(state, propStatus(slice), action.status);
+            feature = setValue(feature, propStatus, action.status);
             break;
           case FormActionsInternal.UpdateErrors:
-            nextState = setValue(state, propErrors(slice), deepClone(action.errors));
+            feature = setValue(feature, propErrors, deepClone(action.errors));
             break;
           case FormActionsInternal.UpdateDirty:
-            nextState = setValue(state, propDirty(slice), action.dirty);
+            feature = setValue(feature, propDirty, action.dirty);
             break;
           case FormActionsInternal.AutoInit:
-            nextState = setValue(state, slice, { value: primitive(action.value) ? action.value : Object.assign(deepClone(getValue(state, propValue(slice)) || {}), action.value) });
+            feature = setValue(feature, propValue, action.value);
             break;
           case FormActionsInternal.AutoSubmit:
-            nextState = setValue(state, propSubmitted(slice), true);
+            feature = setValue(feature, propSubmitted, true);
             break;
           case FormActionsInternal.FormDestroyed:
             break;
         }
 
+        nextState = setValue(nextState, slice, feature)
         return nextState;
-
       } else {
         const queue = actionQueues.get(slice) as Queue<Action>;
         const type = queue.peek()?.type;

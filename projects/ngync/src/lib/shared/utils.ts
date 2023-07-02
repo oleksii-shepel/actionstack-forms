@@ -17,7 +17,7 @@ export const setValue = (obj: any, prop: string, val: any): any => {
   let item = root;
   while(split.length >= 1) {
     const key = split[0];
-    item[key] = isArray(split) ? [...item[key] || []] : isObject(split) ? {...item[key]} : val;
+    item[key] = Array.isArray(item[key]) ? [...(item[key] || [])] : isObject(split) ? {...item[key]} : val;
 
     item = item[key];
     split.shift()
