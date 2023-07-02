@@ -197,11 +197,48 @@ export function difference(x: any, y: any) : Difference {
 
 
 
+const scheduledFnMap = new Map<object, {endTime: number; lastCall: number; delay: number; timeout: any}>();
+
+
+
 export function debounce(fn: any, time: number) {
-  let timeout: any;
-  return (...args: any[]) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), time);
+  function scheduledFn(...args: any[]) {
+    const endTime = new Date().getTime() + time;
+    const lastCall = new Date().getTime();
+    const delay = time;
+
+    const timeout = setTimeout(() => {
+      clearTimeout(timeout);
+      scheduledFnMap.delete(fn);
+      return fn(...args);
+    }, delay);
+
+    scheduledFnMap.set(fn, {endTime: endTime, lastCall: lastCall, delay: delay, timeout: timeout});
+  }
+
+  if(scheduledFnMap.has(fn)) {
+    const {endTime, timeout} = scheduledFnMap.get(fn) as any;
+    const lastCall = new Date().getTime();
+    const delay = endTime - lastCall;
+
+    if(delay > 0) {
+      clearTimeout(timeout);
+
+      return (...args: any[]) => {
+        const newTimeout = setTimeout(() => {
+          clearTimeout(newTimeout);
+          scheduledFnMap.delete(fn);
+          return fn(...args);
+        }, delay);
+
+        scheduledFnMap.set(fn, {endTime: endTime, lastCall: lastCall, delay: delay, timeout: newTimeout});
+      }
+    } else {
+      return scheduledFn;
+    }
+  }
+  else {
+   return scheduledFn;
   }
 }
 

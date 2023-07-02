@@ -1,4 +1,4 @@
-import { boxed, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, reset, setValue } from '../lib/shared/utils';
+import { boxed, debounce, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, reset, setValue } from '../lib/shared/utils';
 describe('utils', () => {
   it('should get value', () => {
     const obj1 = { a: { b: { c: 1 } } };
@@ -170,4 +170,19 @@ describe('utils', () => {
     const result = reset(formValue);
     expect(result).toEqual({ firstName: '', lastName: '', address: { street: '', city: '', state: '', zip: ''}, date: result.date, phone: '', emails: [] });
   }))
+
+  it('should debounce function', () => {
+    jest.useFakeTimers();
+
+    const func = jest.fn();
+
+    debounce(func, 1000)();
+    debounce(func, 1000)();
+    debounce(func, 1000)();
+
+    expect(func).not.toBeCalled();
+
+    jest.advanceTimersByTime(3000);
+    expect(func).toBeCalledTimes(1);
+  })
 });

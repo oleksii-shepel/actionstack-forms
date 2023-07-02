@@ -74,10 +74,19 @@ const reducers = {
 const developmentReducer: ActionReducer<ApplicationState> = compose(storeFreeze, combineReducers)(reducers);
 const productionReducer: ActionReducer<ApplicationState> = combineReducers(reducers);
 
-export function reducer(state = initialState, action: any) {
-  if(action.type === '@ngrx/store/property/update') {
-    return setValue(state, `${action.path}.${action.property}`, action.value);
+export const global = () => (reducer: ActionReducer<any>): any => {
+  return (state: any, action: any) => {
+    let newState = reducer(state, action);
+
+    if(action.type === '@ngrx/store/slice/property/update') {
+      newState = setValue(newState, `${action.path}.${action.property}`, action.value);
+    }
+
+    return newState;
   }
+}
+
+export function reducer(state = initialState, action: any) {
 
   if (environment.production) {
     // suppress console output
@@ -93,5 +102,4 @@ export function reducer(state = initialState, action: any) {
 
 export const selectSlice = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
 export const selectProperty = (slice: string, property: string) => createSelector((state: any) => getValue(state, `${slice}.${property}`), state => state);
-export const UpdateProperty = createAction('@ngrx/store/property/update', props<{ path: string; property: string; value: any; }>());
-
+export const UpdateProperty = createAction('@ngrx/store/slice/property/update', props<{ path: string; property: string; value: any; }>());

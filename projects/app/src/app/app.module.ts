@@ -13,7 +13,7 @@ import { TemplateProfileEditorComponent } from './components/template-driven-for
 import { FieldArrayDirective } from './directives/array.directive';
 import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
-import { initialState, reducer } from './reducers';
+import { global, initialState, reducer } from './reducers';
 
 @NgModule({
   declarations: [
@@ -34,7 +34,7 @@ import { initialState, reducer } from './reducers';
     BrowserAnimationsModule,
     NgFormsModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [logger({showOnlyModifiers: true}), forms(initialState)]
+      metaReducers: [logger({showOnlyModifiers: true}), forms(initialState), global()]
     }),
 
     NgFormsModule
