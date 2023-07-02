@@ -39,38 +39,38 @@ describe('reducers', () => {
     const f = forms(initialState);
     let expected = {} as any;
 
-    let newState = f((state: any, action: any) => { Function.prototype })(initialState, AutoInit({path: "slice", value: model}));
+    let newState = f((state: any, action: any) => { return state; })(initialState, AutoInit({path: "slice", value: model}));
     expected = { slice: { model } };
     expect(newState.model).toEqual(expected.model);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateForm({path: "slice", value: model}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateForm({path: "slice", value: model}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateField({path: "slice", property: "email", value: model.email}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({path: "slice", property: "email", value: model.email}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, ResetForm({path: "slice", state: 'initial'}));
+    newState = f((state: any, action: any) => { return state; })(initialState, ResetForm({path: "slice", state: 'initial'}));
     expect(newState).toEqual(newState);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateStatus({path: "slice", status: "VALID"}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateStatus({path: "slice", status: "VALID"}));
     expected = deepClone(initialState); (expected as any)['slice'].status = "VALID";
     expect(newState).toEqual(expected);
 
     const errors = {required: "Field is required", email: "Email is invalid"};
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateErrors({path: "slice", errors: errors}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateErrors({path: "slice", errors: errors}));
     expected = deepClone(initialState); (expected as any)['slice'].errors = errors;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, UpdateDirty({path: "slice", dirty: true}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateDirty({path: "slice", dirty: true}));
     expected = deepClone(initialState); (expected as any)['slice'].dirty = true;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, AutoSubmit({path: "slice"}));
+    newState = f((state: any, action: any) => { return state; })(initialState, AutoSubmit({path: "slice"}));
     expected = deepClone(initialState); (expected as any)['slice'].submitted = true;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { Function.prototype })(initialState, FormDestroyed({path: "slice"}));
+    newState = f((state: any, action: any) => { return state; })(initialState, FormDestroyed({path: "slice"}));
   });
 });

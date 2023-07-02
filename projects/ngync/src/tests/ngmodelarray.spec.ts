@@ -58,16 +58,16 @@ describe('core', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    FormGroupMixin(directive.form).registerControl('test1', new FormControl('test'));
+    FormGroupMixin(directive.form).registerControl('2', new FormControl('test'));
     FormGroupMixin(directive.form).registerOnChange((_: any) => {});
     FormGroupMixin(directive.form).registerOnDisabledChange((_: any) => {});
     expect(FormGroupMixin(directive.form).contains('2')).toBe(true);
-    FormGroupMixin(directive.form).removeControl('test1');
+    FormGroupMixin(directive.form).removeControl('2');
     expect(FormGroupMixin(directive.form).contains('2')).toBe(false);
 
-    FormGroupMixin(directive.form).addControl('test2', new FormControl('test'));
+    FormGroupMixin(directive.form).addControl('2', new FormControl('test'));
     expect(FormGroupMixin(directive.form).contains('2')).toBe(true);
-    FormGroupMixin(directive.form).removeControl('test2');
+    FormGroupMixin(directive.form).removeControl('2');
     expect(FormGroupMixin(directive.form).contains('2')).toBe(false);
   });
 });
