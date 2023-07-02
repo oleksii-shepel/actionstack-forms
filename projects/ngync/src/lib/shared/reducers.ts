@@ -138,12 +138,10 @@ export const logger = (settings: {showAll?: boolean, showRegular?: boolean, show
     delete actionCopy.type;
 
     const actionPath = actionCopy?.path ?? '';
-    const sep = actionPath.indexOf('::');
-    const path = actionPath.substring(0, sep === -1 ? actionPath.length : sep).trim();
-    delete actionCopy.path;
+    delete actionCopy?.path;
 
-    const previous = path.length > 0 ? deepClone(getValue(state, path)) : state;
-    const current = path.length > 0 ? deepClone(getValue(result, path)): result;
+    const previous = actionPath.length > 0 ? getValue(state, actionPath) : state;
+    const current = actionPath.length > 0 ? getValue(result, actionPath) : result;
     const diff = difference(previous, current);
 
     if(filter(action, diff)) {
