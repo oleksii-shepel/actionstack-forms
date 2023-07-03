@@ -6,7 +6,7 @@
       <h1>{{shots}}</h1>
     </div>
   </div>
-  <button (click)="toggleMode($event)" #walter tooltip="load the weapon">
+  <button (click)="toggleMode($event)" #walter title="Load The Weapon" [class.enabled]="enabled">
     <img id="walter" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D"/>
   </button>
 </div>

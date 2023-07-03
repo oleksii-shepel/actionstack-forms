@@ -39,7 +39,7 @@
       margin: 0;
     }
 
-    & button:not(:only-child) {
+    & button.enabled {
       height: calc(100% - 18px);
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
