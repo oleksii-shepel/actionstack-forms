@@ -15,12 +15,18 @@
     width: 210px;
     height: 80px;
     display: flex;
-    justify-content: center;
+    justify-content: right;
     align-items: center;
 
-    & div {
+    & .clipping-rect {
+      overflow: hidden;
+    }
+
+    & .statistics {
       background-color: beige;
       padding: 10px;
+      border-top-left-radius: 2px;
+      border-bottom-left-radius: 2px;
     }
 
     & h1, h3 {
@@ -28,6 +34,12 @@
     }
 
     & button {
+      height: calc(100% - 18px);
+      border-radius: 2px;
+      margin: 0;
+    }
+
+    & button:not(:only-child) {
       height: calc(100% - 18px);
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
@@ -41,5 +53,4 @@
     width: 50px;
     content:url(../../../assets/walter.png);
   }
-
 }
