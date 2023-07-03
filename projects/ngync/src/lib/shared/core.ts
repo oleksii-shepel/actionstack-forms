@@ -105,14 +105,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
   };
 
-  inputCallback = (control: NgControl) => (value : any) => {
-    control.control?.setValue(value);
+  debounceCallback = (control: NgControl, value: any) => {
+    if(this.updateOn === 'change' && control.path) {
+      this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: value }));
+    }
+  }
 
-    debounce(() => {
-      if(this.updateOn === 'change' && control.path) {
-        this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: control.value }));
-      }
-    }, this.debounceTime)();
+  inputCallback = (control: NgControl) => (value : any) => {
+    debounce(this.debounceCallback, this.debounceTime)(control, value);
   };
 
   onInitOrUpdate$!: Observable<any>;
@@ -190,6 +190,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
         const path = action.property.split('.');
         const control = path.reduce((acc: any, key: string, index: number) => acc[key], this.dir.form.controls);
+        control.setValue(action.value, { emitEvent: false });
+
         const dirty = this.dir.form.dirty;
 
         !(savedState === control.value) ? control.markAsDirty() : control.markAsPristine();

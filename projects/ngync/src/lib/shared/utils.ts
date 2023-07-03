@@ -201,18 +201,17 @@ const scheduledFnMap = new Map<object, {endTime: number; lastCall: number; delay
 
 
 export function debounce(fn: any, time: number) {
-  function scheduledFn(...args: any[]) {
-    const endTime = new Date().getTime() + time;
-    const lastCall = new Date().getTime();
-    const delay = time;
+  function scheduledFn(endTime: number, lastCall: number, delay: number): ((...args: any[]) => void) {
+    return (...args: any[]) => {
+      clearTimeout(scheduledFnMap.get(fn)?.timeout);
+      const timeout = setTimeout(() => {
+        clearTimeout(timeout);
+        scheduledFnMap.delete(fn);
+        return fn(...args);
+      }, delay);
 
-    const timeout = setTimeout(() => {
-      clearTimeout(timeout);
-      scheduledFnMap.delete(fn);
-      return fn(...args);
-    }, delay);
-
-    scheduledFnMap.set(fn, {endTime: endTime, lastCall: lastCall, delay: delay, timeout: timeout});
+      scheduledFnMap.set(fn, {endTime: endTime, lastCall: lastCall, delay: delay, timeout: timeout});
+    }
   }
 
   if(scheduledFnMap.has(fn)) {
@@ -221,23 +220,12 @@ export function debounce(fn: any, time: number) {
     const delay = endTime - lastCall;
 
     if(delay > 0) {
-      clearTimeout(timeout);
-
-      return (...args: any[]) => {
-        const newTimeout = setTimeout(() => {
-          clearTimeout(newTimeout);
-          scheduledFnMap.delete(fn);
-          return fn(...args);
-        }, delay);
-
-        scheduledFnMap.set(fn, {endTime: endTime, lastCall: lastCall, delay: delay, timeout: newTimeout});
-      }
+      return scheduledFn(endTime, lastCall, delay);
     } else {
-      return scheduledFn;
+      return scheduledFn(new Date().getTime() + time, new Date().getTime(), time);
     }
-  }
-  else {
-   return scheduledFn;
+  } else {
+   return scheduledFn(new Date().getTime() + time, new Date().getTime(), time);
   }
 }
 

@@ -171,18 +171,19 @@ describe('utils', () => {
     expect(result).toEqual({ firstName: '', lastName: '', address: { street: '', city: '', state: '', zip: ''}, date: result.date, phone: '', emails: [] });
   }))
 
-  it('should debounce function', () => {
+  it('should call debounce function', () => {
     jest.useFakeTimers();
 
     const func = jest.fn();
 
-    debounce(func, 1000)();
-    debounce(func, 1000)();
-    debounce(func, 1000)();
+    debounce(func, 1000)('a');
+    debounce(func, 1000)('b');
+    debounce(func, 1000)('c');
 
     expect(func).not.toBeCalled();
 
     jest.advanceTimersByTime(3000);
+    expect(func).toBeCalledWith('c');
     expect(func).toBeCalledTimes(1);
   })
 });
