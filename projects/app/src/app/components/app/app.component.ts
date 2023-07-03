@@ -16,7 +16,7 @@ export class AppComponent implements OnDestroy {
   @ViewChild('view', {read: ViewContainerRef}) viewContainerRef!: ViewContainerRef;
 
   editor: EditorType = 'reactive';
-  selectedColor: string = 'rgba(255, 0, 0, 0.5)';
+  selectedColor = 'rgba(255, 0, 0, 0.5)';
 
   text = [{
     id: 'default-modal',
@@ -78,9 +78,9 @@ export class AppComponent implements OnDestroy {
   }
 
   shuffle(array: any[]): any[] {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
         array[i] = array[j];
         array[j] = temp;
     }
@@ -89,7 +89,7 @@ export class AppComponent implements OnDestroy {
 
   readMessages() {
 
-    let updating$ = new BehaviorSubject<boolean>(false);
+    const updating$ = new BehaviorSubject<boolean>(false);
     this.sub = from(this.shuffle(this.text)).pipe(
       mergeMap((value) => from(updating$).pipe(filter(value => !value), take(1), map(() => value), tap(() => updating$.next(false)))),
       concatMap((value) => from(this.modalService.open(value).written$).pipe(filter((value)=> value), take(1), map(() => value))),

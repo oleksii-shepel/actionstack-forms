@@ -10,6 +10,7 @@ import { MessengerComponent } from './components/messenger/messenger.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
 import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
 import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
+import { GunShotComponent } from './components/walter/walter.component';
 import { FieldArrayDirective } from './directives/array.directive';
 import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
@@ -25,7 +26,8 @@ import { global, initialState, reducer } from './reducers';
     FieldArrayDirective,
     FieldGroupDirective,
     MessengerComponent,
-    JsonEditorComponent
+    JsonEditorComponent,
+    GunShotComponent
   ],
   imports: [
     BrowserModule,
