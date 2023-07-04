@@ -99,6 +99,9 @@ export class ShootingGroundComponent implements OnInit {
             event.stopPropagation();
             target.classList.add('hit');
 
+            const documentRef = doc(this.firestore, 'statistics/xeEFpi8UCnJjMexo2raf');
+            updateDoc(documentRef, { totalShots: increment(1) });
+
             const shotSound = new Audio();
             shotSound.src = "shotgun.mp3";
             shotSound.play();
