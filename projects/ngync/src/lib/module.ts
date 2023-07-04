@@ -13,4 +13,4 @@ export const NGYNC_CONFIG_DEFAULT: NgyncConfig = { debounce: 100, resetOnDestroy
   exports: [SyncDirective],
   providers: [SyncDirective]
 })
-export class SharedModule {}
+export class NgFormsModule {}

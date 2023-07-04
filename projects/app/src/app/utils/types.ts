@@ -29,11 +29,11 @@ export type KeyCount<Obj, Cache extends any[] = []> = keyof Obj extends never ? 
 
 
 
-export type ModelOptions<T> =
-T extends Array<infer U> ? ArrayToObject<ModelOptions<U>[]> & {
+export type FormOptions<T> =
+T extends Array<infer U> ? ArrayToObject<FormOptions<U>[]> & {
   ["__group"]?: T extends object ? AbstractControlOptions : never;
 } : T extends object ? {
-  [key in keyof Partial<T>]? : ModelOptions<T[key]>;
+  [key in keyof Partial<T>]? : FormOptions<T[key]>;
 } & {
   ["__group"]?: AbstractControlOptions;
 } : AbstractControlOptions;

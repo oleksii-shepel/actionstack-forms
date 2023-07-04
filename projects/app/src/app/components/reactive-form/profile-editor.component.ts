@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateValue, buildForm, getSlice, getValue } from 'ngync';
+import { UpdateValue, getSlice, getValue } from 'ngync';
+import { buildForm } from '../../utils/builder';
+
 import { Observable, take } from 'rxjs';
 import { initialProfile, profileOptions } from '../../models/profile';
 import { ProfileState } from '../../reducers/profile.reducer';

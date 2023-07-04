@@ -30,10 +30,8 @@ import {
   withLatestFrom
 } from 'rxjs';
 import {
-  DomObserver,
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
-  checkForm,
   deepEqual,
   getModel,
   getSlice,
@@ -137,7 +135,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(([, action]) => { if(action.type === FormActions.InitForm) { this._initDispatched = true; }}),
       filter(([ , action]) => action.type === FormActions.InitForm || action.type === FormActions.UpdateValue),
       debounceTime(this.debounce),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      takeWhile(() => document.contains(this.elRef.nativeElement)),
       delayWhen(() => this._updating$),
       ).subscribe(([state, action]) => {
       this._updating$.next(true);
@@ -162,7 +160,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       debounceTime(this.debounce),
       filter(() => this._initialized),
       delayWhen(() => this._updating$),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      takeWhile(() => document.contains(this.elRef.nativeElement)),
       map((state) => !!state),
       tap((state) => { selector.release(); this._submitted$.next(state); })
     ).subscribe();
@@ -172,7 +170,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         debounceTime(this.debounce),
         filter(() => this._initialized),
         delayWhen(() => this._updating$),
-        takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+        takeWhile(() => document.contains(this.elRef.nativeElement)),
         filter(() => this.dir.form.valid),
         tap(() => this.store.dispatch(AutoSubmit({ path: this.slice }))),
         tap(() => this._submitted$.next(true))
@@ -183,7 +181,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       debounceTime(this.debounce),
       filter(([input, blur, submitted, updating]) => !updating && (input || blur || submitted)),
       filter(() => this._initialized),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      takeWhile(() => document.contains(this.elRef.nativeElement)),
       tap(() => { this._updating$.next(true) }),
       tap(([input, blur, submitted]) => {
 
@@ -252,8 +250,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         first(),
         repeat({ count: 10 }),
         tap((state) => { if(state?.model) { this.dir.form.patchValue(state.model); }}),
-        filter((state) => {return (state?.model) ? checkForm(this.dir.form, state.model): true;}),
-        takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+        takeWhile(() => document.contains(this.elRef.nativeElement)),
         filter(() => !this._initDispatched && !this._initialized)
     ).subscribe((state) => {
       this._updating$.next(true);

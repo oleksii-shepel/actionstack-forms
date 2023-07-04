@@ -1,6 +1,6 @@
-import { Input, OnInit, Directive, Provider, forwardRef } from '@angular/core';
+import { Directive, Input, OnInit, Provider, forwardRef } from '@angular/core';
 import { ControlContainer } from "@angular/forms";
-import { NgModelArray } from "ngync";
+import { NgModelArray } from "../utils";
 
 const formControlBinding: Provider = {
   provide: ControlContainer,

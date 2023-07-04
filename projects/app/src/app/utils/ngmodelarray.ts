@@ -1,6 +1,6 @@
 import { Directive, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf, forwardRef } from "@angular/core";
 import { AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
-import { composeAsyncValidators, composeValidators } from "../shared";
+import { composeAsyncValidators, composeValidators } from ".";
 import { FormGroupMixin } from "./mixin";
 
 
@@ -16,7 +16,7 @@ export const moduleFactory = () => {
   return new Promise((resolve) => {
 
     Object.assign(NgModel.prototype, {
-      _checkParentType() {}
+      _checkParentType() { Function.prototype }
     });
 
     resolve(true);
@@ -35,7 +35,7 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   _rawAsyncValidators!: (AsyncValidatorFn | AsyncValidator)[];
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
-  form: FormArray<any>;
+  form: FormArray;
 
   constructor(
       @Optional() @Host() @SkipSelf() parent: ControlContainer,
@@ -78,7 +78,10 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   }
 
   override get path(): string[] {
-    return [...this._parent.path!, this.name!.toString()];
+    if(this._parent.path == null || this.name == null) {
+      throw new Error('Control path or name is null');
+    }
+    return [...this._parent.path, this.name.toString()];
   }
 
   get ngForm(): any {

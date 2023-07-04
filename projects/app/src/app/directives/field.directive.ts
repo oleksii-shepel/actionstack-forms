@@ -1,7 +1,8 @@
 import { ChangeDetectorRef, Directive, EventEmitter, Host, Inject, Input, OnDestroy, OnInit, Optional, Output, Provider, Self, forwardRef } from '@angular/core';
-import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, SetDisabledStateOption, Validator, ValidatorFn } from '@angular/forms';
-import { CALL_SET_DISABLED_STATE, SyncDirective, composeAsyncValidators, composeValidators, getSlice, getValue, selectValueAccessor } from 'ngync';
+import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, Validator, ValidatorFn } from '@angular/forms';
+import { SyncDirective, getSlice, getValue } from 'ngync';
 import { Subject, distinctUntilChanged, map, takeUntil } from 'rxjs';
+import { CALL_SET_DISABLED_STATE, SetDisabledStateOption, composeAsyncValidators, composeValidators, selectValueAccessor } from '../utils';
 import { FieldArrayDirective } from './array.directive';
 import { FieldGroupDirective } from './group.directive';
 
@@ -48,7 +49,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
       @Optional() @Inject(CALL_SET_DISABLED_STATE) callSetDisabledState?:
           SetDisabledStateOption,
           ) {
-    super(parent, validators, asyncValidators, valueAccessors, changeDetectorRef, callSetDisabledState);
+    super(parent, validators, asyncValidators, valueAccessors, changeDetectorRef);
 
     this._parent = parent;
     this._ngStore = ngStore;
