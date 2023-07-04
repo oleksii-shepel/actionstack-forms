@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostBinding, HostListener, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, inject } from '@angular/core';
 import { Firestore, doc, getDoc, increment, updateDoc } from '@angular/fire/firestore';
 import { walter } from '../../animations/animations';
 
@@ -11,8 +11,8 @@ import { walter } from '../../animations/animations';
 export class WalterComponent implements OnInit {
   @ViewChild("walter") walter!: ElementRef<HTMLElement>;
   enabled = false;
-  targetEnabled = true;
-  displayHoles = false;
+  targetEnabled = false;
+  displayHoles = true;
 
   shots = 0;
   firestore: Firestore = inject(Firestore);
@@ -59,8 +59,6 @@ export class WalterComponent implements OnInit {
     shotSound.play();
   }
 
-  @HostBinding() color = '#eee';
-
   toggleMode(event: Event) {
     event.stopPropagation();
     this.enabled = !this.enabled;
@@ -90,13 +88,22 @@ export class WalterComponent implements OnInit {
         target.style.top = positionY + 'px';
 
         target.addEventListener('click', (event) => {
+          event.stopPropagation();
           target.classList.add('hit');
+
+          const shotSound = new Audio();
+          shotSound.src = "shotgun.mp3";
+          shotSound.play();
         });
 
         clearTimeout(timer);
           const timer2 = setTimeout(() => {
             if(!target.classList.contains('hit')) {
               target.classList.add('missed');
+
+              const laugh = new Audio();
+              laugh.src = "villain-laugh.mp3";
+              laugh.play();
             }
 
             const timer3 = setTimeout(() => {
