@@ -62,7 +62,7 @@ export class SyncDirective implements AfterViewInit, OnDestroy {
       sampleTime(this.debounceTime),
       takeWhile(() => document.contains(this.elRef.nativeElement)),
     ).subscribe((value) => {
-      this.store.dispatch(UpdateForm({ path: this.slice, value: this.dir.form.value }));
+      this.store.dispatch(UpdateForm({ path: this.slice, value: value }));
     });
   }
 
