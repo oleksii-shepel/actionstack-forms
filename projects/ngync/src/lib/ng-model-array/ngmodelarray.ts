@@ -103,7 +103,7 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   }
 
   normalizeValidators(validators: (any | Validator | AsyncValidator)[]): any[] {
-    return validators.map((validator) => {
+    return (validators || []).map((validator) => {
       return !(validator as Validator).validate
         ? validator
         : (((c: AbstractControl) => (validator as Validator).validate(c)));

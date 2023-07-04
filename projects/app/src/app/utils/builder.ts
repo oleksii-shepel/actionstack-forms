@@ -1,6 +1,10 @@
 import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import { primitive } from 'ngync';
 import { FormOptions } from './types';
+
+
+
+export const primitive = (value: any) => value === undefined || value === null || typeof value !== 'object';
+
 
 
 export const fb = new FormBuilder();
