@@ -3,19 +3,23 @@ import { Firestore, doc, getDoc, increment, updateDoc } from '@angular/fire/fire
 import { walter } from '../../animations/animations';
 
 @Component({
-  selector: 'walter',
-  templateUrl: './walter.component.html',
-  styleUrls: ['./walter.component.scss'],
+  selector: 'shooting-ground',
+  templateUrl: './shooting-ground.component.html',
+  styleUrls: ['./shooting-ground.component.scss'],
   animations: [walter]
 })
-export class WalterComponent implements OnInit {
+export class ShootingGroundComponent implements OnInit {
   @ViewChild("walter") walter!: ElementRef<HTMLElement>;
   enabled = false;
-  targetEnabled = false;
+  targetEnabled = true;
   displayHoles = true;
 
   shots = 0;
+
   firestore: Firestore = inject(Firestore);
+
+  objects = new Set<HTMLElement>();
+  timers = new Set<ReturnType<typeof setTimeout>>();
 
   constructor(public elRef: ElementRef<HTMLElement>) {}
 
@@ -41,6 +45,7 @@ export class WalterComponent implements OnInit {
 
       const bulletHole = el.cloneNode() as HTMLElement;
       this.elRef.nativeElement.append(bulletHole);
+      this.objects.add(bulletHole);
 
       bulletHole.style.display = 'block';
       bulletHole.style.position = 'absolute';
@@ -52,6 +57,8 @@ export class WalterComponent implements OnInit {
         this.elRef.nativeElement.removeChild(bulletHole);
         clearTimeout(timer);
       }, Math.random() * 5000 + 1000);
+
+      this.timers.add(timer);
     }
 
     const shotSound = new Audio();
@@ -75,28 +82,29 @@ export class WalterComponent implements OnInit {
         delay += Math.random() * 5000 + 1000;
 
         const timer = setTimeout(() => {
-        const target = el.cloneNode(true) as HTMLElement;
-        this.elRef.nativeElement.append(target);
+          const target = el.cloneNode(true) as HTMLElement;
+          this.elRef.nativeElement.append(target);
+          this.objects.add(target);
 
-        target.style.display = 'block';
-        target.style.position = 'absolute';
+          target.style.display = 'block';
+          target.style.position = 'absolute';
 
-        const positionX = Math.floor((window.innerWidth - target.offsetWidth) * Math.random());
-        const positionY = Math.floor((window.innerHeight - target.offsetHeight) * Math.random());
+          const positionX = Math.floor((window.innerWidth - target.offsetWidth) * Math.random());
+          const positionY = Math.floor((window.innerHeight - target.offsetHeight) * Math.random());
 
-        target.style.left = positionX + 'px';
-        target.style.top = positionY + 'px';
+          target.style.left = positionX + 'px';
+          target.style.top = positionY + 'px';
 
-        target.addEventListener('click', (event) => {
-          event.stopPropagation();
-          target.classList.add('hit');
+          target.addEventListener('click', (event) => {
+            event.stopPropagation();
+            target.classList.add('hit');
 
-          const shotSound = new Audio();
-          shotSound.src = "shotgun.mp3";
-          shotSound.play();
-        });
+            const shotSound = new Audio();
+            shotSound.src = "shotgun.mp3";
+            shotSound.play();
+          });
 
-        clearTimeout(timer);
+          clearTimeout(timer);
           const timer2 = setTimeout(() => {
             if(!target.classList.contains('hit')) {
               target.classList.add('missed');
@@ -110,10 +118,20 @@ export class WalterComponent implements OnInit {
               this.elRef.nativeElement.removeChild(target);
               clearTimeout(timer3);
             }, 2000);
+            this.timers.add(timer3);
             clearTimeout(timer2);
           }, Math.random() * 5000 + 1000);
+          this.timers.add(timer2);
         }, delay);
+        this.timers.add(timer);
       }
+    } else {
+      this.objects.forEach((object) => {
+        this.elRef.nativeElement.removeChild(object);
+      });
+      this.timers.forEach((timer) => {
+        clearTimeout(timer);
+      });
     }
   }
 }

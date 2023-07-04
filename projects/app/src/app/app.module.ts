@@ -12,8 +12,8 @@ import { JsonEditorComponent } from './components/json-editor/json-editor.compon
 import { MessengerComponent } from './components/messenger/messenger.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
 import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
+import { ShootingGroundComponent } from './components/shooting-ground/shooting-round.component';
 import { TemplateProfileEditorComponent } from './components/template-driven-form/profile-editor.component';
-import { WalterComponent } from './components/walter/walter.component';
 import { FieldArrayDirective } from './directives/array.directive';
 import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
@@ -29,7 +29,7 @@ import { global, initialState, reducer } from './reducers';
     FieldGroupDirective,
     MessengerComponent,
     JsonEditorComponent,
-    WalterComponent
+    ShootingGroundComponent
   ],
   imports: [
     BrowserModule,
