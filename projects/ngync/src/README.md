@@ -101,7 +101,7 @@ If you may probably noticed, you do not must to dispatch any actions to the stor
 ```typescript
 export enum FormActions {
   UpdateForm = '[Form] Update Form',
-  UpdateProperty = '[Form] Update Property',
+  UpdateField = '[Form] Update Form Field',
   ResetForm = '[Form] Reset Form'
 }
 ```
