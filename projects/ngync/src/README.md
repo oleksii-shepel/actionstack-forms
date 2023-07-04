@@ -1,4 +1,4 @@
-<h1>ngync</h1>
+<h1>ngync mini</h1>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/ngync/src/maskot.svg" alt="ngync" width="250"/>
@@ -15,7 +15,7 @@
 
 </p>
 <p align="justify">
-<b>ngync</b> is a lightweight JavaScript library designed to facilitate the integration of Angular forms with the NgRx store. It aims to simplify the developing process by taking care of keeping states in sync what can be challenging when done manually. One of the key benefits of using ngync is that it enables form binding with the store effortlessly. This means that you don't have to go through the usual hassle of dispatching actions, writing reducers, or creating selectors. The library takes care of these tasks for you, eliminating the need for additional code and reducing the effort required. The library allows you to leverage your existing knowledge of working with Angular forms, no additional knowledge required.
+<b>ngync</b> is a lightweight JavaScript library designed to facilitate the integration of Angular forms with the NgRx store. This is a minimalistic version of the package for those who love simplicity. One of the key benefits of using ngync is that it enables form binding with the store effortlessly. This means that you don't have to go through the usual hassle of dispatching actions, writing reducers, or creating selectors. The library takes care of these tasks for you, eliminating the need for additional code and reducing the effort required. The library allows you to leverage your existing knowledge of working with Angular forms, no additional knowledge required.
 </p>
 <p align="justify">
 Curious about bridging Angular Forms and NgRx store worlds? Allow me to unveil a remarkable solution: the ingenious <b>ngync</b> library. Prepare to be captivated as I unravel its unique characteristics and describe how it sets itself apart from other available alternatives. Let me introduce it to you. Application example is available at <a href="https://oleksii-shepel.github.io/angular-ngrx-forms/">Github Pages</a>.</p>
