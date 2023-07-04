@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateValue, getSlice, getValue } from 'ngync';
+import { selectForm } from 'ngync';
 import { buildForm } from '../../utils/builder';
 
 import { Observable, take } from 'rxjs';
@@ -35,30 +35,14 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
 
   constructor(private fb: FormBuilder, private store: Store<any>) {
 
-    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
-      let model: any = getValue(state, "model") ?? initialProfile;
+    this.a = this.store.select(selectForm(this.slice)).pipe(take(1)).subscribe((state) => {
+      let model: any = state ?? initialProfile;
     });
 
-    this.profile$ = this.store.select(getSlice(this.slice));
+    this.profile$ = this.store.select(selectForm(this.slice));
   }
 
   updateProfile() {
-    this.store.dispatch(UpdateValue({value: {
-      bookmark: true,
-      firstName: 'Dr. Julius No',
-      lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      address: {
-        street: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        city: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-        state: 'Jamaica',
-        zip: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-      },
-      books: ['Reading is prohibited, burn all the books...'],
-      selected: 0,
-      quotes: `Unfortunately I misjudged you. You are just a stupid policeman whose luck has run out.`,
-      aliases: ['❗❗❗❗❗❗ Executive for Counterintelligence, Revenge and Extortion ❗❗❗❗❗❗']
-    }, path: "profile"}));
-
     this.hacked.emit(true);
   }
 

@@ -16,7 +16,7 @@ export class FieldGroupDirective extends AbstractFormGroupDirective implements O
   _composedValidator!: ValidatorFn | null;
   _composedAsyncValidator!: AsyncValidatorFn | null;
   _parent: ControlContainer;
-  form: FormGroup<any>;
+  form: FormGroup;
 
   constructor(
       @Host() @SkipSelf() parent: ControlContainer,
@@ -42,7 +42,6 @@ export class FieldGroupDirective extends AbstractFormGroupDirective implements O
     const container = self._findContainer(this.path);
     const group = this.form;
     container?.registerControl(this.name, group);
-    // group.updateValueAndValidity({emitEvent: false});
   }
 
   override ngOnDestroy(): void {

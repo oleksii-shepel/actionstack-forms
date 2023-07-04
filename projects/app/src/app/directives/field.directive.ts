@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Directive, EventEmitter, Host, Inject, Input, OnDestroy, OnInit, Optional, Output, Provider, Self, forwardRef } from '@angular/core';
 import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, Validator, ValidatorFn } from '@angular/forms';
-import { SyncDirective, getSlice, getValue } from 'ngync';
-import { Subject, distinctUntilChanged, map, takeUntil } from 'rxjs';
+import { SyncDirective, getValue, selectForm } from 'ngync';
+import { Subject, distinctUntilChanged, takeUntil } from 'rxjs';
 import { CALL_SET_DISABLED_STATE, SetDisabledStateOption, composeAsyncValidators, composeValidators, selectValueAccessor } from '../utils';
 import { FieldArrayDirective } from './array.directive';
 import { FieldGroupDirective } from './group.directive';
@@ -22,12 +22,12 @@ const formControlBinding: Provider = {
   [{provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true}]
 ], exportAs: 'ngField'})
 export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgControl {
-  @Input("ngField") override name!: string;
+  @Input("ngField") override name = '';
   @Output('ngFieldChange') override update = new EventEmitter();
 
   override control: FormControl<string | null>;
   override valueAccessor: ControlValueAccessor | null;
-  override viewModel: any;
+  override viewModel: any = undefined;
 
   _parent: ControlContainer;
   _ngStore: SyncDirective;
@@ -63,15 +63,22 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this.control.setAsyncValidators(this._composedAsyncValidator);
 
     this.control.setParent(this.formDirective.control);
+
+    Object.assign(this, {
+      _checkForErrors: () => { Function.prototype },
+      _checkParentType: () => { Function.prototype },
+      _checkName: () => { Function.prototype }
+    })
   }
 
   onChange(value: any) {
+    (this.valueAccessor as DefaultValueAccessor)?.onChange(value);
     this.control.setValue(value);
-    this.control.updateValueAndValidity();
     this.viewToModelUpdate(value);
   }
 
   onTouched() {
+    (this.valueAccessor as DefaultValueAccessor)?.onTouched();
     this.control.markAsTouched();
   }
 
@@ -85,14 +92,15 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   }
 
   ngOnInit(): void {
-    this._ngStore?.store.select((state: any) => state).pipe(
+    this._ngStore?.store.select(selectForm(this._ngStore.slice)).pipe(
       distinctUntilChanged(),
-      takeUntil(this._destroyed$),
-      map(state => getSlice(this._ngStore.slice)(state).model))
+      takeUntil(this._destroyed$))
     .subscribe((model: any) => {
-      let value = getValue(model, this.path.join('.'));
-      this.valueAccessor?.writeValue(value);
-      this.control.setValue(value);
+      const value = getValue(model, this.path.join('.'));
+      if(value !== this.control.value) {
+        this.valueAccessor?.writeValue(value);
+        this.control.setValue(value);
+      }
     });
 
     this.formDirective.addControl(this);

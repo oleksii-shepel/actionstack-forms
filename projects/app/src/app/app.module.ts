@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { StoreModule } from '@ngrx/store';
-import { NgFormsModule, forms, logger } from 'ngync';
+import { NgFormsModule, forms } from 'ngync';
 import { AppComponent } from './components/app/app.component';
 import { HackedBannerComponent } from './components/hacked-banner/hacked-banner.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
@@ -31,7 +31,7 @@ import { NgModelArrayModule } from './utils';
     ReactiveFormsModule,
     FormsModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [forms(initialState), logger]
+      metaReducers: [forms(initialState)]
     }),
 
     NgFormsModule,

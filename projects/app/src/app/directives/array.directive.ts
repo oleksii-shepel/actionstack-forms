@@ -15,7 +15,7 @@ const formControlBinding: Provider = {
   exportAs: 'ngFieldArray',
 })
 export class FieldArrayDirective extends NgModelArray implements OnInit {
-  @Input('ngFieldArray') override name!: string;
+  @Input('ngFieldArray') override name: string = '';
 
   override ngOnInit() {
     super.ngOnInit();

@@ -1,7 +1,7 @@
 {
   "name": "ngync",
-  "version": "1.0.8",
-  "description": "Angular Forms integrated into NgRx store",
+  "version": "1.1.0",
+  "description": "Forms Module for NgRx store",
   "license": "MIT",
   "keywords": [
     "ngrx",
