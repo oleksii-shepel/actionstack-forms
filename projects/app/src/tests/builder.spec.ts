@@ -1,6 +1,6 @@
 import { Validators } from '@angular/forms';
-import { buildForm } from '../lib/shared/builder';
-import { FormOptions } from '../lib/shared/types';
+import { buildForm } from '../../../app/src/app/utils/builder';
+import { FormOptions } from '../../../app/src/app/utils/types';
 
 describe('builder', () => {
   it('should build form', () => {

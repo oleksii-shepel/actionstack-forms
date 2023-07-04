@@ -29,6 +29,7 @@ import {
   mergeMap,
   observeOn,
   of,
+  sampleTime,
   scan,
   skip,
   startWith,
@@ -38,10 +39,8 @@ import {
   tap
 } from 'rxjs';
 import {
-  DomObserver,
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
-  debounce,
   deepEqual,
   getValue,
   intersection,
@@ -103,17 +102,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     if(this.updateOn === 'blur' && control.path) {
       this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: control.value }));
     }
-  };
+  }
 
-  debounceCallback = (control: NgControl, value: any) => {
+  inputCallback = (control: NgControl) => (value : any) => {
     if(this.updateOn === 'change' && control.path) {
       this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: value }));
     }
   }
-
-  inputCallback = (control: NgControl) => (value : any) => {
-    debounce(this.debounceCallback, this.debounceTime)(control, value);
-  };
 
   onInitOrUpdate$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
@@ -183,6 +178,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onUpdateField$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.type === FormActions.UpdateField && action.path === this.slice),
+      sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         const state = this.submittedState ?? this.initialState;
@@ -301,7 +297,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
       }),
-      takeWhile(() => DomObserver.mounted(this.elRef.nativeElement)),
+      takeWhile(() => document.contains(this.elRef.nativeElement)),
       finalize(() => {
         const queue = actionQueues.get(this.slice) as Queue<Action>;
         if(queue.initialized$.value) {

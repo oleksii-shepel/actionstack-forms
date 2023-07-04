@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA, Component, Renderer2 } from "@angular/core";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CheckboxControlValueAccessor, ControlValueAccessor, DefaultValueAccessor, FormsModule, NgControl, ReactiveFormsModule, SelectControlValueAccessor, SelectMultipleControlValueAccessor } from "@angular/forms";
-import { BuiltInControlValueAccessor, isBuiltInAccessor, selectValueAccessor } from "../lib/shared/accessors";
+import { BuiltInControlValueAccessor, isBuiltInAccessor, selectValueAccessor } from "../lib/ng-model-array/accessors";
 
 class ValueAccessor extends BuiltInControlValueAccessor implements ControlValueAccessor {
   constructor() {

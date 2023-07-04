@@ -1,4 +1,4 @@
-import { debounce, scheduledFnMap } from '../lib/shared/timers';
+import { debounce, scheduledFnMap } from '../../../app/src/app/utils/timers';
 
 describe('timers', () => {
   it('should debounce function calls', () => {

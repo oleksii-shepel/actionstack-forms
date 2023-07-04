@@ -1,4 +1,4 @@
-import { boxed, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, reset, setValue } from '../lib/shared/utils';
+import { boxed, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, reset, setValue } from '../lib/ng-forms/utils';
 describe('utils', () => {
   it('should get value', () => {
     const obj1 = { a: { b: { c: 1 } } };

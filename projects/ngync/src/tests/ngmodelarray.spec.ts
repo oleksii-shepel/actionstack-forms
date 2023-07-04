@@ -2,9 +2,9 @@ import { CommonModule } from "@angular/common";
 import { CUSTOM_ELEMENTS_SCHEMA, Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { NgModelArray } from "../lib/template-driven-forms/ngmodelarray";
+import { FormGroupMixin } from '../lib/ng-model-array/mixin';
+import { NgModelArray } from "../lib/ng-model-array/ngmodelarray";
 import { NgFormsModule, NgModelArrayModule } from "../public-api";
-import { FormGroupMixin } from './../lib/template-driven-forms/mixin';
 
 @Component({
   selector: 'test-component',

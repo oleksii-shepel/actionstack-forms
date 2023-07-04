@@ -1,6 +1,6 @@
 import { Directive, forwardRef, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf } from '@angular/core';
 import { AbstractFormGroupDirective, AsyncValidator, AsyncValidatorFn, ControlContainer, FormGroup, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from '@angular/forms';
-import { composeAsyncValidators, composeValidators } from 'ngync';
+import { composeAsyncValidators, composeValidators } from '../utils';
 
 export const modelGroupProvider: any = {
   provide: ControlContainer,
@@ -10,7 +10,7 @@ export const modelGroupProvider: any = {
 @Directive({selector: '[ngFieldGroup]', providers: [modelGroupProvider], exportAs: 'ngFieldGroup'})
 export class FieldGroupDirective extends AbstractFormGroupDirective implements OnInit, OnDestroy {
 
-  @Input('ngFieldGroup') override name: string = '';
+  @Input('ngFieldGroup') override name = '';
   _rawValidators!: (Validator | ValidatorFn)[];
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
