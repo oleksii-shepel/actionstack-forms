@@ -98,8 +98,10 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
       map(state => selectValue(this._ngStore.slice)(state)))
     .subscribe((model: any) => {
       const value = getValue(model, this.path.join('.'));
-      this.valueAccessor?.writeValue(value);
-      this.control.setValue(value);
+      if(value !== this.control.value) {
+        this.valueAccessor?.writeValue(value);
+        this.control.setValue(value);
+      }
     });
 
     this.formDirective.addControl(this);

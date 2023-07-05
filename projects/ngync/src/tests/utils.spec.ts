@@ -1,4 +1,4 @@
-import { boxed, deepClone, deepCloneJSON, deepEqual, difference, findProps, getValue, intersection, iterable, prop, reset, setValue } from '../lib/ng-forms/utils';
+import { boxed, deepClone, deepEqual, deepFreeze, difference, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/ng-forms/utils';
 describe('utils', () => {
   it('should get value', () => {
     const obj1 = { a: { b: { c: 1 } } };
@@ -101,13 +101,8 @@ describe('utils', () => {
     expect(deepEqual(deepClone(obj7), ref7)).toEqual(false);
   });
 
-  it('should deep clone json', () => {
-    const obj1 = { a: 1, b: 2, c: 3 };
-    const obj2 = { a: 1, b: 2, c: 3 };
-    const obj3 = { a: 1, b: 2, c: 4 };
+  it('should deep freeze object', () => {
 
-    expect(deepEqual(deepCloneJSON(obj1), obj2)).toEqual(true);
-    expect(deepEqual(deepCloneJSON(obj1), obj3)).toEqual(false);
   });
 
   it('boxed', () => {
@@ -152,22 +147,18 @@ describe('utils', () => {
     expect(difference(obj1, obj2)).toEqual({"added": {"c": 3}, "changed": {"a": 1, "b": 2, "e": [1, 2]}, "removed": {"d": 7}} );
     expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, 2]}});
   });
-  it('should reset object to blank', (async () => {
-    const formValue = {
-      firstName: 'John',
-      lastName: 'Doe',
-      address: {
-        street: '123 Main St',
-        city: 'New York',
-        state: 'NY',
-        zip: '10001',
-      },
-      date: new Date(),
-      phone: '212-555-1234',
-      emails: ['john.doe@contoso.com', 'john.doe@works.hard']
-    };
 
-    const result = reset(formValue);
-    expect(result).toEqual({ firstName: '', lastName: '', address: { street: '', city: '', state: '', zip: ''}, date: result.date, phone: '', emails: [] });
-  }))
+  it('should deep freeze an object', () => {
+
+    const obj1 = { a: 1, b: 2, c: 3, e: [1, 2]};
+    const obj2 = { a: 4, b: 5, d: 7, e: [1] };
+
+    const freezed1 = deepFreeze(obj1);
+    const freezed2 = deepFreeze(obj2);
+
+    expect(() => freezed1.a = 2).toThrow(TypeError);
+    expect(() => freezed1.e[0] = 2).toThrow(TypeError);
+    expect(() => freezed2.a = 2).toThrow(TypeError);
+    expect(() => freezed2.e[0] = 2).toThrow(TypeError);
+  });
 });

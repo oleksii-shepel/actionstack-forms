@@ -31,7 +31,6 @@ import {
   of,
   sampleTime,
   scan,
-  skip,
   startWith,
   switchMap,
   take,
@@ -44,7 +43,6 @@ import {
   deepEqual,
   getValue,
   intersection,
-  reset,
   selectValue,
   setValue
 } from '.';
@@ -93,7 +91,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   submittedState: any = undefined;
   destoyed = false;
 
-  checkStatus$ = new BehaviorSubject<boolean>(false);
   initialized$ = new BehaviorSubject<boolean>(false);
 
   subs = {} as any;
@@ -197,8 +194,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
 
         control.updateValueAndValidity();
-
-        this.checkStatus$.next(true);
         this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
@@ -225,8 +220,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
 
         this.dir.form.updateValueAndValidity();
-
-        this.checkStatus$.next(true);
         this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
@@ -263,17 +256,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
               this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState || {} }));
               break;
             case 'blank':
-              this.store.dispatch(UpdateForm({ path: this.slice, value: reset(this.formValue)}));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset(this.controls)}));
               break;
           }
         }
       }),
       takeWhile(() => !this.destoyed));
 
-    this.onStatusChanges$ = from(this.checkStatus$).pipe(
-      skip(1),
-      map(() => this.dir.form.status),
-      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
+    this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
+      filter(() => this.initialized$.value),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
       distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
       tap((value) => {
@@ -327,7 +318,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       this.subs[sub].unsubscribe();
     }
 
-    this.checkStatus$.complete();
     this.initialized$.complete();
 
     this.destoyed = true;
@@ -368,5 +358,20 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   get formStatus(): FormControlStatus {
     return this.dir.form.status;
+  }
+
+  reset(controls: QueryList<NgControl>): any {
+    if(!this.controls) { return {}; }
+
+    let value = {};
+    for (const control of controls.toArray()) {
+      control.reset((control.valueAccessor as any)?._elementRef?.nativeElement.defaultValue);
+
+      if(control.path) {
+        value = setValue(value, control.path.join('.'), control.value);
+      }
+    }
+
+    return value;
   }
 }
