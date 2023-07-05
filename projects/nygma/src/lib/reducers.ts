@@ -149,7 +149,7 @@ export const logger = (settings: {showAll?: boolean, showRegular?: boolean, show
 
     if(filter(action, diff)) {
       console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
-      console.log("path: '%c%s%c', payload: %o", "color: red;", split.join('::'), "color: black;", actionCopy);
+      console.log("path: '%c%s%c', payload: %o", "color: red;", split?.join('::'), "color: black;", actionCopy);
       console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
       console.groupEnd();
     }
