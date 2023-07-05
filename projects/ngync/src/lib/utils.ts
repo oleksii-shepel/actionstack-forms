@@ -38,10 +38,10 @@ export const iterable = (obj: any) => {
 
 
 export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[prop] }) => any) {
-  const noCommentsStr = expression.toString().replace(/\/\*(.|[\r\n])*?\*\//g, '').replace(/\/\/.*/gm, '');
-  const split = noCommentsStr.split('=>');
+  const noComments = expression.toString().replace(/\/\*(.|[\r\n])*?\*\//g, '').replace(/\/\/.*/gm, '');
+  const split = noComments.split('=>');
   if(split && split.length == 2) {
-    const str = noCommentsStr.split('=>')[1].trim();
+    const str = split[1].trim();
     return str.substring(str.indexOf('.') + 1, str.length).replace(/\]/g, '').replace(/\[/g, '.');
   } else {
     throw new Error('Invalid expression');
@@ -122,9 +122,25 @@ export function deepClone(objectToClone: any) {
 
 
 
-export function deepCloneJSON(objectToClone: any) {
-  if (!objectToClone) return objectToClone;
-  return JSON.parse(JSON.stringify(objectToClone));
+export function deepFreeze(objectToFreeze: any) {
+  if (primitive(objectToFreeze)) return objectToFreeze;
+
+  let obj = undefined;
+  if (boxed(objectToFreeze)) {
+    if (objectToFreeze instanceof Date) { obj = new Date(objectToFreeze.valueOf()); }
+    else { obj = {...objectToFreeze.constructor(objectToFreeze.valueOf())}; }
+  }
+  else if(objectToFreeze instanceof Map) { obj = new Map(objectToFreeze); }
+  else if(objectToFreeze instanceof Set) { obj = new Set(objectToFreeze); }
+  else if(Array.isArray(objectToFreeze)) { obj = [...objectToFreeze]; }
+  else if (typeof objectToFreeze === 'object') { obj = {...objectToFreeze}; }
+
+  for (const key in obj) {
+    const value = objectToFreeze[key];
+    obj[key] = typeof value === 'object' ? deepFreeze(value) : value;
+  }
+
+  return Object.freeze(obj);
 }
 
 
@@ -137,6 +153,7 @@ export function intersection(x: any, y: any) {
     return result;
   }, {} as any);
 }
+
 
 
 export interface Difference {
@@ -192,31 +209,4 @@ export function difference(x: any, y: any) : Difference {
   }
 
   return diff;
-}
-
-
-
-export function reset(target: any, source?: any): any {
-  if(!source) { source = target; }
-  const date = new Date();
-  for(const prop of findProps(source)) {
-
-    const value = getValue(source, prop);
-    if(typeof value === 'string') {
-      target = setValue(target, prop, '');
-    } else if (typeof value === 'number') {
-      target = setValue(target, prop, 0);
-    } else if (typeof value === 'boolean') {
-      target = setValue(target, prop, false);
-    } else if (typeof value === 'bigint') {
-      target = setValue(target, prop, BigInt(0));
-    } else if(Array.isArray(value)) {
-      target = setValue(target, prop, []);
-    } else if(value instanceof Date) {
-      target = setValue(target, prop, date);
-    } else if(typeof value === 'object') {
-      target = setValue(target, prop, new value.constructor());
-    }
-  }
-  return target;
 }
