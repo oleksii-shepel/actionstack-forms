@@ -1,6 +1,6 @@
 import { Directive, Input, OnInit, Provider, forwardRef } from '@angular/core';
 import { ControlContainer } from "@angular/forms";
-import { NgModelArray } from "nygma";
+import { NgModelArray } from "../../app/utils/ng-model-array";
 
 const formControlBinding: Provider = {
   provide: ControlContainer,
@@ -15,7 +15,7 @@ const formControlBinding: Provider = {
   exportAs: 'ngFieldArray',
 })
 export class FieldArrayDirective extends NgModelArray implements OnInit {
-  @Input('ngFieldArray') override name: string = '';
+  @Input('ngFieldArray') override name = '';
 
   override ngOnInit() {
     super.ngOnInit();

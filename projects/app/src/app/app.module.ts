@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { NgFormsModule, NgModelArrayModule, forms, logger } from 'nygma';
+import { NgFormsModule, forms, logger } from 'nygma';
 import { environment } from '../environments/environment';
 import { AppComponent } from './components/app/app.component';
 import { JsonEditorComponent } from './components/json-editor/json-editor.component';
@@ -18,6 +18,7 @@ import { FieldArrayDirective } from './directives/array.directive';
 import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
 import { global, initialState, reducer } from './reducers';
+import { NgModelArrayModule } from './utils';
 @NgModule({
   declarations: [
     AppComponent,
