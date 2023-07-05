@@ -1,0 +1,71 @@
+{
+  "version": "16.0.0",
+  "description": "Forms Add-On for NgRx store",
+  "license": "MIT",
+  "keywords": [
+    "ngrx",
+    "angular",
+    "forms",
+    "reactive",
+    "template-driven",
+    "sync",
+    "nygma",
+    "store"
+  ],
+  "module": "public-api.ts",
+  "dependencies": {
+    "@angular/animations": "~16.0.0",
+    "@angular/common": "~16.0.0",
+    "@angular/compiler": "~16.0.0",
+    "@angular/core": "~16.0.0",
+    "@angular/fire": "^7.6.1",
+    "@angular/forms": "~16.0.0",
+    "@angular/platform-browser": "~16.0.0",
+    "@angular/platform-browser-dynamic": "~16.0.0",
+    "@angular/router": "~16.0.0",
+    "@ngrx/store": "~16.0.0",
+    "rxjs": "~7.8.0",
+    "zone.js": "~0.13.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "~16.0.0",
+    "@angular-devkit/schematics": "~16.0.0",
+    "@angular/cli": "~16.0.0",
+    "@angular/compiler-cli": "~16.0.0",
+    "@schematics/angular": "~16.0.0",
+    "@types/jest": "^29.5.2",
+    "@types/node": "20.1.2",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "angular-cli-ghpages": "^1.0.6",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.43.0",
+    "jest": "^29.5.0",
+    "jest-preset-angular": "^13.1.1",
+    "ng-packagr": "~16.0.1",
+    "ngrx-store-freeze": "^0.2.4",
+    "ts-node": "~10.9.0",
+    "tslib": "^2.5.2",
+    "typescript": "~4.9.2"
+  },
+  "scripts": {
+    "ng": "ng",
+    "start": "cd .. && ng serve",
+    "build": "cd .. && ng build",
+    "watch": "cd .. && ng build --watch --configuration development",
+    "test": "cd .. && jest --verbose",
+    "test:coverage": "cd .. && jest --coverage --watchAll=false",
+    "test:watch": "cd .. && jest --watch",
+    "deploy": "cd .. && ng deploy --base-href=/angular-ngrx-forms/",
+    "eslint": "cd .. && eslint ./projects/nygma/src/lib --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oleksii-shepel/angular-ngrx-reactive-forms.git"
+  },
+  "author": "Oleksii Shepel",
+  "bugs": {
+    "url": "https://github.com/oleksii-shepel/angular-ngrx-reactive-forms/issues"
+  },
+  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-reactive-forms#readme"
+}

@@ -3,23 +3,23 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ngync": {
+    "nygma": {
       "projectType": "library",
-      "root": "projects/ngync/src",
-      "sourceRoot": "projects/ngync/src/lib",
+      "root": "projects/nygma/src",
+      "sourceRoot": "projects/nygma/src/lib",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/ngync/src/ng-package.json"
+            "project": "projects/nygma/src/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngync/src/tsconfig.lib.prod.json"
+              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngync/src/tsconfig.lib.json"
+              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"

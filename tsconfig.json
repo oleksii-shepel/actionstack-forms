@@ -3,9 +3,9 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "ngync": [
-        "dist/ngync",
-        "projects/ngync/src/lib"
+      "nygma": [
+        "dist/nygma",
+        "projects/nygma/src/lib"
       ],
     },
     "baseUrl": "./",

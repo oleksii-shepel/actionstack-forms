@@ -1,4 +1,4 @@
-import { FormCast } from "ngync";
+import { FormCast } from "nygma";
 import { FormOptions } from "../utils/types";
 export interface ProfileForm {
   bookmark: boolean;

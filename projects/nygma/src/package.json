@@ -1,9 +1,9 @@
 {
-  "name": "ngync",
+  "name": "nygma",
   "version": "1.3.12",
   "description": "Forms Module for NgRx store",
   "license": "MIT",
-  "keywords": [ "NgRx", "Angular", "forms", "reactive", "template-driven", "sync", "ngync", "store", "ngModelArray"],
+  "keywords": [ "NgRx", "Angular", "forms", "reactive", "template-driven", "sync", "nygma", "store", "ngModelArray"],
   "peerDependencies": {
     "@angular/core": ">=14.0.0",
     "@angular/forms": ">=14.0.0",

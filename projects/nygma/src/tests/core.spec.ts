@@ -34,7 +34,7 @@ describe('core', () => {
       fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" ngync="slice">
+          <form [formGroup]="form" nygma="slice">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -362,7 +362,7 @@ describe('core', () => {
       fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form #form="ngForm" ngync="slice">
+          <form #form="ngForm" nygma="slice">
             <input type="text" [(ngModel)]="firstName" name="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -688,7 +688,7 @@ describe('core', () => {
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [ngync]="'slice'">
+          <form [formGroup]="form" [nygma]="'slice'">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -739,7 +739,7 @@ describe('core', () => {
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [ngync]="{slice: 'slice', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
+          <form [formGroup]="form" [nygma]="{slice: 'slice', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -785,7 +785,7 @@ describe('core', () => {
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [ngync]="{}">
+          <form [formGroup]="form" [nygma]="{}">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -824,7 +824,7 @@ describe('core', () => {
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [ngync]="slice">
+          <form [nygma]="slice">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`

@@ -4,7 +4,7 @@
     <main>
       <pre *ngIf="!collapsed" [@occurence]>{{profile$ | async | json}}</pre>
 
-      <form [formGroup]="profileForm" autocomplete="off" [ngync]="formCast">
+      <form [formGroup]="profileForm" autocomplete="off" [nygma]="formCast">
         <h2>{{caption}}</h2>
         <div class="bookmark">
           <a (click)="addToBookmark(bookmark)">

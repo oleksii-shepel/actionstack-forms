@@ -36,7 +36,7 @@ import { combineReducers } from '@ngrx/store';
  * the state of the reducer plus any selector functions. The `* as`
  * notation packages up all of the exports into a single object.
  */
-import { getValue, setValue } from 'ngync';
+import { getValue, setValue } from 'nygma';
 import * as fromHero from './hero.reducer';
 import * as fromProfile from './profile.reducer';
 import * as fromStandard from './standard.reducer';
