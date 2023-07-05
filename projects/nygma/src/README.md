@@ -1,7 +1,7 @@
 <h1>Nygma</h1>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/nygma/src/maskot.svg" alt="nygma" width="250"/>
+  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/nygma/src/maskot.png" alt="nygma" width="250"/>
 </p>
 
   ![npm version](https://badge.fury.io/js/nygma.svg)

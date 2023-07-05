@@ -21,7 +21,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   profile$!: Observable<any>;
   slice = "hero";
-  formCast = "hero.form";
+  formCast = "hero::form";
   model = initialHeroPage.form.value;
   a: any; b: any;
 
@@ -42,7 +42,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
     const state: any = await firstValueFrom(this.store.select(selectFormCast(this.formCast)));
 
     if(!state) {
-      this.store.dispatch(UpdateForm({value: initialHeroPage.form.value, path: `${this.formCast}.value`}));
+      this.store.dispatch(UpdateForm({value: initialHeroPage.form.value, split: `${this.formCast}.value`}));
       this.collapsed = true;
     }
 
