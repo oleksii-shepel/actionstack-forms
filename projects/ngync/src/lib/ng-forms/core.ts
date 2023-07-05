@@ -201,7 +201,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
       filter((action: any) => action && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
-      filter((action: any) => (!actionQueues.has(this.slice) || action.deferred)),
+      filter((action: any) => (!this.enableQueue || action.deferred)),
       tap((action) => {
 
         this.dir.form.patchValue(action?.value, {emitEvent: false});
@@ -244,7 +244,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onReset$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.ResetForm),
-      filter((action) => (!actionQueues.has(this.slice) || action.deferred)),
+      filter((action) => (!this.enableQueue || action.deferred)),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         if(action.state){
@@ -256,7 +256,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
               this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState || {} }));
               break;
             case 'blank':
-              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset(this.controls)}));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset()}));
               break;
           }
         }
@@ -360,11 +360,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     return this.dir.form.status;
   }
 
-  reset(controls: QueryList<NgControl>): any {
+  reset(): any {
     if(!this.controls) { return {}; }
 
     let value = {};
-    for (const control of controls.toArray()) {
+    for (const control of this.controls.toArray()) {
       control.reset((control.valueAccessor as any)?._elementRef?.nativeElement.defaultValue);
 
       if(control.path) {
