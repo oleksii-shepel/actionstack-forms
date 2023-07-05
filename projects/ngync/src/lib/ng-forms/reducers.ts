@@ -84,7 +84,7 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 }
 
 export const logger = (settings: {showAll?: boolean, showOnlyModifiers?: boolean}) => (reducer: ActionReducer<any>): any => {
-  settings = Object.assign({showAll: false, showRegular: false, showDeferred: false, showOnlyModifiers: true}, settings);
+  settings = Object.assign({showAll: false, showOnlyModifiers: true}, settings);
 
   function filter(action: any, difference: any): boolean {
     let show = false;

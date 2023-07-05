@@ -240,7 +240,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
               this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState || {} }));
               break;
             case 'blank':
-              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset(this.controls)}));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset()}));
               break;
           }
         }
@@ -316,11 +316,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     return this.dir.form.status;
   }
 
-  reset(controls: QueryList<NgControl>): any {
+  reset(): any {
     if(!this.controls) { return {}; }
 
     let value = {};
-    for (const control of controls.toArray()) {
+    for (const control of this.controls.toArray()) {
       control.reset((control.valueAccessor as any)?._elementRef?.nativeElement.defaultValue);
 
       if(control.path) {
