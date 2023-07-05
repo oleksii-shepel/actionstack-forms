@@ -1,4 +1,4 @@
-import { Queue } from '../lib/ng-forms/queue';
+import { Queue } from '../lib/queue';
 
 describe('Queue', () => {
   it('should enqueue and dequeue', () => {

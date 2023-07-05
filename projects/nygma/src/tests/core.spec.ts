@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
 import { firstValueFrom } from 'rxjs';
-import { NGYNC_CONFIG_DEFAULT, NgFormsModule } from "../lib/ng-forms/module";
+import { NGYNC_CONFIG_DEFAULT, NgFormsModule } from "../lib/module";
 import { AutoInit, AutoSubmit, ResetForm, SyncDirective, UpdateForm, actionQueues, forms, selectValue } from "../public-api";
 
 describe('core', () => {

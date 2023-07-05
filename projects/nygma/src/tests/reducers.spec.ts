@@ -1,5 +1,5 @@
-import { AutoInit, AutoSubmit, FormDestroyed, ResetForm, UpdateDirty, UpdateErrors, UpdateField, UpdateForm, UpdateStatus } from '../lib/ng-forms/actions';
-import { forms, logger } from '../lib/ng-forms/reducers';
+import { AutoInit, AutoSubmit, FormDestroyed, ResetForm, UpdateDirty, UpdateErrors, UpdateField, UpdateForm, UpdateStatus } from '../lib/actions';
+import { forms, logger } from '../lib/reducers';
 import { deepClone } from '../public-api';
 
 describe('reducers', () => {
