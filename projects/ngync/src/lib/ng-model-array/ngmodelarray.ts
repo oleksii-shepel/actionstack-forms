@@ -1,6 +1,5 @@
 import { Directive, Host, Inject, Input, OnDestroy, OnInit, Optional, Self, SkipSelf, forwardRef } from "@angular/core";
-import { AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
-import { composeAsyncValidators, composeValidators } from "../shared";
+import { AbstractControl, AsyncValidator, AsyncValidatorFn, ControlContainer, FormArray, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NgForm, NgModel, Validator, ValidatorFn } from "@angular/forms";
 import { FormGroupMixin } from "./mixin";
 
 
@@ -31,10 +30,6 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   _parent: ControlContainer;
   @Input('ngModelArray') override name: string|number|null = null;
 
-  _rawValidators!: (ValidatorFn | Validator)[];
-  _rawAsyncValidators!: (AsyncValidatorFn | AsyncValidator)[];
-  _composedValidator!: ValidatorFn | null;
-  _composedAsyncValidator!: AsyncValidatorFn | null;
   form: FormArray;
 
   constructor(
@@ -44,12 +39,11 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
           (AsyncValidator|AsyncValidatorFn)[]) {
     super();
     this._parent = parent;
-    this._setValidators(validators);
-    this._setAsyncValidators(asyncValidators);
 
     this.form = new FormArray<any>([]);
-    this.form.setValidators(this._composedValidator);
-    this.form.setAsyncValidators(this._composedAsyncValidator);
+
+    this.form.setValidators(this.normalizeValidators(validators));
+    this.form.setAsyncValidators(this.normalizeValidators(asyncValidators));
 
     Object.assign(this.form, FormGroupMixin(this.form));
   }
@@ -78,7 +72,10 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
   }
 
   override get path(): string[] {
-    return [...this._parent.path!, this.name!.toString()];
+    if(this._parent.path == null || this.name == null) {
+      throw new Error('Control path or name is null');
+    }
+    return [...this._parent.path, this.name.toString()];
   }
 
   get ngForm(): any {
@@ -105,15 +102,11 @@ export class NgModelArray extends ControlContainer implements OnInit, OnDestroy 
     container?.removeControl(control.name, control.control);
   }
 
-  _setValidators(validators: Array<Validator | ValidatorFn> | undefined): void {
-    this._rawValidators = validators || [];
-    this._composedValidator = composeValidators(this._rawValidators);
-  }
-
-  _setAsyncValidators(validators: Array<AsyncValidator | AsyncValidatorFn> | undefined): void {
-    this._rawAsyncValidators = validators || [];
-    this._composedAsyncValidator = composeAsyncValidators(
-      this._rawAsyncValidators
-    );
+  normalizeValidators(validators: (any | Validator | AsyncValidator)[]): any[] {
+    return (validators || []).map((validator) => {
+      return !(validator as Validator).validate
+        ? validator
+        : (((c: AbstractControl) => (validator as Validator).validate(c)));
+    });
   }
 }

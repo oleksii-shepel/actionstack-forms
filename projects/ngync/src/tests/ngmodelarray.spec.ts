@@ -2,9 +2,9 @@ import { CommonModule } from "@angular/common";
 import { CUSTOM_ELEMENTS_SCHEMA, Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { NgModelArray } from "../lib/template-driven-forms/ngmodelarray";
-import { NgFormsModule } from "../public-api";
-import { FormGroupMixin } from './../lib/template-driven-forms/mixin';
+import { FormGroupMixin } from '../lib/ng-model-array/mixin';
+import { NgModelArray } from "../lib/ng-model-array/ngmodelarray";
+import { NgFormsModule, NgModelArrayModule } from "../public-api";
 
 @Component({
   selector: 'test-component',
@@ -23,7 +23,7 @@ describe('core', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       declarations: [TestComponent],
-      imports: [CommonModule, ReactiveFormsModule, FormsModule, NgFormsModule],
+      imports: [CommonModule, ReactiveFormsModule, FormsModule, NgFormsModule, NgModelArrayModule],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
     });
 
@@ -58,16 +58,16 @@ describe('core', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    FormGroupMixin(directive.form).registerControl('test1', new FormControl('test'));
+    FormGroupMixin(directive.form).registerControl('2', new FormControl('test'));
     FormGroupMixin(directive.form).registerOnChange((_: any) => {});
     FormGroupMixin(directive.form).registerOnDisabledChange((_: any) => {});
     expect(FormGroupMixin(directive.form).contains('2')).toBe(true);
-    FormGroupMixin(directive.form).removeControl('test1');
+    FormGroupMixin(directive.form).removeControl('2');
     expect(FormGroupMixin(directive.form).contains('2')).toBe(false);
 
-    FormGroupMixin(directive.form).addControl('test2', new FormControl('test'));
+    FormGroupMixin(directive.form).addControl('2', new FormControl('test'));
     expect(FormGroupMixin(directive.form).contains('2')).toBe(true);
-    FormGroupMixin(directive.form).removeControl('test2');
+    FormGroupMixin(directive.form).removeControl('2');
     expect(FormGroupMixin(directive.form).contains('2')).toBe(false);
   });
 });

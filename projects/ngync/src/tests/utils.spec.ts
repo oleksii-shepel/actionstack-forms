@@ -1,13 +1,13 @@
-import { boxed, deepClone, deepCloneJSON, deepEqual, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/shared/utils';
+import { boxed, deepClone, deepEqual, deepFreeze, difference, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/ng-forms/utils';
 describe('utils', () => {
   it('should get value', () => {
-    let obj1 = { a: { b: { c: 1 } } };
-    let obj2 = { a: { b: [{c: 1}] } };
-    let obj3 = { a: [{ b: { c: 1 } }] };
-    let obj4 = [ { b: { c: 1 } } ];
-    let obj5 = {a: Object(BigInt(1))};
-    let map = new Map([[Object(1), 'value1'], ['key2', 'value2']]), set = new Set([{a: 1}, {b: 2}, 3, 3]), array: any[] = [], array2 = [1, 2, 3];
-    let obj6 = { s: map, t: set, o: array, p: array2 };
+    const obj1 = { a: { b: { c: 1 } } };
+    const obj2 = { a: { b: [{c: 1}] } };
+    const obj3 = { a: [{ b: { c: 1 } }] };
+    const obj4 = [ { b: { c: 1 } } ];
+    const obj5 = {a: Object(BigInt(1))};
+    const map = new Map([[Object(1), 'value1'], ['key2', 'value2']]), set = new Set([{a: 1}, {b: 2}, 3, 3]), array: any[] = [], array2 = [1, 2, 3];
+    const obj6 = { s: map, t: set, o: array, p: array2 };
 
     expect(getValue(obj1, 'a.b.c')).toEqual(1);
     expect(getValue(obj2, 'a.b.0.c')).toEqual(1);
@@ -23,10 +23,10 @@ describe('utils', () => {
   });
 
   it('should set value', () => {
-    let obj1 = { a: { b: { c: 1 } } };
-    let obj2 = { a: { b: [{c: 1}] } };
-    let obj3 = { a: [{ b: { c: 1 } }] };
-    let obj4 = [ { b: { c: 1 } } ];
+    const obj1 = { a: { b: { c: 1 } } };
+    const obj2 = { a: { b: [{c: 1}] } };
+    const obj3 = { a: [{ b: { c: 1 } }] };
+    const obj4 = [ { b: { c: 1 } } ];
 
     expect(getValue(setValue(obj1, 'a.b.c', 2), 'a.b.c')).toEqual(2);
     expect(getValue(setValue(obj2, 'a.b.0.c', 2), 'a.b.0.c')).toEqual(2);
@@ -35,8 +35,8 @@ describe('utils', () => {
   });
 
   it('should iterate', () => {
-    let obj = { a: 1, b: 2, c: 3 };
-    let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    const obj = { a: 1, b: 2, c: 3 };
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
     expect([...iterable(obj)]).toEqual([1, 2, 3]);
     expect([...iterable(arr)]).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
@@ -44,7 +44,7 @@ describe('utils', () => {
 
   it('should get prop', () => {
     type Obj = { a: number; b: number; c: number; d: {a : number; b: number[]} }
-    let obj: Obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]} };
+    const obj: Obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]} };
 
     expect(prop<Obj>(x => x.a)).toEqual('a');
     expect(prop<Obj>(x => x.b)).toEqual('b');
@@ -54,41 +54,41 @@ describe('utils', () => {
   });
 
   it('should find props', () => {
-    let obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]}, e: BigInt(1), f: false, g: true, h: null, i: undefined, j: NaN, k: Infinity, l: -Infinity, m: '', n: 'a', q: {}, r: {a: 1}}
-    let obj2 = { s: new Map([['key1', 'value1'], ['key2', 'value2']]), t: new Set([1, 2, 3, 3]), o: [], p: [1, 2, 3] };
-    let obj3 = null;
-    let obj4 = undefined;
-    let obj5 = 'string';
-    let obj6 = [1, {a: 1}, {a: {b: 1}}];
+    const obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]}, e: BigInt(1), f: false, g: true, h: null, i: undefined, j: NaN, k: Infinity, l: -Infinity, m: '', n: 'a', q: {}, r: {a: 1}}
+    const obj2 = { s: new Map([['key1', 'value1'], ['key2', 'value2']]), t: new Set([1, 2, 3, 3]), o: [], p: [1, 2, 3] };
+    const obj3 = null;
+    const obj4 = undefined;
+    const obj5 = 'string';
+    const obj6 = [1, {a: 1}, {a: {b: 1}}];
 
-    expect(findProps(obj)).toEqual(['a', 'b', 'c', 'd.a', 'd.b.0', 'd.b.1', 'd.b.2', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'q', 'r.a']);
-    expect(findProps(obj2)).toEqual(['s', 't', 'o', 'p.0', 'p.1', 'p.2']);
+    expect(findProps(obj)).toEqual(['a', 'b', 'c', 'd.a', 'd.b', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'q', 'r.a']);
+    expect(findProps(obj2)).toEqual(['s', 't', 'o', 'p']);
     expect(findProps(obj3)).toEqual([]);
     expect(findProps(obj4)).toEqual([]);
     expect(findProps(obj5)).toEqual([]);
-    expect(findProps(obj6)).toEqual(['0', '1.a', '2.a.b']);
+    expect(findProps(obj6)).toEqual(["0", "1.a", "2.a.b"]);
   });
 
   it('should deep equal', () => {
-    let obj1 = { a: 1, b: 2, c: 3 };
-    let obj2 = { a: 1, b: 2, c: 3 };
-    let obj3 = { a: 1, b: 2, c: 4 };
+    const obj1 = { a: 1, b: 2, c: 3 };
+    const obj2 = { a: 1, b: 2, c: 3 };
+    const obj3 = { a: 1, b: 2, c: 4 };
 
     expect(deepEqual(obj1, obj2)).toEqual(true);
     expect(deepEqual(obj1, obj3)).toEqual(false);
   });
 
   it('should deep clone', () => {
-    let date = new Date();
-    let obj1 = { a: 1, b: 2, c: 3, d: BigInt(12121212), e: date };
-    let obj2 = { a: 1, b: 2, c: 3, d: BigInt(12121212), e: date };
-    let obj3 = { a: 1, b: 2, c: 4, d: BigInt(12121213), e: date };
-    let obj4 = { a: 1, b: 2, c: 4, d: BigInt(12121212), e: new Date() };
-    let obj5 = { a: 1, b: 2, c: 4, d: Object(BigInt(12121212)), e: new Date() };
-    let obj6 = { a: new Map([['key1', 'value1'], ['key2', 'value2']]) };
-    let ref6 = { a: new Map([['key1', 'value1'], ['key2', 'value3'], ]) };
-    let obj7 = { a: new Set([1, 2, 3, 4]) };
-    let ref7 = { a: new Set([1, 2, 3, 5]) };
+    const date = new Date();
+    const obj1 = { a: 1, b: 2, c: 3, d: BigInt(12121212), e: date };
+    const obj2 = { a: 1, b: 2, c: 3, d: BigInt(12121212), e: date };
+    const obj3 = { a: 1, b: 2, c: 4, d: BigInt(12121213), e: date };
+    const obj4 = { a: 1, b: 2, c: 4, d: BigInt(12121212), e: new Date() };
+    const obj5 = { a: 1, b: 2, c: 4, d: Object(BigInt(12121212)), e: new Date() };
+    const obj6 = { a: new Map([['key1', 'value1'], ['key2', 'value2']]) };
+    const ref6 = { a: new Map([['key1', 'value1'], ['key2', 'value3'], ]) };
+    const obj7 = { a: new Set([1, 2, 3, 4]) };
+    const ref7 = { a: new Set([1, 2, 3, 5]) };
 
     expect(deepEqual(deepClone(obj1), obj1)).toEqual(true);
     expect(deepEqual(deepClone(obj2), obj2)).toEqual(true);
@@ -101,27 +101,22 @@ describe('utils', () => {
     expect(deepEqual(deepClone(obj7), ref7)).toEqual(false);
   });
 
-  it('should deep clone json', () => {
-    let obj1 = { a: 1, b: 2, c: 3 };
-    let obj2 = { a: 1, b: 2, c: 3 };
-    let obj3 = { a: 1, b: 2, c: 4 };
+  it('should deep freeze object', () => {
 
-    expect(deepEqual(deepCloneJSON(obj1), obj2)).toEqual(true);
-    expect(deepEqual(deepCloneJSON(obj1), obj3)).toEqual(false);
   });
 
   it('boxed', () => {
-    let obj1 = { a: 1, b: 2, c: 3 };
-    let obj2 = false;
-    let obj3 = BigInt(1);
-    let obj4 = Object(1n);
-    let obj5 = null;
-    let obj6 = undefined;
-    let obj7 = new Date();
-    let obj8 = new RegExp('a');
-    let obj9 = new String('a');
-    let obj10 = true;
-    let obj11 = 1;
+    const obj1 = { a: 1, b: 2, c: 3 };
+    const obj2 = false;
+    const obj3 = BigInt(1);
+    const obj4 = Object(1n);
+    const obj5 = null;
+    const obj6 = undefined;
+    const obj7 = new Date();
+    const obj8 = new RegExp('a');
+    const obj9 = new String('a');
+    const obj10 = true;
+    const obj11 = 1;
 
     expect(boxed(obj1)).toEqual(false);
     expect(boxed(obj2)).toEqual(false);
@@ -138,10 +133,32 @@ describe('utils', () => {
   });
 
   it('intersection', () => {
-    let obj1 = { a: 1, b: 2, c: 3 };
-    let obj2 = { a: 4, b: 5, d: 7 };
+    const obj1 = { a: 1, b: 2, c: 3, e: [1, 2]};
+    const obj2 = { a: 4, b: 5, d: 7, e: [1] };
 
-    expect(intersection(obj1, obj2)).toEqual({ a: 1, b: 2 });
+    expect(intersection(obj1, obj2)).toEqual({ a: 1, b: 2, e: [1, 2] });
   });
 
+  it('should return the difference', () => {
+    const obj1 = { a: 4, b: 5, d: 7, e: [1] };
+    const obj2 = { a: 1, b: 2, c: 3, e: [1, 2]};
+    const obj3 = { a: 1, b: 2, c: 3, e: [2, 2]};
+
+    expect(difference(obj1, obj2)).toEqual({"added": {"c": 3}, "changed": {"a": 1, "b": 2, "e": [1, 2]}, "removed": {"d": 7}} );
+    expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, 2]}});
+  });
+
+  it('should deep freeze an object', () => {
+
+    const obj1 = { a: 1, b: 2, c: 3, e: [1, 2]};
+    const obj2 = { a: 4, b: 5, d: 7, e: [1] };
+
+    const freezed1 = deepFreeze(obj1);
+    const freezed2 = deepFreeze(obj2);
+
+    expect(() => freezed1.a = 2).toThrow(TypeError);
+    expect(() => freezed1.e[0] = 2).toThrow(TypeError);
+    expect(() => freezed2.a = 2).toThrow(TypeError);
+    expect(() => freezed2.e[0] = 2).toThrow(TypeError);
+  });
 });

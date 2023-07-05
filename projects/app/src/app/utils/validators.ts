@@ -73,7 +73,7 @@ export function mergeErrors(
 ): ValidationErrors | null {
   let res: { [key: string]: any } = {};
   arrayOfErrors.forEach((errors: ValidationErrors | null) => {
-    res = errors != null ? { ...res!, ...errors } : res!;
+    res = errors != null ? { ...res, ...errors } : res;
   });
 
   return Object.keys(res).length === 0 ? null : res;

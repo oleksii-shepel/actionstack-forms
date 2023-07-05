@@ -2,5 +2,6 @@
  * Public API Surface of ngrx/forms
  */
 
-export * from './shared'
-export * from './template-driven-forms'
+export * from './ng-forms'
+export * from './ng-model-array'
+

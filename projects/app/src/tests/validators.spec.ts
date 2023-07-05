@@ -10,7 +10,7 @@ import {
 import { Observable, of } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { GenericValidatorFn, composeAsyncValidators, composeValidators, executeValidators, isPromise, isValidatorFn, mergeErrors, mergeValidators, normalizeValidators, toObservable } from '../lib/shared/validators';
+import { GenericValidatorFn, composeAsyncValidators, composeValidators, executeValidators, isPromise, isValidatorFn, mergeErrors, mergeValidators, normalizeValidators, toObservable } from '../app/utils/validators';
 
 function validator(key: string, error: any): ValidatorFn {
   return (c: AbstractControl) => {

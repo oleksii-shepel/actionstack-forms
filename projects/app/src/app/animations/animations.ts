@@ -21,3 +21,14 @@ export const messenger = trigger('messenger', [
     animate('0.5s', style({ opacity: 0 })),
   ]),
 ])
+
+export const walter = trigger('walter', [
+  transition('void => *', [
+    style({ transform: 'translateX(100%)' }),
+    animate('0.5s', style({ transform: 'translateX(0)' })),
+  ]),
+  transition('* => void', [
+    style({ transform: 'translateX(0)', display: 'block' }),
+    animate('0.5s', style({ transform: 'translateX(100%)', display: 'none' })),
+  ]),
+])

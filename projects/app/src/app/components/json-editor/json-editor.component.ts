@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { deepEqual, difference, findProps, getValue } from 'ngync';
+import { BehaviorSubject, sampleTime } from 'rxjs';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
 
@@ -11,24 +12,26 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 export class JsonEditorComponent implements OnChanges {
   JSON = JSON;
   changes = "";
+  changes$ = new BehaviorSubject<string>(this.changes);
+  changesWithDelay$ = this.changes$.pipe(sampleTime(150));
 
   @Input() data: any = {};
   @Input() collapsed = true;
   @Output() collapsedChange = new EventEmitter<boolean>();
 
   ngOnChanges(changes: SimpleChanges) {
-    let previousValue = {...(changes['data']?.previousValue ?? {}), action: null};
-    let currentValue = {...(changes['data']?.currentValue ?? {}), action: null};
+    const previousValue = changes['data']?.previousValue ?? {};
+    const currentValue = changes['data']?.currentValue ?? {};
 
     if(deepEqual(previousValue, currentValue)) { return; }
 
-    let diff = difference(previousValue, currentValue);
+    const diff = difference(previousValue, currentValue);
     let changedProperties = "";
 
     if(diff.changed) {
       changedProperties = "Changed: ";
-      let props = findProps(diff.changed);
-      for(let prop of props) {
+      const props = findProps(diff.changed);
+      for(const prop of props) {
         changedProperties += `<b>${prop}</b> (${getValue(diff.changed, prop)}), `;
       }
       changedProperties = changedProperties.replace(/, $/, "<br/>");
@@ -36,13 +39,13 @@ export class JsonEditorComponent implements OnChanges {
 
     if (diff.removed) {
       changedProperties += "Removed: ";
-      Object.keys(diff.removed).forEach(x => changedProperties += `<b>${x}</b>, `);
+      findProps(diff.removed).forEach(x => changedProperties += `<b>${x}</b>, `);
       changedProperties = changedProperties.replace(/, $/, "<br/>");
     }
 
     if(diff.added) {
       changedProperties += "Added: ";
-      Object.keys(diff.added).forEach(x => changedProperties += `<b>${x}</b>, `);
+      findProps(diff.added).forEach(x => changedProperties += `<b>${x}</b>, `);
       changedProperties = changedProperties.replace(/, $/, "<br/>");
     }
 
@@ -50,6 +53,7 @@ export class JsonEditorComponent implements OnChanges {
 
     this.changes = `<span>${changedProperties}</span>`;
     this.data = changes['data'].currentValue;
+    this.changes$.next(this.changes);
   }
 
   toggle(collapsed: boolean) {

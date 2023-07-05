@@ -1,5 +1,6 @@
-import { ActionReducer } from '@ngrx/store';
+import { ActionReducer, createAction, createSelector, props } from '@ngrx/store';
 import { environment } from '../../environments/environment';
+import { HeroPage, ModelPage, ProfilePage, initialHeroPage, initialModelPage, initialProfilePage } from './../models/profile';
 
 /**
  * The compose function is one of our most handy tools. In basic terms, you give
@@ -35,6 +36,7 @@ import { combineReducers } from '@ngrx/store';
  * the state of the reducer plus any selector functions. The `* as`
  * notation packages up all of the exports into a single object.
  */
+import { getValue, setValue } from 'ngync';
 import * as fromHero from './hero.reducer';
 import * as fromProfile from './profile.reducer';
 import * as fromStandard from './standard.reducer';
@@ -45,15 +47,15 @@ import * as fromStandard from './standard.reducer';
  * our top level state interface is just a map of keys to inner state types.
  */
 export interface ApplicationState {
-  profile: fromProfile.ProfileState;
-  hero: fromHero.HeroState;
-  model: fromStandard.ModelState;
+  profile: ProfilePage;
+  hero: HeroPage;
+  model: ModelPage;
 }
 
 export const initialState: ApplicationState = {
-  profile: fromProfile.initialState,
-  hero: fromHero.initialState,
-  model: fromStandard.initialState,
+  profile: initialProfilePage,
+  hero: initialHeroPage,
+  model: initialModelPage,
 }
 
 /**
@@ -72,13 +74,32 @@ const reducers = {
 const developmentReducer: ActionReducer<ApplicationState> = compose(storeFreeze, combineReducers)(reducers);
 const productionReducer: ActionReducer<ApplicationState> = combineReducers(reducers);
 
+export const global = () => (reducer: ActionReducer<any>): any => {
+  return (state: any, action: any) => {
+    let newState = reducer(state, action);
+
+    if(action.type === '@ngrx/store/slice/property/update') {
+      newState = setValue(newState, `${action.path}.${action.property}`, action.value);
+    }
+
+    return newState;
+  }
+}
+
 export function reducer(state = initialState, action: any) {
+
   if (environment.production) {
     // suppress console output
-    console.log = function () {};
+    console.log = function () { Function.prototype };
+
     return productionReducer(state, action);
+
   } else {
     return developmentReducer(state, action);
   }
 
 }
+
+export const selectSlice = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
+export const selectProperty = (slice: string, property: string) => createSelector((state: any) => getValue(state, `${slice}.${property}`), state => state);
+export const UpdateProperty = createAction('@ngrx/store/slice/property/update', props<{ path: string; property: string; value: any; }>());

@@ -1,10 +1,10 @@
 import { Validators } from '@angular/forms';
-import { buildForm, checkForm } from '../lib/shared/builder';
-import { ModelOptions } from '../lib/shared/types';
+import { buildForm } from '../../../app/src/app/utils/builder';
+import { FormOptions } from '../../../app/src/app/utils/types';
 
 describe('builder', () => {
   it('should build form', () => {
-    let model = {
+    const model = {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@contoso.com',
@@ -17,7 +17,7 @@ describe('builder', () => {
       aliases: ['Johny', 'Johnny'],
     };
 
-    let modelOptions: ModelOptions<typeof model> = {
+    const modelOptions: FormOptions<typeof model> = {
       __group: {},
       firstName: {validators: Validators.required},
       lastName: {validators: Validators.required},
@@ -36,13 +36,12 @@ describe('builder', () => {
       },
     };
 
-    let form = buildForm(model, modelOptions);
+    const form = buildForm(model, modelOptions);
 
     expect(form.value).toEqual(model);
-    expect(checkForm(form, model)).toEqual(true);
   });
   it('should build form array', () => {
-    let model = [{
+    const model = [{
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@contoso.com',
@@ -66,7 +65,7 @@ describe('builder', () => {
       aliases: ['Janey', 'Janie'],
     }];
 
-    let modelOptions: ModelOptions<typeof model> = {
+    const modelOptions: FormOptions<typeof model> = {
       __group: {},
       '0': {
         __group: {},
@@ -106,9 +105,7 @@ describe('builder', () => {
       }
     };
 
-    let form = buildForm(model, modelOptions);
-
+    const form = buildForm(model, modelOptions);
     expect(form.value).toEqual(model);
-    expect(checkForm(form, model)).toEqual(true);
   });
 });

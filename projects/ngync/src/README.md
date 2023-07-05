@@ -1,7 +1,7 @@
 <h1>ngync</h1>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/ngync/src/maskot.svg" alt="ngync" width="250"/>
+  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/ngync/src/maskot.png" alt="ngync" width="250"/>
 </p>
 
   ![npm version](https://badge.fury.io/js/ngync.svg)
@@ -15,7 +15,7 @@
 
 </p>
 <p align="justify">
-<b>ngync</b> is a lightweight javascript library that helps to integrate Angular forms into NgRx store easily. You can forget the nightmare of doing it on your own. And all your knowledge of mastering Angular forms is also applicable in a proposed solution. Binding forms with the store with almost no efforts, isn't that delightful? No need of dispatching actions and writing reducers, no need of creating selectors in usual scenarios. Without further ado, all of this is already done by ngync.
+<b>ngync</b> is a lightweight JavaScript library designed to facilitate the integration of Angular forms with the NgRx store. It aims to simplify the developing process by taking care of keeping states in sync what can be challenging when done manually. One of the key benefits of using ngync is that it enables form binding with the store effortlessly. This means that you don't have to go through the usual hassle of dispatching actions, writing reducers, or creating selectors. The library takes care of these tasks for you, eliminating the need for additional code and reducing the effort required. The library allows you to leverage your existing knowledge of working with Angular forms, no additional knowledge required.
 </p>
 <p align="justify">
 <a href="https://ngrx.io/">NgRx</a> is a state management library tailor-made for Angular applications, granting you the extraordinary ability to fashion software. Inspired by the renowned Redux, NgRx harnesses the power of a single source of truth, empowering you to disentangle concerns and navigate through debugging with unparalleled ease. Prepare to unlock a world of enhanced application development possibilities with NgRx at your side!
@@ -48,9 +48,12 @@ export interface NgyncConfig {
   slice: string;
   debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
+  enableQueue?: boolean;
 }
 ```
-
+<p align="justify">
+<i>*** I highly recommend you to enable the action queue as it is made by default. It is a new feature of ngync that will save you a lot of time and efforts by developing. The option is appropriate not only for setting the correct initialization order, it also fixes an issue related to action dispatching internals. I mean the dispatching of actions from an incorrect context. For some reason ActionsSubject instance within NgRx store does not propagate such actions to their subscribers, even if reducer handles them as usual. The issue itself has a solution, but it is not emphasized.</i>
+</p>
 <p align="justify">
 Additionally, you have to import ngync module to your application and set up meta-reducers. They are core functions that orchestrate all main functionality of the library. Before reaping the benefits of their power, these components must be registered with the NgRx store module. Don't worry, it's just another pint-sized prerequisite. Once registered, they take charge of handling the Redux action set, relieving you from the burden of implementing repetitive boilerplate functionality time and again.
 </p>
@@ -59,7 +62,7 @@ The code snippet of main NgModule shows how the import looks like:
 </p>
 
 ```typescript
-import { NgFormsModule, SharedModule, forms } from 'ngync';
+import { NgFormsModule, NgModelArrayModule, forms, logger } from 'ngync';
 
 @NgModule({
   declarations: [
@@ -69,9 +72,10 @@ import { NgFormsModule, SharedModule, forms } from 'ngync';
     BrowserModule,
     ReactiveFormsModule,
     FormsModule,
-    SharedModule,
+    NgFormsModule,
+    NgModelArrayModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [forms(initialState)]
+      metaReducers: [logger({showOnlyModifiers: true}), forms(initialState)]
     }),
 
     NgFormsModule
@@ -82,7 +86,7 @@ export class AppModule { }
 ```
 
 <p align="justify">
-Behold, we now unveil a formidable forms meta-reducer that works tirelessly to synchronize the form state with the mighty NgRx store. The beloved logger meta-reducer we once cherished is no longer readily available. But it is still used internally, silently serving its purpose. To invoke its power, you need to pass a true value as the second parameter to the forms function. This is due to the fact that actions are queued and the order of their execution differs from the sequence of their dispatch.
+Behold, we now unveil a formidable forms meta-reducer that works tirelessly to synchronize the form state with the mighty NgRx store. The beloved logger meta-reducer we once cherished is turned to life. It is extended with the new action filters and is fully ready for serving its purpose.
 </p>
 <p align="justify">
 That's it, with all the settings in place, your form is now synchronized with the store. It's time to embark on an exciting journey and delve into the exploration of internal processes.
@@ -91,15 +95,13 @@ That's it, with all the settings in place, your form is now synchronized with th
 By default, ngync will generate tracing actions every time user enters the data in the form. They have to be displayed in console of your browser. This behavior can be changed by passing on a special updateOn attribute to the directive. It can take one of three values: 'change', 'blur' or 'submit'. The tracing actions will be generated respectively every time user enters the data, when user leaves one of the form fields or when entire form is submitted or to be submitted.
 </p>
 <p align="justify">
-If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. Sync directive is pretty smart and can initialize form controls automatically if the state is present in the store and also it can notice form submitting. However, if you are determined to dispatch actions by yourself, feel free to proceed without any hesitation. There are five actions supported by ngync right out of the box. In my opinion, the names are self-explanatory, and you can find the parameter list for each action in the library's source code. Here is a condensed list of actions (note that there are additional actions available, but it's crucial to understand their functionality before utilizing them):
+If you may probably noticed, you do not must to dispatch any actions to the store. All the work is done by ngync behind the scenes. Sync directive is pretty smart and can initialize form controls automatically if the state is present in the store and also it can notice form submitting event. However, if you are determined to dispatch actions by yourself, feel free to proceed without any hesitation. There are three actions supported by ngync right out of the box. Their names are self-explanatory, and you can find the parameter list for each action in the library's source code. Here is a condensed list of actions (note that there are additional actions available, but it's crucial to understand their influence before utilizing them):
 </p>
 
 ```typescript
 export enum FormActions {
-  InitForm = '[Form] Init Form',
   UpdateForm = '[Form] Update Form',
-  UpdateSubmitted = '[Form] Update Submitted',
-  UpdateModelProperty = '[Form] Update Model',
+  UpdateField = '[Form] Update Form Field',
   ResetForm = '[Form] Reset Form'
 }
 ```

@@ -1,11 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateForm, UpdateProperty, deepClone, selectSlice, selectValue } from 'ngync';
+import { deepClone, selectFormCast } from 'ngync';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
-import { initialModel } from '../../models/profile';
-import { ApplicationState } from '../../reducers';
+import { initialModelPage } from '../../models/profile';
+import { ApplicationState, UpdateProperty, selectSlice } from '../../reducers';
 
 @Component({
   selector: 'standard-profile-editor',
@@ -15,21 +15,22 @@ import { ApplicationState } from '../../reducers';
   animations: [occurence]
 })
 export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('heroForm') form: NgForm | null = null;
+  @ViewChild('modelForm') form: NgForm | null = null;
 
   @Input() caption = '';
   @Output() messenger = new EventEmitter<boolean>();
 
   profile$!: Observable<any>;
   slice = "model";
-  model = initialModel;
+  formCast = "model.form";
+  model = initialModelPage.form.value;
 
   a: any; b: any;
 
-  _collapsed: boolean = true;
+  _collapsed = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateProperty({value: value, path: `${this.slice}::collapsed`}));
+    this.store.dispatch(UpdateProperty({value: value, path: this.slice, property: 'collapsed'}));
   }
 
   get collapsed() {
@@ -41,14 +42,14 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   async ngAfterViewInit() {
 
-    let state = await firstValueFrom(this.store.select(selectValue(this.slice)));
+    const state = await firstValueFrom(this.store.select(selectFormCast(this.formCast)));
 
-    this.model = state ? deepClone(state) : initialModel;
+    this.model = state ? deepClone(state.value) : initialModelPage.form.value;
     this.collapsed = true;
 
     this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
-    let scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
+    const scrollable = this.elementRef.nativeElement.querySelector('.scrollable');
     this.b = merge(fromEvent(window, 'resize'), fromEvent(scrollable, 'scroll')).subscribe((e: any) => {
       scrollable.style.height = window.innerHeight - scrollable.offsetTop - 60 + 'px';
     });
@@ -58,7 +59,6 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   addAlias() {
     this.model.aliases.push('');
-    this.store.dispatch(UpdateForm({value: this.model, path: "hero"}));
   }
 
   trackById(index: number, obj: string): any {

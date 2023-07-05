@@ -12,4 +12,4 @@ import { NgModelArray, moduleFactory } from './ngmodelarray';
     multi: true
   }]
 })
-export class NgFormsModule {}
+export class NgModelArrayModule {}
