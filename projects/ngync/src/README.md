@@ -136,6 +136,31 @@ Here is an example of how to combine it with ngModels instances seamlessly:
 <p align="justify">
 For more information about ngModelArray, see the <a href="https://angular.io/api/forms/NgModelArray">documentation</a>. Just a jest!
 </p>
+<h2>Versions</h2>
+<table>
+  <tr>
+    <th>Type</th>
+    <th>Minor Version</th>
+    <th>Features</th>
+  </tr>
+  <tr>
+    <td>Mini</td>
+    <td>1.1.*</td>
+    <td>forms, sync, formValue, utils</td>
+  </tr>
+  <tr>
+    <td>Medium</td>
+    <td>1.2.*</td>
+    <td>forms, logger, formCast, sync, utils, ngmodelarray</td>
+  </tr>
+  <tr>
+    <td>Large</td>
+    <td>1.3.*</td>
+    <td>forms, logger, formCast, sync, utils, ngmodelarray, action queueing</td>
+  </tr>
+</table>
+<h2>Conclusion</h2>
 <p align="justify">
-I sincerely hope that your experience with <b>ngync</b> brings you great joy and empowers you to develop highly robust and maintainable applications. Embrace the knowledge that the journey has just begun, and there are even greater advancements on the horizon. State management can indeed be made effortless. Stay tuned, as there's much more to come!</p>
+I sincerely hope that your experience with <b>ngync</b> brings you great joy and empowers you to develop highly robust and maintainable applications. Embrace the knowledge that the journey has just begun, and there are even greater advancements on the horizon. State management can indeed be made effortless. Stay tuned, as there's much more to come!
+</p>
 
