@@ -146,17 +146,17 @@ For more information about ngModelArray, see the <a href="https://angular.io/api
   <tr>
     <td>Mini</td>
     <td>1.1.*</td>
-    <td>forms, sync, formValue, utils</td>
+    <td>forms, sync, formValue, utils, builder</td>
   </tr>
   <tr>
     <td>Medium</td>
     <td>1.2.*</td>
-    <td>forms, logger, formCast, sync, utils, ngmodelarray</td>
+    <td>forms, logger, formCast, sync, utils, builder, ngmodelarray</td>
   </tr>
   <tr>
     <td>Large</td>
     <td>1.3.*</td>
-    <td>forms, logger, formCast, sync, utils, ngmodelarray, action queueing</td>
+    <td>forms, logger, formCast, sync, utils, builder, ngmodelarray, action queueing</td>
   </tr>
 </table>
 <h2>Conclusion</h2>
