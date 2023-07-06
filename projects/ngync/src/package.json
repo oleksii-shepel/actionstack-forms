@@ -1,6 +1,6 @@
 {
   "name": "ngync",
-  "version": "1.2.29",
+  "version": "1.2.30,
   "description": "Forms Module for NgRx store",
   "license": "MIT",
   "keywords": [ "NgRx", "Angular", "forms", "reactive", "template-driven", "sync", "ngync", "store", "ngModelArray"],
