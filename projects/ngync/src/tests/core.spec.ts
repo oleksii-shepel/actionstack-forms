@@ -42,12 +42,14 @@ describe('core', () => {
       }).createComponent(TestComponent);
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+
+      jest.useFakeTimers();
+      fixture.detectChanges();
+
       directive.slice = 'slice';
       directive.enableQueue = false;
       actionQueues.clear();
 
-      jest.useFakeTimers();
-      fixture.detectChanges();
       await fixture.whenStable();
     });
 
@@ -370,11 +372,13 @@ describe('core', () => {
       }).createComponent(TestComponent);
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
-      directive.slice = 'slice';
       actionQueues.clear();
 
       jest.useFakeTimers();
       fixture.detectChanges();
+
+      directive.slice = 'slice';
+
       await fixture.whenStable();
     });
 

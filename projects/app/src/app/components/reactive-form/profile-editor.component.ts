@@ -2,10 +2,10 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBind
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, fromEvent, merge, shareReplay } from 'rxjs';
+import { buildForm } from '../../../../../ngync/src/lib/ng-forms/builder';
 import { occurence } from '../../animations/animations';
 import { initialProfilePage, profileOptions } from '../../models/profile';
 import { UpdateProperty, selectSlice } from '../../reducers';
-import { buildForm } from '../../utils/builder';
 
 
 @Component({
