@@ -7,7 +7,7 @@
       <button type="button" (click)="toggleEditor('standard')">Template-Driven Form</button>
       <button type="button" id="messages" (click)="readMessages()" [disabled]="!text.length">Snoozed Messages<i *ngIf="text.length">{{text.length}}</i></button>
     </div>
-    <div>
+    <div class="description">
       <h1>Angular Forms powered by<a href="https://www.npmjs.com/package/ngync">ngync library</a>™</h1>
       <img class="maskot" src="maskot.png" alt="ngync" width="100"/>
     </div>
