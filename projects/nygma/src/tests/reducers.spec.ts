@@ -47,7 +47,7 @@ describe('reducers', () => {
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({split: "slice", property: "email", value: model.email}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({split: "slice::email", value: model.email}));
     expected = deepClone(initialState); (expected as any)['slice'].value = model;
     expect(newState).toEqual(expected);
 

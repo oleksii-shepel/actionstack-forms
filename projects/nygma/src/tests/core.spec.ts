@@ -42,12 +42,14 @@ describe('core', () => {
       }).createComponent(TestComponent);
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
+
+      jest.useFakeTimers();
+      fixture.detectChanges();
+
       directive.split = 'slice';
       directive.enableQueue = false;
       actionQueues.clear();
 
-      jest.useFakeTimers();
-      fixture.detectChanges();
       await fixture.whenStable();
     });
 
@@ -70,11 +72,11 @@ describe('core', () => {
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
     it('should dispatch check status after AutoInit action', async() => {
-      const auto = jest.fn();
-      subs.a = directive.initialized$.subscribe(auto);
-
       const stub = jest.fn();
       subs.b = directive.onStatusChanges$.subscribe(stub);
+
+      const auto = jest.fn();
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -370,11 +372,13 @@ describe('core', () => {
       }).createComponent(TestComponent);
 
       directive = fixture.debugElement.children[0].injector.get(SyncDirective);
-      directive.split = 'slice';
       actionQueues.clear();
 
       jest.useFakeTimers();
       fixture.detectChanges();
+
+      directive.split = 'slice';
+
       await fixture.whenStable();
     });
 
@@ -397,11 +401,11 @@ describe('core', () => {
       expect(directive.updateOn).toBe(NGYNC_CONFIG_DEFAULT.updateOn);
     });
     it('should dispatch check status after AutoInit action', async() => {
-      const auto = jest.fn();
-      subs.a = directive.initialized$.subscribe(auto);
-
       const stub = jest.fn();
       subs.b = directive.onStatusChanges$.subscribe(stub);
+
+      const auto = jest.fn();
+      subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();

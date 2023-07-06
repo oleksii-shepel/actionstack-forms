@@ -15,12 +15,17 @@ export interface FormCast<T> {
 
 
 
-export const selectFormCast = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
-export const selectValue = (slice: string) => createSelector(selectFormCast(slice), state => state?.value);
-export const selectErrors = (slice: string) => createSelector(selectFormCast(slice), state => state?.errors);
-export const selectDirty = (slice: string) => createSelector(selectFormCast(slice), state => state?.dirty);
-export const selectStatus = (slice: string) => createSelector(selectFormCast(slice), state => state?.status);
-export const selectSubmitted = (slice: string) => createSelector(selectFormCast(slice), state => state?.submitted);
+export const selectFormCast = (split: string) => {
+  const location = split.split('::');
+  return (location.length > 1) ?
+    createSelector((state: any) => state[location[0]], state => state[location[1]]) :
+    createSelector((state: any) => state[location[0]], state => state)
+};
+export const selectValue = (split: string) => createSelector(selectFormCast(split), state => state?.value);
+export const selectErrors = (split: string) => createSelector(selectFormCast(split), state => state?.errors);
+export const selectDirty = (split: string) => createSelector(selectFormCast(split), state => state?.dirty);
+export const selectStatus = (split: string) => createSelector(selectFormCast(split), state => state?.status);
+export const selectSubmitted = (split: string) => createSelector(selectFormCast(split), state => state?.submitted);
 
 
 
@@ -42,15 +47,14 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
     state = state ?? deepClone(initialState);
     let nextState = state;
-    const split = action?.split?.split('::');
+    const split = action.split?.split('::');
     const slice = split?.[0];
 
-    if(split.length > 1) {
-      let formCast = getValue(nextState[slice], split[1]);
+    if(split?.length >= 1) {
+      nextState = reducer(state, action);
+      let formCast = split[1] ? getValue(nextState[slice], split[1]) : nextState[slice];
 
-      if(!actionQueues.has(slice) || action.deferred) {
-
-        nextState = reducer(state, action);
+      if(!actionQueues.has(action.split) || action.deferred) {
 
         switch(action.type) {
           case FormActions.UpdateForm:
@@ -82,10 +86,10 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
             break;
         }
 
-        nextState[slice] = setValue(nextState[slice], split[1], formCast)
+        nextState = {...nextState, slice: split[1] ? setValue(nextState[slice], split[1], formCast) : formCast};
         return nextState;
       } else {
-        const queue = actionQueues.get(slice) as Queue<Action>;
+        const queue = actionQueues.get(action.split) as Queue<Action>;
         const type = queue.peek()?.type;
 
         if(!queue.initialized$.value) {
