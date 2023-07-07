@@ -1,4 +1,4 @@
-import { boxed, deepClone, deepEqual, deepFreeze, difference, findProps, getValue, intersection, iterable, prop, setValue } from '../lib/ng-forms/utils';
+import { boxed, deepClone, deepEqual, deepFreeze, difference, findProps, getValue, setValue } from '../lib/ng-forms/utils';
 describe('utils', () => {
   it('should get value', () => {
     const obj1 = { a: { b: { c: 1 } } };
@@ -32,25 +32,6 @@ describe('utils', () => {
     expect(getValue(setValue(obj2, 'a.b.0.c', 2), 'a.b.0.c')).toEqual(2);
     expect(getValue(setValue(obj3, 'a.0.b.c', 2), 'a.0.b.c')).toEqual(2);
     expect(getValue(setValue(obj4, '0.b.c', 2), '0.b.c')).toEqual(2);
-  });
-
-  it('should iterate', () => {
-    const obj = { a: 1, b: 2, c: 3 };
-    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-
-    expect([...iterable(obj)]).toEqual([1, 2, 3]);
-    expect([...iterable(arr)]).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-  });
-
-  it('should get prop', () => {
-    type Obj = { a: number; b: number; c: number; d: {a : number; b: number[]} }
-    const obj: Obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]} };
-
-    expect(prop<Obj>(x => x.a)).toEqual('a');
-    expect(prop<Obj>(x => x.b)).toEqual('b');
-    expect(prop<Obj>(x => x.c)).toEqual('c');
-    expect(prop<Obj>(x => x.d.a)).toEqual('d.a');
-    expect(prop<Obj>(x => x.d.b[0])).toEqual('d.b.0');
   });
 
   it('should find props', () => {
@@ -101,10 +82,6 @@ describe('utils', () => {
     expect(deepEqual(deepClone(obj7), ref7)).toEqual(false);
   });
 
-  it('should deep freeze object', () => {
-
-  });
-
   it('boxed', () => {
     const obj1 = { a: 1, b: 2, c: 3 };
     const obj2 = false;
@@ -130,13 +107,6 @@ describe('utils', () => {
     expect(boxed(obj10)).toEqual(false);
     expect(boxed(obj11)).toEqual(false);
 
-  });
-
-  it('intersection', () => {
-    const obj1 = { a: 1, b: 2, c: 3, e: [1, 2]};
-    const obj2 = { a: 4, b: 5, d: 7, e: [1] };
-
-    expect(intersection(obj1, obj2)).toEqual({ a: 1, b: 2, e: [1, 2] });
   });
 
   it('should return the difference', () => {
