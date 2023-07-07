@@ -22,12 +22,12 @@ const formControlBinding: Provider = {
   [{provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true}]
 ], exportAs: 'ngField'})
 export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgControl {
-  @Input("ngField") override name!: string;
+  @Input("ngField") override name = '';
   @Output('ngFieldChange') override update = new EventEmitter();
 
   override control: FormControl<string | null>;
   override valueAccessor: ControlValueAccessor | null;
-  override viewModel: any;
+  override viewModel: any = undefined;
 
   _parent: ControlContainer;
   _ngStore: SyncDirective;
@@ -63,15 +63,22 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this.control.setAsyncValidators(this._composedAsyncValidator);
 
     this.control.setParent(this.formDirective.control);
+
+    Object.assign(this, {
+      _checkForErrors: () => { Function.prototype },
+      _checkParentType: () => { Function.prototype },
+      _checkName: () => { Function.prototype }
+    })
   }
 
   onChange(value: any) {
+    (this.valueAccessor as DefaultValueAccessor)?.onChange(value);
     this.control.setValue(value);
-    this.control.updateValueAndValidity();
     this.viewToModelUpdate(value);
   }
 
   onTouched() {
+    (this.valueAccessor as DefaultValueAccessor)?.onTouched();
     this.control.markAsTouched();
   }
 
@@ -88,11 +95,13 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this._ngStore?.store.select((state: any) => state).pipe(
       distinctUntilChanged(),
       takeUntil(this._destroyed$),
-      map(state => selectForm(this._ngStore.slice)(state).model))
+      map(state => selectForm(this._ngStore.slice)(state)))
     .subscribe((model: any) => {
       const value = getValue(model, this.path.join('.'));
-      this.valueAccessor?.writeValue(value);
-      this.control.setValue(value);
+      if(value !== this.control.value) {
+        this.valueAccessor?.writeValue(value);
+        this.control.setValue(value);
+      }
     });
 
     this.formDirective.addControl(this);

@@ -1,23 +1,30 @@
 import {
-  AfterViewInit,
+  AfterContentInit,
   ChangeDetectorRef,
+  ContentChildren,
   Directive,
   ElementRef,
   Inject,
   Injector,
   Input,
   OnDestroy,
+  OnInit,
   Optional,
+  QueryList,
   Self
 } from '@angular/core';
-import { FormGroupDirective, NgForm } from '@angular/forms';
+import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
+  asyncScheduler,
   sampleTime,
+  scan,
+  startWith,
   take, takeWhile, tap
 } from 'rxjs';
 import { UpdateForm } from './actions';
 import { selectForm } from './reducer';
+import { setValue } from './utils';
 
 
 @Directive({
@@ -25,13 +32,20 @@ import { selectForm } from './reducer';
     'form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]',
   exportAs: 'ngync',
 })
-export class SyncDirective implements AfterViewInit, OnDestroy {
+export class SyncDirective implements OnInit, AfterContentInit, OnDestroy {
   @Input('ngync') slice!: string;
+  @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   dir: NgForm | FormGroupDirective;
   debounceTime = 100;
 
   _subs = {} as any;
+
+  inputCallback = (control: NgControl) => (value : any) => {
+    if(control.path) {
+      this.dir.form.patchValue(setValue(this.dir.form.value, control.path.join('.'), value));
+    }
+  }
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -42,7 +56,7 @@ export class SyncDirective implements AfterViewInit, OnDestroy {
     this.dir = injector.get(FormGroupDirective, null) ?? (injector.get(NgForm, null) as any);
   }
 
-  ngAfterViewInit() {
+  ngOnInit() {
     if (!this.slice) {
       throw new Error('Misuse of sync directive');
     }
@@ -64,6 +78,38 @@ export class SyncDirective implements AfterViewInit, OnDestroy {
       takeWhile(() => document.contains(this.elRef.nativeElement)),
       tap((value) => this.store.dispatch(UpdateForm({ path: this.slice, value: value })))
     ).subscribe();
+  }
+
+  ngAfterContentInit() {
+    asyncScheduler.schedule(() => {
+      this._subs.c = this.controls.changes.pipe(startWith(this.controls)).pipe(
+        scan((acc, _) => acc + 1, 0),
+        tap(() => {
+          this.controls.forEach((control: NgControl) => {
+            if(control.valueAccessor) {
+              control.valueAccessor.registerOnChange(this.inputCallback(control));
+            }
+          });
+        }),
+        tap((value) => { if (value > 1) { this.dir.form.patchValue(this.formValue); this.cdr.detectChanges(); } }),
+      ).subscribe();
+    })
+  }
+
+  get formValue(): any {
+    if(!this.controls) { return {}; }
+
+    let value = {};
+    for (const control of this.controls.toArray()) {
+      if(control.path) {
+        value = setValue(value, control.path.join('.'), control.value);
+      }
+    }
+    return value;
+  }
+
+  get formStatus(): FormControlStatus {
+    return this.dir.form.status;
   }
 
   ngOnDestroy() {
