@@ -3,7 +3,7 @@
   img.gunshot {
     display: none;
     position: absolute;
-    content:url(../../../assets/bullet-hole.png);
+    content: url(../../../assets/bullet-hole.png);
     width: 50px;
   }
 
@@ -19,23 +19,73 @@
     width: 150px;
     height: 150px;
     perspective: 1000px;
+    overflow: hidden;
     z-index: 99;
-
-    & .flip-card-front img {
-      display: block;
-      content:url(../../../assets/target.png);
-      width: 50%;
-      height: 50%;
-    }
+    border-radius: 1em;
+    box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.25),
+      0 0.02125em 0.06125em rgba(0, 0, 0, 0.25);
   }
 
-  .flip-card-inner {
+  .flip-card .flip-card-front img {
+    display: block;
+    content: url(../../../assets/target.png);
+    width: 50%;
+    height: 50%;
+  }
+
+  .flip-card .flip-card-front img.gunshot {
+    display: block;
+    content: url(../../../assets/bullet-hole.png);
+    width: 50%;
+    height: 50%;
+  }
+
+  .flip-card .flip-card-inner {
     position: relative;
     width: 100%;
     height: 100%;
     text-align: center;
-    transition: transform 0.8s;
+    transition: transform 0.7s;
     transform-style: preserve-3d;
+  }
+
+  .flip-card-front {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 1em;
+    width: 100%;
+    height: 100%;
+    transform-origin: bottom;
+    transform: rotateX(180deg);
+    z-index: 100;
+
+    background: transparent linear-gradient(180deg, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.4));
+    transition: 0.7s ease-in-out transform;
+    animation: show 1s ease-in-out forwards;
+  }
+
+  .flip-card-back {
+    display: none;
+    & img {
+      background-color: whitesmoke;
+      display: block;
+      content: url(../../../assets/target-missed.svg);
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  @keyframes show {
+    0% {
+      background-color: transparent;
+      transform: rotateX(180deg);
+    }
+
+    100% {
+      background-color: whitesmoke;
+      transform: rotateX(0);
+    }
   }
 
   .flip-card.hit {
@@ -53,7 +103,7 @@
 
       & img {
         display: block;
-        content:url(../../../assets/target-hit.svg);
+        content: url(../../../assets/target-hit.svg);
         width: 100%;
         height: 100%;
       }
@@ -75,14 +125,15 @@
 
       & img {
         display: block;
-        content:url(../../../assets/target-missed.svg);
+        content: url(../../../assets/target-missed.svg);
         width: 100%;
         height: 100%;
       }
     }
   }
 
-  .flip-card-front, .flip-card-back {
+  .flip-card-front,
+  .flip-card-back {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -113,17 +164,18 @@
     & .statistics {
       background-color: beige;
       padding: 10px;
-      border-top-left-radius: 2px;
-      border-bottom-left-radius: 2px;
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
     }
 
-    & h1, h3 {
+    & h1,
+    h3 {
       margin: 0;
     }
 
     & button {
       height: calc(100% - 18px);
-      border-radius: 2px;
+      border-radius: 5px;
       margin: 0;
     }
 
@@ -139,6 +191,6 @@
     display: block;
     position: relative;
     width: 50px;
-    content:url(../../../assets/walter.png);
+    content: url(../../../assets/walter.png);
   }
 }

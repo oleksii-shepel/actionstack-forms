@@ -35,6 +35,10 @@
         content:url(../../../assets/maskot.png);
       }
     }
+
+    & div.description {
+      align-items: center;
+    }
   }
   & main {
     position: relative;
