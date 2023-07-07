@@ -299,13 +299,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         actionQueues.delete(this.slice);
       }),
     );
+
+    this.subs.a = this.onActionQueued$.subscribe();
+    this.subs.b = this.onStatusChanges$.subscribe();
+    this.subs.c = this.onUpdateField$.subscribe();
+    this.subs.d = this.onInitOrUpdate$.subscribe();
+    this.subs.e = this.onSubmit$.subscribe();
+    this.subs.f = this.onReset$.subscribe();
   }
 
   ngAfterContentInit() {
-    const timer = setTimeout(() => {
-      this.subscribe();
-      clearTimeout(timer);
-    }, 0);
+    asyncScheduler.schedule(() => this.subs.g = this.onControlsChanges$.subscribe());
   }
 
   ngOnDestroy() {
@@ -320,16 +324,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.initialized$.complete();
 
     this.destoyed = true;
-  }
-
-  subscribe() {
-    this.subs.a = this.onActionQueued$.subscribe();
-    this.subs.b = this.onStatusChanges$.subscribe();
-    this.subs.c = this.onUpdateField$.subscribe();
-    this.subs.d = this.onInitOrUpdate$.subscribe();
-    this.subs.e = this.onSubmit$.subscribe();
-    this.subs.f = this.onReset$.subscribe();
-    this.subs.g = this.onControlsChanges$.subscribe();
   }
 
   get activeControl(): NgControl | undefined {
