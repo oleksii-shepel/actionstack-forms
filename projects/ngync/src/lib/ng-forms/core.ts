@@ -151,9 +151,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     if(this.enableQueue) {
       actionQueues.set(this.slice, new Queue());
     }
-  }
 
-  ngAfterContentInit() {
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.dir.form.valid),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
@@ -301,7 +299,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         actionQueues.delete(this.slice);
       }),
     );
+  }
 
+  ngAfterContentInit() {
     asyncScheduler.schedule(() => {
       this.subs.a = this.onActionQueued$.subscribe();
       this.subs.b = this.onStatusChanges$.subscribe();
