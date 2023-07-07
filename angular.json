@@ -43,14 +43,11 @@
             "outputPath": "dist/app",
             "index": "projects/app/src/index.html",
             "main": "projects/app/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": "./node_modules/zone.js",
             "tsConfig": "projects/app/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "projects/app/src/favicon.ico",
-              "projects/app/src/assets"
+              "projects/app/src/favicon.ico"
             ],
             "styles": [
               "projects/app/src/styles.scss"
@@ -101,6 +98,9 @@
           "options": {
             "browserTarget": "app:build"
           }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy"
         }
       }
     }

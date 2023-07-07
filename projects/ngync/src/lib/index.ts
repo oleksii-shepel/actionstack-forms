@@ -1,6 +1,7 @@
-/*
- * Public API Surface of ngrx/forms
- */
+export * from './actions';
+export * from './builder';
+export * from './core';
+export * from './module';
+export * from './reducer';
+export * from './utils';
 
-export * from './shared'
-export * from './template-driven-forms'

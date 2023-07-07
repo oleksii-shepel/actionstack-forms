@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateValue, deepClone, getSlice, getValue } from 'ngync';
+import { UpdateForm, deepClone, getValue, selectForm } from 'ngync';
 import { Observable, take } from 'rxjs';
 import { initialModel } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
@@ -28,16 +28,16 @@ export class StandardProfileEditorComponent implements OnDestroy {
 
   constructor(private store: Store<ApplicationState>) {
 
-    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
-      let model: any = getValue(state, "model") ?? initialModel;
+    this.a = this.store.select(selectForm(this.slice)).pipe(take(1)).subscribe((state) => {
+      const model: any = getValue(state, "model") ?? initialModel;
       this.model = deepClone(model);
     });
 
-    this.profile$ = this.store.select(getSlice(this.slice));
+    this.profile$ = this.store.select(selectForm(this.slice));
   }
 
   updateProfile() {
-    this.store.dispatch(UpdateValue({value: {
+    this.store.dispatch(UpdateForm({value: {
       firstName: 'Dr. Julius No',
       lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       address: {

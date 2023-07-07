@@ -1,4 +1,4 @@
-import { ModelOptions } from "ngync";
+import { FormOptions } from "ngync";
 
 export interface Profile {
   bookmark: boolean;
@@ -50,7 +50,7 @@ export const initialProfile: Profile = {
   aliases: [''],
 }
 
-export const profileOptions: ModelOptions<Profile> = {
+export const profileOptions: FormOptions<Profile> = {
   bookmark: {},
   firstName: {},
   lastName: {},
@@ -90,7 +90,7 @@ export const initialHero: Hero = {
   aliases: ['Mr Fisher', 'Robert Sterling', 'St. John Smyth'],
 }
 
-export const heroOptions: ModelOptions<Profile> = {
+export const heroOptions: FormOptions<Profile> = {
   firstName: {},
   lastName: {},
   address: {
@@ -126,7 +126,7 @@ export const initialModel: Model = {
   aliases: ['Domino'],
 }
 
-export const modelOptions: ModelOptions<Model> = {
+export const modelOptions: FormOptions<Model> = {
   firstName: {},
   lastName: {},
   address: {

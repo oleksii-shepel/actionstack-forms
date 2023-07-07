@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateValue, deepClone, getSlice, getValue } from 'ngync';
+import { UpdateForm, deepClone, getValue, selectForm } from 'ngync';
 import { Observable, take } from 'rxjs';
 import { initialHero } from '../../models/profile';
 import { ApplicationState } from '../../reducers';
@@ -27,16 +27,16 @@ export class TemplateProfileEditorComponent implements OnDestroy {
 
   constructor(private store: Store<ApplicationState>) {
 
-    this.a = this.store.select(getSlice(this.slice)).pipe(take(1)).subscribe((state) => {
-      let model: any = getValue(state, "model") ?? initialHero;
+    this.a = this.store.select(selectForm(this.slice)).pipe(take(1)).subscribe((state) => {
+      const model: any = getValue(state, "model") ?? initialHero;
       this.model = deepClone(model);
     });
 
-    this.profile$ = this.store.select(getSlice(this.slice));
+    this.profile$ = this.store.select(selectForm(this.slice));
   }
 
   updateProfile() {
-    this.store.dispatch(UpdateValue({value: {
+    this.store.dispatch(UpdateForm({value: {
       firstName: 'Dr. Julius No',
       lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       address: {
@@ -53,7 +53,7 @@ export class TemplateProfileEditorComponent implements OnDestroy {
 
   addAlias() {
     this.model.aliases.push('');
-    this.store.dispatch(UpdateValue({value: this.model, path: "hero"}));
+    this.store.dispatch(UpdateForm({value: this.model, path: "hero"}));
   }
 
   trackById(index: number, obj: string): any {
