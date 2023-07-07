@@ -247,7 +247,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       }),
       takeWhile(() => !this.destoyed));
 
-    this.onStatusChanges$ = defer(() => this.dir.form.statusChanges).pipe(
+    this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
       distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
