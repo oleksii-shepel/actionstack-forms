@@ -23,29 +23,6 @@ export const setValue = (obj: any, prop: string, val: any): any => {
   }
   item[key] = val;
   return root;
-};
-
-
-
-export const iterable = (obj: any) => {
-  return { [Symbol.iterator]: function* () {
-    if(Array.isArray(obj)) { for(const element of obj) { yield element; } }
-    else if(!primitive(obj) && typeof obj[Symbol.iterator] === 'function') { for(const element of Array.from(obj).sort()) { yield element; } }
-    else if(!!obj && typeof obj === 'object') { for(const element of Object.keys(obj).sort()) { yield obj[element]; } }
-  }}
-}
-
-
-
-export function prop<T extends object>(expression: (x: { [prop in keyof T]: T[prop] }) => any) {
-  const noComments = expression.toString().replace(/\/\*(.|[\r\n])*?\*\//g, '').replace(/\/\/.*/gm, '');
-  const split = noComments.split('=>');
-  if(split && split.length == 2) {
-    const str = split[1].trim();
-    return str.substring(str.indexOf('.') + 1, str.length).replace(/\]/g, '').replace(/\[/g, '.');
-  } else {
-    throw new Error('Invalid expression');
-  }
 }
 
 
@@ -145,27 +122,8 @@ export function deepFreeze(objectToFreeze: any) {
 
 
 
-export function intersection(x: any, y: any) {
-  return Object.keys(x || {}).reduce((result, key) => {
-    if (key in (y || {})) {
-      result[key] = x[key];
-    }
-    return result;
-  }, {} as any);
-}
-
-
-
-export interface Difference {
-  added?: any;
-  removed?: any;
-  changed?: any;
-}
-
-
-
-export function difference(x: any, y: any) : Difference {
-  const diff = {} as Difference;
+export function difference(x: any, y: any) : { added?: any, removed?: any, changed?: any } {
+  const diff = {} as any;
 
   x = x ?? {};
   y = y ?? {};

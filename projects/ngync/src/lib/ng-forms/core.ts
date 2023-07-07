@@ -42,7 +42,6 @@ import {
   NGYNC_CONFIG_TOKEN,
   deepEqual,
   getValue,
-  intersection,
   selectValue,
   setValue
 } from '.';
@@ -227,7 +226,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
       switchMap(() => from(this.store.select(selectValue(this.slice))).pipe(take(1))),
-      map((value) => value ? intersection(value, this.formValue) : this.formValue),
+      map((value) => value ? value : this.formValue),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
