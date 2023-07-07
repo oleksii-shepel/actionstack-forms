@@ -95,6 +95,7 @@ export class ShootingGroundComponent implements OnInit {
           target.style.top = positionY + 'px';
 
           target.addEventListener('click', (event) => {
+            event.stopPropagation();
 
             if(target.classList.contains('hit') || target.classList.contains('missed')) { return; }
 

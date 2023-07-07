@@ -259,16 +259,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       }),
       takeWhile(() => !this.destoyed),
     );
-
-    this.subs.a = this.onStatusChanges$.subscribe();
-    this.subs.b = this.onUpdateField$.subscribe();
-    this.subs.c = this.onInitOrUpdate$.subscribe();
-    this.subs.d = this.onSubmit$.subscribe();
-    this.subs.e = this.onReset$.subscribe();
   }
 
   ngAfterContentInit() {
-    asyncScheduler.schedule(() => { this.subs.f = this.onControlsChanges$.subscribe(); });
+    asyncScheduler.schedule(() => {
+      this.subs.a = this.onStatusChanges$.subscribe();
+      this.subs.b = this.onUpdateField$.subscribe();
+      this.subs.c = this.onInitOrUpdate$.subscribe();
+      this.subs.d = this.onSubmit$.subscribe();
+      this.subs.e = this.onReset$.subscribe();
+      this.subs.f = this.onControlsChanges$.subscribe();
+    });
   }
 
   ngOnDestroy() {
