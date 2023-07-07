@@ -6,10 +6,12 @@ export class Queue<T> {
   maxLength = 25;
 
   public constructor(
-      private elements: Record<number, T> = {},
+      private elements: Array<T> = new Array<T>(),
       private head: number = 0,
       private tail: number = 0
-  ) { }
+  ) {
+    this.elements.length = this.maxLength;
+  }
 
   public first(element: T): void {
     if(this.length === 0) {
@@ -26,7 +28,7 @@ export class Queue<T> {
       console.warn('Queue is full, dequeuing first element');
     }
 
-    this.head--;
+    this.head = this.decrement(this.head);
     this.elements[this.head] = element;
     this.updated$.next(this);
   }
@@ -38,7 +40,7 @@ export class Queue<T> {
     }
 
     this.elements[this.tail] = element;
-    this.tail++;
+    this.tail = this.increment(this.tail);
     this.updated$.next(this);
   }
 
@@ -49,7 +51,7 @@ export class Queue<T> {
 
       const item = this.elements[this.head];
       delete this.elements[this.head];
-      this.head++;
+      this.head = this.increment(this.head);
 
       return item;
   }
@@ -63,16 +65,23 @@ export class Queue<T> {
   }
 
   public clear(): void {
-    this.elements = {};
     this.head = 0;
     this.tail = 0;
   }
 
   public get length(): number {
-      return this.tail - this.head;
+      return (this.tail - this.head + this.maxLength) % this.maxLength;
   }
 
   public get isEmpty(): boolean {
       return this.length === 0;
+  }
+
+  private increment(pointer: number) {
+    return (pointer + 1) % this.maxLength;
+  }
+
+  private decrement(pointer: number) {
+    return (pointer - 1 + this.maxLength) % this.maxLength;
   }
 }
