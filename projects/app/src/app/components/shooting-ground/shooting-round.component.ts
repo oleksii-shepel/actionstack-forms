@@ -45,7 +45,6 @@ export class ShootingGroundComponent implements OnInit {
 
       const bulletHole = el.cloneNode() as HTMLElement;
       this.elRef.nativeElement.append(bulletHole);
-      this.objects.add(bulletHole);
 
       bulletHole.style.display = 'block';
       bulletHole.style.position = 'absolute';
@@ -96,25 +95,41 @@ export class ShootingGroundComponent implements OnInit {
           target.style.top = positionY + 'px';
 
           target.addEventListener('click', (event) => {
-            event.stopPropagation();
-            target.classList.add('hit');
+
+            if(target.classList.contains('hit') || target.classList.contains('missed')) { return; }
 
             const documentRef = doc(this.firestore, 'statistics/xeEFpi8UCnJjMexo2raf');
             updateDoc(documentRef, { totalShots: increment(1) });
 
-            const shotSound = new Audio();
-            shotSound.src = "shotgun.mp3";
-            shotSound.play();
+            this.shots++;
+
+            const targetElement = (event.target as HTMLElement)?.parentElement;
+            if(targetElement) {
+              const el = document.querySelector('#gunshot') as HTMLElement;
+
+              const bulletHole = el.cloneNode() as HTMLElement;
+              targetElement.append(bulletHole);
+
+              bulletHole.style.display = 'block';
+              bulletHole.style.position = 'absolute';
+              bulletHole.style.zIndex = '101';
+
+              bulletHole.style.left = (event as any).layerX - bulletHole.offsetWidth / 2 + 'px';
+              bulletHole.style.top = (event as any).layerY - bulletHole.offsetHeight / 2 + 'px';
+
+              const shotSound = new Audio();
+              shotSound.src = "shotgun.mp3";
+              shotSound.play();
+            }
+
+            event.stopPropagation();
+            target.classList.add('hit');
           });
 
           clearTimeout(timer);
           const timer2 = setTimeout(() => {
             if(!target.classList.contains('hit')) {
               target.classList.add('missed');
-
-              const laugh = new Audio();
-              laugh.src = "villain-laugh.mp3";
-              laugh.play();
             }
 
             const timer3 = setTimeout(() => {
@@ -130,7 +145,7 @@ export class ShootingGroundComponent implements OnInit {
       }
     } else {
       this.objects.forEach((object) => {
-        this.elRef.nativeElement.removeChild(object);
+        object.parentElement?.removeChild(object);
       });
       this.timers.forEach((timer) => {
         clearTimeout(timer);
