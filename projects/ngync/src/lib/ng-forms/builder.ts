@@ -2,57 +2,13 @@ import { AbstractControl, AbstractControlOptions, FormArray, FormBuilder, FormGr
 import { primitive } from './utils';
 
 
-/**
- * ArrayToObject
- *
- * @description
- * A type that represents an array as an array object.
- */
+
 export type ArrayToObject<T extends any[]> = {
   [key in keyof T as string]?: T[key];
 }
 
 
-/**
- * FormOptions
- *
- * @description
- * A type that represents the AbstractControlOptions for each control within the form.
- * Options for compound controls (i.e. FormGroup, FormArray) are represented by the __group property.
- *
- * @example
- * const model = {
- *   firstName: 'John',
- *   lastName: 'Doe',
- *   email: '',
- *   address: {
- *     street: '123 Main St.',
- *     city: 'Anytown',
- *     state: 'CA',
- *     zip: '',
- *   },
- *   aliases: ['Johny', 'Johnny'],
- * };
- *
- * const modelOptions: FormOptions<typeof model> = {
- *   __group: {},
- *   firstName: {validators: Validators.required},
- *   lastName: {validators: Validators.required},
- *   email: {validators: Validators.email},
- *   address: {
- *     __group: {},
- *     street: {validators: Validators.required},
- *     city: {validators: Validators.required},
- *     state: {validators: Validators.required},
- *     zip: {validators: Validators.required},
- *   },
- *   aliases: {
- *     __group: {},
- *     '0': {validators: Validators.required},
- *     '1': {validators: Validators.required},
- *   },
- * };
- */
+
 export type FormOptions<T> = T extends Array<infer U> ? ArrayToObject<FormOptions<U>[]> & {
   ["__group"]?: T extends object ? AbstractControlOptions : never;
 } : T extends object ? {
