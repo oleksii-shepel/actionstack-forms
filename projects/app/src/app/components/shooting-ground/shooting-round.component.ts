@@ -130,10 +130,6 @@ export class ShootingGroundComponent implements OnInit {
           const timer2 = setTimeout(() => {
             if(!target.classList.contains('hit')) {
               target.classList.add('missed');
-
-              const laugh = new Audio();
-              laugh.src = "villain-laugh.mp3";
-              laugh.play();
             }
 
             const timer3 = setTimeout(() => {
