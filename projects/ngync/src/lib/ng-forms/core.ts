@@ -18,6 +18,7 @@ import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
+  asyncScheduler,
   defer,
   distinctUntilChanged,
   filter,
@@ -114,7 +115,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ) {
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.dir = this.injector.get(FormGroupDirective, null) ?? (this.injector.get(NgForm, null) as any);
 
     let config = this.injector.get<any>(NGYNC_CONFIG_TOKEN, {});
@@ -246,8 +247,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       }),
       takeWhile(() => !this.destoyed));
 
-    this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
-      filter(() => this.initialized$.value),
+    this.onStatusChanges$ = defer(() => this.dir.form.statusChanges).pipe(
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
       distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
       tap((value) => {
@@ -258,13 +259,16 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       }),
       takeWhile(() => !this.destoyed),
     );
+
+    this.subs.a = this.onStatusChanges$.subscribe();
+    this.subs.b = this.onUpdateField$.subscribe();
+    this.subs.c = this.onInitOrUpdate$.subscribe();
+    this.subs.d = this.onSubmit$.subscribe();
+    this.subs.e = this.onReset$.subscribe();
   }
 
   ngAfterContentInit() {
-    const timer = setTimeout(() => {
-      this.subscribe();
-      clearTimeout(timer);
-    }, 0);
+    asyncScheduler.schedule(() => { this.subs.f = this.onControlsChanges$.subscribe(); });
   }
 
   ngOnDestroy() {
@@ -277,15 +281,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.initialized$.complete();
 
     this.destoyed = true;
-  }
-
-  subscribe() {
-    this.subs.a = this.onStatusChanges$.subscribe();
-    this.subs.b = this.onUpdateField$.subscribe();
-    this.subs.c = this.onInitOrUpdate$.subscribe();
-    this.subs.d = this.onSubmit$.subscribe();
-    this.subs.e = this.onReset$.subscribe();
-    this.subs.f = this.onControlsChanges$.subscribe();
   }
 
   get activeControl(): NgControl | undefined {
