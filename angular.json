@@ -26,6 +26,75 @@
         }
       }
     },
+    "@nygma/v16": {
+      "projectType": "library",
+      "root": "projects/nygma/src",
+      "sourceRoot": "projects/nygma/src/lib",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "packages/v16/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "@nygma/v15": {
+      "projectType": "library",
+      "root": "projects/nygma/src",
+      "sourceRoot": "projects/nygma/src/lib",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "packages/v15/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "@nygma/v14": {
+      "projectType": "library",
+      "root": "projects/nygma/src",
+      "sourceRoot": "projects/nygma/src/lib",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "packages/v14/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
     "app": {
       "projectType": "application",
       "schematics": {

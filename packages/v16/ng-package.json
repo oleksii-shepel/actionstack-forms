@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/@nygma/v16",
+  "lib": {
+    "entryFile": "../../projects/nygma/src/public-api.ts"
+  }
+}
