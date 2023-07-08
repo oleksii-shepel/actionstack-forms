@@ -42,7 +42,6 @@ import {
   NGYNC_CONFIG_TOKEN,
   deepEqual,
   getValue,
-  selectValue,
   setValue
 } from '.';
 import {
@@ -59,7 +58,7 @@ import {
   UpdateStatus
 } from './actions';
 import { Queue } from './queue';
-import { actionQueues } from './reducers';
+import { actionQueues, selectValue } from './reducers';
 
 
 export interface NgyncConfig {
@@ -173,14 +172,16 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onUpdateField$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.type === FormActions.UpdateField && action.split === this.split),
+      filter((action: any) => action && action.split.startsWith(this.split) && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         const state = this.submittedState ?? this.initialState;
-        const savedState = getValue(state, action.property);
+        const split = action.split.split('::');
+        const property = split.slice(0, split.lenght - 1);
+        const savedState = getValue(state, property);
 
-        const path = action.property.split('.');
+        const path = property.split('.');
         const control = path.reduce((acc: any, key: string, index: number) => acc[key], this.dir.form.controls);
         control.setValue(action.value, { emitEvent: false });
 
@@ -199,7 +200,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
+      filter((action: any) => action && action.split === this.split && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!this.enableQueue || action.deferred)),
       tap((action) => {
 
