@@ -3,7 +3,7 @@
   img.gunshot {
     display: none;
     position: absolute;
-    content: url(../../../assets/bullet-hole.png);
+    content: url(../../../docs/assets/bullet-hole.png);
     width: 50px;
   }
 
@@ -28,14 +28,14 @@
 
   .flip-card .flip-card-front img {
     display: block;
-    content: url(../../../assets/target.svg);
+    content: url(../../../docs/assets/target.svg);
     width: 50%;
     height: 50%;
   }
 
   .flip-card .flip-card-front img.gunshot {
     display: block;
-    content: url(../../../assets/bullet-hole.png);
+    content: url(../../../docs/assets/bullet-hole.png);
     width: 50%;
     height: 50%;
   }
@@ -70,7 +70,7 @@
     & img {
       background-color: whitesmoke;
       display: block;
-      content: url(../../../assets/target-missed.svg);
+      content: url(../../../docs/assets/target-missed.svg);
       width: 100%;
       height: 100%;
     }
@@ -103,7 +103,7 @@
 
       & img {
         display: block;
-        content: url(../../../assets/target-hit.png);
+        content: url(../../../docs/assets/target-hit.png);
         width: 100%;
         height: 100%;
       }
@@ -125,7 +125,7 @@
 
       & img {
         display: block;
-        content: url(../../../assets/target-missed.svg);
+        content: url(../../../docs/assets/target-missed.svg);
         width: 100%;
         height: 100%;
       }
@@ -191,6 +191,6 @@
     display: block;
     position: relative;
     width: 50px;
-    content: url(../../../assets/walter.png);
+    content: url(../../../docs/assets/walter.png);
   }
 }
