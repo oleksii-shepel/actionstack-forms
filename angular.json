@@ -46,8 +46,10 @@
             "polyfills": "./node_modules/zone.js",
             "tsConfig": "projects/app/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "resourcesOutputPath": "docs/assets",
             "assets": [
-              "projects/app/src/favicon.ico"
+              "projects/app/src/favicon.ico",
+              "projects/app/src/docs"
             ],
             "styles": [
               "projects/app/src/styles.scss"
@@ -68,7 +70,7 @@
                   "maximumError": "4kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "bundles"
             },
             "development": {
               "buildOptimizer": false,
