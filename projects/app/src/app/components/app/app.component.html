@@ -9,21 +9,21 @@
     </div>
     <div class="description">
       <h1>Angular Forms powered by<a href="https://www.npmjs.com/package/nygma">nygma library</a>™</h1>
-      <img class="maskot" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D" alt="nygma" width="100"/>
+      <img class="maskot" src="../../../docs/assets/maskot.png" alt="nygma" width="100"/>
     </div>
   </nav>
 
-  <ng-container *ngSwitchCase="'reactive'">
+  <div *ngSwitchCase="'reactive'">
     <reactive-profile-editor [caption]="'Author'"></reactive-profile-editor>
-  </ng-container>
+  </div>
 
-  <ng-container *ngSwitchCase="'template-driven'">
+  <div *ngSwitchCase="'template-driven'">
     <template-profile-editor [caption]="'Agent'"></template-profile-editor>
-   </ng-container>
+  </div>
 
-  <ng-container *ngSwitchCase="'standard'">
+  <div *ngSwitchCase="'standard'">
     <standard-profile-editor [caption]="'Model'"></standard-profile-editor>
-  </ng-container>
+  </div>
 </main>
 
 <ng-container #view></ng-container>
