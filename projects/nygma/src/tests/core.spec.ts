@@ -95,7 +95,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' }} }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -144,7 +144,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      subs.b = directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      subs.b = directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -164,7 +164,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalled();
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -237,10 +237,10 @@ describe('core', () => {
       document.body.removeChild(fixture.debugElement.nativeElement);
       directive.ngOnDestroy();
 
-      directive.store.dispatch(AutoInit({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(AutoInit({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
       directive.store.dispatch(AutoSubmit({ split:'slice::form' }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
       directive.store.dispatch(ResetForm({ split:'slice::form', state: 'blank' }));
 
       fixture.detectChanges();
@@ -265,9 +265,9 @@ describe('core', () => {
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
 
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Helen' } }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'John' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Helen' } }}));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'John' } }}));
 
       jest.advanceTimersByTime(5000);
       await fixture.whenStable();
@@ -285,7 +285,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.store.dispatch(UpdateForm({ split: 'slice::form', value: { firstName: 'Helen' }}));
+      directive.store.dispatch(UpdateForm({ split: 'slice::form', formCast: {value: { firstName: 'Helen' }}}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -327,7 +327,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.store.dispatch(UpdateForm({ split: 'slice::form', value: { firstName: 'Jane' }}));
+      directive.store.dispatch(UpdateForm({ split: 'slice::form', formCast: {value: { firstName: 'Jane' }}}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -421,7 +421,7 @@ describe('core', () => {
       const stub = jest.fn();
       subs.b = directive.onStatusChanges$.subscribe(stub);
 
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -470,7 +470,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -490,7 +490,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalled();
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -564,10 +564,10 @@ describe('core', () => {
       document.body.removeChild(fixture.debugElement.nativeElement);
       directive.ngOnDestroy();
 
-      directive.store.dispatch(AutoInit({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(AutoInit({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
       directive.store.dispatch(AutoSubmit({ split:'slice::form' }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
       directive.store.dispatch(ResetForm({ split:'slice::form', state: 'blank' }));
 
       fixture.detectChanges();
@@ -592,9 +592,9 @@ describe('core', () => {
 
       subs.b = directive.onInitOrUpdate$.subscribe(stub);
 
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Jane' } }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'Helen' } }));
-      directive.store.dispatch(UpdateForm({ split:'slice::form', value: { firstName: 'John' } }));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Jane' } }}));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'Helen' } }}));
+      directive.store.dispatch(UpdateForm({ split:'slice::form', formCast: {value: { firstName: 'John' } }}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -612,7 +612,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.store.dispatch(UpdateForm({ split: 'slice::form', value: { firstName: 'Helen' }}));
+      directive.store.dispatch(UpdateForm({ split: 'slice::form', formCast: {value: { firstName: 'Helen' }}}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -654,7 +654,7 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-      directive.store.dispatch(UpdateForm({ split: 'slice::form', value: { firstName: 'Jane' }}));
+      directive.store.dispatch(UpdateForm({ split: 'slice::form', formCast: {value: { firstName: 'Jane' }}}));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "nygma": {
+    "@nygma/forms": {
       "projectType": "library",
       "root": "projects/nygma/src",
       "sourceRoot": "projects/nygma/src/lib",

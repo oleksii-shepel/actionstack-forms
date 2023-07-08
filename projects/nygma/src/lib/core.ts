@@ -58,7 +58,7 @@ import {
   UpdateStatus
 } from './actions';
 import { Queue } from './queue';
-import { actionQueues, selectValue } from './reducers';
+import { actionQueues, selectFormCast } from './reducers';
 
 
 export interface NgyncConfig {
@@ -154,13 +154,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.dir.form.valid),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      tap(() => {
+      switchMap(() => from(this.store.select(selectFormCast(this.split))).pipe(take(1))),
+      tap((value) => {
 
         if(this.updateOn === 'submit') {
-          this.store.dispatch(UpdateForm({split: this.split, value: this.formValue}));
+          this.store.dispatch(UpdateForm({split: this.split, formCast: value }));
         }
 
-        this.submittedState = this.formValue;
+        this.submittedState = value;
 
         if (this.dir.form.dirty) {
           this.dir.form.markAsPristine();
@@ -172,7 +173,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onUpdateField$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split.startsWith(this.split) && action.type === FormActions.UpdateField),
+      filter((action: any) => action && action.split?.startsWith(this.split) && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
@@ -204,13 +205,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => (!this.enableQueue || action.deferred)),
       tap((action) => {
 
-        this.dir.form.patchValue(action?.value, {emitEvent: false});
+        this.dir.form.patchValue(action.formCast.value, {emitEvent: false});
 
         const initialized = this.initialized$.value;
-        const dirty = !initialized ? false : !deepEqual(action?.value, this.submittedState ?? this.initialState);
+        const dirty = !initialized ? (action.formCast.dirty ?? false) : !deepEqual(action.formCast, this.submittedState ?? this.initialState);
 
         if(!initialized) {
-          this.initialState = action?.value;
+          this.initialState = action.formCast;
           this.initialized$.next(true);
         }
 
@@ -226,8 +227,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      switchMap(() => from(this.store.select(selectValue(this.split))).pipe(take(1))),
-      map((value) => value ? value : this.formValue),
+      switchMap(() => from(this.store.select(selectFormCast(this.split))).pipe(take(1))),
+      map((value) => value ? value : {value: this.formValue}),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
@@ -236,9 +237,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         });
       }),
-      tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ split: this.split, value: value })); } }),
+      tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ split: this.split, formCast: value })); } }),
       scan((acc, _) => acc + 1, 0),
-      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ split: this.split, value: this.formValue })); } }),
+      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ split: this.split, formCast: { value: this.formValue } })); } }),
       takeWhile(() => !this.destoyed),
     );
 
@@ -250,13 +251,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         if(action.state){
           switch(action.state) {
             case 'initial':
-              this.store.dispatch(UpdateForm({ split: this.split, value: this.initialState || {} }));
+              this.store.dispatch(UpdateForm({ split: this.split, formCast: this.initialState || {} }));
               break;
             case 'submitted':
-              this.store.dispatch(UpdateForm({ split: this.split, value: this.submittedState || {} }));
+              this.store.dispatch(UpdateForm({ split: this.split, formCast: this.submittedState || {} }));
               break;
             case 'blank':
-              this.store.dispatch(UpdateForm({ split: this.split, value: this.reset()}));
+              this.store.dispatch(UpdateForm({ split: this.split, formCast: {value: this.reset()}}));
               break;
           }
         }

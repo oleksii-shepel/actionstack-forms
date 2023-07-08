@@ -9,7 +9,7 @@ describe('reducers', () => {
     const state = { test: 'test' };
     log((state: any, action: any) => {
       state = { ...state, test: 'test2' };
-    })(state, UpdateForm({split: 'test', value: 'test'}));
+    })(state, UpdateForm({split: 'test', formCast: {value: 'test'}}));
     expect(logSpy).toHaveBeenCalledTimes(2);
   });
   it('should handle actions', () => {
@@ -41,16 +41,16 @@ describe('reducers', () => {
     const f = forms(initialState);
     let expected = {} as any;
 
-    let newState = f((state: any, action: any) => { return state; })(initialState, AutoInit({split: "slice::form", value: model}));
+    let newState = f((state: any, action: any) => { return state; })(initialState, AutoInit({split: "slice::form", formCast: {value: model}}));
     expected = { slice: { form: model } };
     expect(newState.model).toEqual(expected.model);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, UpdateForm({split: "slice::form", value: model}));
-    expected = deepClone(initialState); (expected as any)['slice']['form'].value = model;
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateForm({split: "slice::form", formCast: {value: model}}));
+    expected = deepClone(initialState); (expected as any)['slice']['form'] = {value: model};
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({split: "slice::form::email", value: model.email}));
-    expected = deepClone(initialState); (expected as any)['slice']['form'].value = model;
+    expected = deepClone(initialState); (expected as any)['slice']['form'].value['email'] = model.email;
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => { return state; })(initialState, ResetForm({split: "slice::form", state: 'initial'}));

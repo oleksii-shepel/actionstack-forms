@@ -17,7 +17,7 @@ export enum FormActionsInternal {
 
 export const UpdateForm = createAction(
   FormActions.UpdateForm,
-  props<{ split: string; value: any; }>()
+  props<{ split: string; formCast: any; }>()
 );
 
 export const UpdateField = createAction(
@@ -47,7 +47,7 @@ export const UpdateErrors = createAction(
 
 export const AutoInit = createAction(
   FormActionsInternal.AutoInit,
-  props<{ split: string; value: any; }>()
+  props<{ split: string; formCast: any; }>()
 );
 
 export const AutoSubmit = createAction(

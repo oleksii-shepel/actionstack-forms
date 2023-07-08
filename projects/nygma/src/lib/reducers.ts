@@ -60,7 +60,7 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
         switch(action.type) {
           case FormActions.UpdateForm:
-            formCast = setValue(formCast, propValue, action.value);
+            formCast = action.formCast;
             break;
           case FormActions.UpdateField:
             formCast = property ? setValue(formCast,`${propValue}.${property}`, action.value) : formCast;
@@ -77,7 +77,7 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
             formCast = setValue(formCast, propDirty, action.dirty);
             break;
           case FormActionsInternal.AutoInit:
-            formCast = setValue(formCast, propValue, action.value);
+            formCast = action.formCast;
             break;
           case FormActionsInternal.AutoSubmit:
             formCast = setValue(formCast, propSubmitted, true);
