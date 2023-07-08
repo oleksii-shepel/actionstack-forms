@@ -34,21 +34,21 @@ body {
 }
 body::after{
    position:absolute; width:0; height:0; overflow:hidden; z-index:-1;
-   content:url(./assets/james_bond.png)
-   url(./assets/james_bond_model.png)
-   url(./assets/james_bond_poster.png)
-   url(./assets/maskot.png)
-   url(./assets/dr_no.png)
-   url(./assets/honey_ryder.png)
-   url(./assets/moneypenny.png)
-   url(./assets/m.png)
-   url(./assets/bullet-hole.png)
-   url(./assets/walter.png)
-   url(./assets/target.png)
-   url(./assets/target-hit.svg)
-   url(./assets/target-missed.svg)
-   url(./assets/shotgun.mp3)
-   url(./assets/villain-laugh.mp3);
+   content:url(./docs/assets/james_bond.png)
+   url(./docs/assets/james_bond_model.png)
+   url(./docs/assets/james_bond_poster.png)
+   url(./docs/assets/maskot.png)
+   url(./docs/assets/dr_no.png)
+   url(./docs/assets/honey_ryder.png)
+   url(./docs/assets/moneypenny.png)
+   url(./docs/assets/m.png)
+   url(./docs/assets/bullet-hole.png)
+   url(./docs/assets/walter.png)
+   url(./docs/assets/target-hit.png)
+   url(./docs/assets/target.svg)
+   url(./docs/assets/target-missed.svg)
+   url(./docs/assets/shotgun.mp3)
+   url(./docs/assets/villain-laugh.mp3);
 }
 .modal-open {
   overflow: inherit;
