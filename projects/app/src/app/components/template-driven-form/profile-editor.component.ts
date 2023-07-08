@@ -42,7 +42,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
     const state: any = await firstValueFrom(this.store.select(selectFormCast(this.formCast)));
 
     if(!state) {
-      this.store.dispatch(UpdateForm({value: initialHeroPage.form.value, split: this.formCast}));
+      this.store.dispatch(UpdateForm({formCast: initialHeroPage.form, split: this.formCast}));
       this.collapsed = true;
     }
 
