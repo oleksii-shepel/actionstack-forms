@@ -61,7 +61,7 @@ export class ShootingGroundComponent implements OnInit {
     }
 
     const shotSound = new Audio();
-    shotSound.src = "../../../docs/assets/shotgun.mp3";
+    shotSound.src = "./docs/assets/shotgun.mp3";
     shotSound.play();
   }
 
@@ -119,7 +119,7 @@ export class ShootingGroundComponent implements OnInit {
               bulletHole.style.top = (event as any).layerY - bulletHole.offsetHeight / 2 + 'px';
 
               const shotSound = new Audio();
-              shotSound.src = "../../../docs/assets/shotgun.mp3";
+              shotSound.src = "./docs/assets/shotgun.mp3";
               shotSound.play();
             }
 
