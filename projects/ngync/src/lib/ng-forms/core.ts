@@ -173,7 +173,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onUpdateField$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.type === FormActions.UpdateField && action.path === this.slice),
+      filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
@@ -199,7 +199,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
+      filter((action: any) => action && action.path === this.slice && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!this.enableQueue || action.deferred)),
       tap((action) => {
 
