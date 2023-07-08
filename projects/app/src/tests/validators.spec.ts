@@ -329,4 +329,22 @@ describe('Validators', () => {
       expect(executeValidators(new FormControl(''), v).reduce((prev, curr) => prev = Object.assign(prev as any, curr), {})).toEqual({'dummy1': true, 'required': true, 'dummy2': true});
     });
   });
+  describe('toObservable', () => {
+    it('should convert a promise to an observable', fakeAsync(() => {
+      const promise = Promise.resolve({'dummy1': true});
+      let errorMap: ValidationErrors|null = null;
+      toObservable(promise).subscribe((errors: ValidationErrors|null) => errorMap = errors);
+      tick();
+      expect(errorMap).toEqual({'dummy1': true});
+    }));
+    it('should interpret observable as observable', fakeAsync(() => {
+      let errorMap: ValidationErrors|null = null;
+      toObservable(of({'dummy1': true})).subscribe((errors: ValidationErrors|null) => errorMap = errors);
+      tick();
+      expect(errorMap).toEqual({'dummy1': true});
+    }));
+    it('should throw an error for an invalid input', () => {
+      expect(() => toObservable({'dummy1': true} as any)).toThrowError();
+    });
+  });
 });
