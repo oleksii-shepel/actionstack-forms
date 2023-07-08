@@ -41,6 +41,7 @@ export class ReactiveProfileEditorComponent implements OnDestroy {
   }
 
   updateProfile() {
+
     this.store.dispatch(UpdateForm({value: {
       bookmark: true,
       firstName: 'Dr. Julius No',
