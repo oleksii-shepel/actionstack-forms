@@ -47,23 +47,23 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
     state = state ?? deepClone(initialState);
     let nextState = state;
-    const split = action.split?.split('::');
-    const slice = split?.[0];
+    const split = action.split?.split('::') as string[];
 
-    if(split?.length >= 1) {
+    if(split?.length > 1) {
       nextState = reducer(state, action);
-      let formCast = split[1] ? getValue(nextState[slice], split[1]) : nextState[slice];
+      let formCast = getValue(nextState[split[0]], split[1]);
 
-      if(!actionQueues.has(action.split) || action.deferred) {
+      const property = (split.length > 2) ? split.pop() : undefined;
+      const queue = actionQueues.get(split.join('::'));
+
+      if(!queue || action.deferred) {
 
         switch(action.type) {
           case FormActions.UpdateForm:
             formCast = setValue(formCast, propValue, action.value);
             break;
           case FormActions.UpdateField:
-            if(split.length > 2) {
-              formCast = setValue(formCast,`${propValue}.${split[2]}`, action.value);
-            }
+            formCast = property ? setValue(formCast,`${propValue}.${property}`, action.value) : formCast;
             break;
           case FormActions.ResetForm:
             break;
@@ -86,10 +86,10 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
             break;
         }
 
-        nextState = {...nextState, slice: split[1] ? setValue(nextState[slice], split[1], formCast) : formCast};
+        nextState = {...nextState};
+        nextState[split[0]] = setValue(nextState[split[0]], split[1], formCast);
         return nextState;
       } else {
-        const queue = actionQueues.get(action.split) as Queue<Action>;
         const type = queue.peek()?.type;
 
         if(!queue.initialized$.value) {
