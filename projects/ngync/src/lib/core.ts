@@ -16,7 +16,6 @@ import {
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
-  asyncScheduler,
   sampleTime,
   scan,
   startWith,
@@ -81,19 +80,17 @@ export class SyncDirective implements OnInit, AfterContentInit, OnDestroy {
   }
 
   ngAfterContentInit() {
-    asyncScheduler.schedule(() => {
-      this._subs.c = this.controls.changes.pipe(startWith(this.controls)).pipe(
-        scan((acc, _) => acc + 1, 0),
-        tap(() => {
-          this.controls.forEach((control: NgControl) => {
-            if(control.valueAccessor) {
-              control.valueAccessor.registerOnChange(this.inputCallback(control));
-            }
-          });
-        }),
-        tap((value) => { if (value > 1) { this.dir.form.patchValue(this.formValue); this.cdr.detectChanges(); } }),
-      ).subscribe();
-    })
+    this._subs.c = this.controls.changes.pipe(startWith(this.controls)).pipe(
+      scan((acc, _) => acc + 1, 0),
+      tap(() => {
+        this.controls.forEach((control: NgControl) => {
+          if(control.valueAccessor) {
+            control.valueAccessor.registerOnChange(this.inputCallback(control));
+          }
+        });
+      }),
+      tap((value) => { if (value > 1) { this.dir.form.patchValue(this.formValue); this.cdr.detectChanges(); } }),
+    ).subscribe();
   }
 
   get formValue(): any {
