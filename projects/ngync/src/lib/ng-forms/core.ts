@@ -302,15 +302,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    asyncScheduler.schedule(() => {
-      this.subs.a = this.onActionQueued$.subscribe();
-      this.subs.b = this.onStatusChanges$.subscribe();
-      this.subs.c = this.onUpdateField$.subscribe();
-      this.subs.d = this.onInitOrUpdate$.subscribe();
-      this.subs.e = this.onSubmit$.subscribe();
-      this.subs.f = this.onReset$.subscribe();
-      this.subs.g = this.onControlsChanges$.subscribe();
-    });
+    this.subs.a = this.onActionQueued$.subscribe();
+    this.subs.b = this.onStatusChanges$.subscribe();
+    this.subs.c = this.onUpdateField$.subscribe();
+    this.subs.d = this.onInitOrUpdate$.subscribe();
+    this.subs.e = this.onSubmit$.subscribe();
+    this.subs.f = this.onReset$.subscribe();
+    this.subs.g = this.onControlsChanges$.subscribe();
   }
 
   ngOnDestroy() {
@@ -339,7 +337,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   get formValue(): any {
-    if(!this.controls) { return {}; }
 
     let value = {};
     for (const control of this.controls.toArray()) {
