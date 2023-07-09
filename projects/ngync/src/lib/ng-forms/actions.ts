@@ -7,7 +7,7 @@ export enum FormActions {
 }
 
 export enum FormActionsInternal {
-  UpdateStatus = '@forms/internal/statuc/update',
+  UpdateStatus = '@forms/internal/status/update',
   UpdateDirty = '@forms/internal/dirty/update',
   UpdateErrors = '@forms/internal/errors/update',
   AutoInit = '@forms/internal/form/init',
