@@ -15,17 +15,12 @@ export interface FormCast<T> {
 
 
 
-export const selectFormCast = (split: string) => {
-  const location = split.split('::');
-  return (location.length > 1) ?
-    createSelector((state: any) => state[location[0]], state => state[location[1]]) :
-    createSelector((state: any) => state[location[0]], state => state)
-};
-export const selectValue = (split: string) => createSelector(selectFormCast(split), state => state?.value);
-export const selectErrors = (split: string) => createSelector(selectFormCast(split), state => state?.errors);
-export const selectDirty = (split: string) => createSelector(selectFormCast(split), state => state?.dirty);
-export const selectStatus = (split: string) => createSelector(selectFormCast(split), state => state?.status);
-export const selectSubmitted = (split: string) => createSelector(selectFormCast(split), state => state?.submitted);
+export const selectFormCast = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
+export const selectValue = (slice: string) => createSelector(selectFormCast(slice), state => state?.value);
+export const selectErrors = (slice: string) => createSelector(selectFormCast(slice), state => state?.errors);
+export const selectDirty = (slice: string) => createSelector(selectFormCast(slice), state => state?.dirty);
+export const selectStatus = (slice: string) => createSelector(selectFormCast(slice), state => state?.status);
+export const selectSubmitted = (slice: string) => createSelector(selectFormCast(slice), state => state?.submitted);
 
 
 
@@ -47,49 +42,47 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
     state = state ?? deepClone(initialState);
     let nextState = state;
-    const split = action.split?.split('::') as string[];
+    const slice = action?.path;
 
-    if(split?.length > 1) {
-      nextState = reducer(state, action);
-      let formCast = getValue(nextState[split[0]], split[1]);
+    if(slice) {
 
-      const property = (split.length > 2) ? split.pop() : undefined;
-      const queue = actionQueues.get(split.join('::'));
+      if(!actionQueues.has(slice) || action.deferred) {
 
-      if(!queue || action.deferred) {
+        nextState = reducer(state, action);
+        let feature = getValue(nextState, slice);
 
         switch(action.type) {
           case FormActions.UpdateForm:
-            formCast = action.formCast;
+            feature = setValue(feature, propValue, action.value);
             break;
           case FormActions.UpdateField:
-            formCast = property ? setValue(formCast,`${propValue}.${property}`, action.value) : formCast;
+            feature = setValue(feature,`${propValue}.${action.property}`, action.value);
             break;
           case FormActions.ResetForm:
             break;
           case FormActionsInternal.UpdateStatus:
-            formCast = setValue(formCast, propStatus, action.status);
+            feature = setValue(feature, propStatus, action.status);
             break;
           case FormActionsInternal.UpdateErrors:
-            formCast = setValue(formCast, propErrors, deepClone(action.errors));
+            feature = setValue(feature, propErrors, deepClone(action.errors));
             break;
           case FormActionsInternal.UpdateDirty:
-            formCast = setValue(formCast, propDirty, action.dirty);
+            feature = setValue(feature, propDirty, action.dirty);
             break;
           case FormActionsInternal.AutoInit:
-            formCast = action.formCast;
+            feature = setValue(feature, propValue, action.value);
             break;
           case FormActionsInternal.AutoSubmit:
-            formCast = setValue(formCast, propSubmitted, true);
+            feature = setValue(feature, propSubmitted, true);
             break;
           case FormActionsInternal.FormDestroyed:
             break;
         }
 
-        nextState = {...nextState};
-        nextState[split[0]] = setValue(nextState[split[0]], split[1], formCast);
+        nextState = setValue(nextState, slice, feature)
         return nextState;
       } else {
+        const queue = actionQueues.get(slice) as Queue<Action>;
         const type = queue.peek()?.type;
 
         if(!queue.initialized$.value) {
@@ -144,16 +137,16 @@ export const logger = (settings: {showAll?: boolean, showRegular?: boolean, show
     const actionCopy = deepClone(action);
     delete actionCopy.type;
 
-    const split = actionCopy?.split?.split('::');
-    delete actionCopy?.split;
+    const actionPath = actionCopy?.path ?? '';
+    delete actionCopy?.path;
 
-    const previous = split && split.length > 1 ? getValue(state[split[0]], split[1]) : state;
-    const current = split && split.length > 1 ? getValue(result[split[0]], split[1]) : result;
+    const previous = actionPath.length > 0 ? getValue(state, actionPath) : state;
+    const current = actionPath.length > 0 ? getValue(result, actionPath) : result;
     const diff = difference(previous, current);
 
     if(filter(action, diff)) {
       console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
-      console.log("path: '%c%s%c', payload: %o", "color: red;", split?.join('::'), "color: black;", actionCopy);
+      console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
       console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
       console.groupEnd();
     }

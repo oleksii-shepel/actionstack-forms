@@ -1,63 +1,63 @@
 import { Action, createAction, props } from '@ngrx/store';
 
 export enum FormActions {
-  UpdateForm = '@nygma/forms/update',
-  UpdateField = '@nygma/forms/field/update',
-  ResetForm = '@nygma/forms/reset',
+  UpdateForm = '@forms/update',
+  UpdateField = '@forms/field/update',
+  ResetForm = '@forms/reset',
 }
 
 export enum FormActionsInternal {
-  UpdateStatus = '@nygma/forms/internal/status/update',
-  UpdateDirty = '@nygma/forms/internal/dirty/update',
-  UpdateErrors = '@nygma/forms/internal/errors/update',
-  AutoInit = '@nygma/forms/internal/init',
-  AutoSubmit = '@nygma/forms/internal/submit',
-  FormDestroyed = '@nygma/forms/internal/destroyed',
+  UpdateStatus = '@forms/internal/status/update',
+  UpdateDirty = '@forms/internal/dirty/update',
+  UpdateErrors = '@forms/internal/errors/update',
+  AutoInit = '@forms/internal/init',
+  AutoSubmit = '@forms/internal/submit',
+  FormDestroyed = '@forms/internal/destroyed',
 }
 
 export const UpdateForm = createAction(
   FormActions.UpdateForm,
-  props<{ split: string; formCast: any; }>()
+  props<{ path: string; value: any; }>()
 );
 
 export const UpdateField = createAction(
   FormActions.UpdateField,
-  props<{ split: string; value: any; }>()
+  props<{ path: string; property: string; value: any; }>()
 );
 
 export const ResetForm = createAction(
   FormActions.ResetForm,
-  props<{ split: string; state: 'initial' | 'submitted' | 'blank'}>()
+  props<{ path: string; state: 'initial' | 'submitted' | 'blank'}>()
 );
 
 export const UpdateStatus = createAction(
   FormActionsInternal.UpdateStatus,
-  props<{ split: string; status: string; }>()
+  props<{ path: string; status: string; }>()
 );
 
 export const UpdateDirty = createAction(
   FormActionsInternal.UpdateDirty,
-  props<{ split: string; dirty: boolean; }>()
+  props<{ path: string; dirty: boolean; }>()
 );
 
 export const UpdateErrors = createAction(
   FormActionsInternal.UpdateErrors,
-  props<{ split: string; errors: Record<string, string>; }>()
+  props<{ path: string; errors: Record<string, string>; }>()
 );
 
 export const AutoInit = createAction(
   FormActionsInternal.AutoInit,
-  props<{ split: string; formCast: any; }>()
+  props<{ path: string; value: any; }>()
 );
 
 export const AutoSubmit = createAction(
   FormActionsInternal.AutoSubmit,
-  props<{ split: string; }>()
+  props<{ path: string; }>()
 );
 
 export const FormDestroyed = createAction(
   FormActionsInternal.FormDestroyed,
-  props<{ split: string; }>()
+  props<{ path: string; }>()
 );
 
 export class Deferred implements Action {

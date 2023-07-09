@@ -21,6 +21,7 @@ describe('utils', () => {
     expect(getValue(obj6, 'p.1')).toEqual(2);
     expect(getValue(obj6, 'p.2')).toEqual(3);
   });
+
   it('should set value', () => {
     const obj1 = { a: { b: { c: 1 } } };
     const obj2 = { a: { b: [{c: 1}] } };
@@ -32,6 +33,7 @@ describe('utils', () => {
     expect(getValue(setValue(obj3, 'a.0.b.c', 2), 'a.0.b.c')).toEqual(2);
     expect(getValue(setValue(obj4, '0.b.c', 2), '0.b.c')).toEqual(2);
   });
+
   it('should find props', () => {
     const obj = { a: 1, b: 2, c: 3, d: { a : 1, b: [1, 2, 3]}, e: BigInt(1), f: false, g: true, h: null, i: undefined, j: NaN, k: Infinity, l: -Infinity, m: '', n: 'a', q: {}, r: {a: 1}}
     const obj2 = { s: new Map([['key1', 'value1'], ['key2', 'value2']]), t: new Set([1, 2, 3, 3]), o: [], p: [1, 2, 3] };
@@ -47,6 +49,7 @@ describe('utils', () => {
     expect(findProps(obj5)).toEqual([]);
     expect(findProps(obj6)).toEqual(["0", "1.a", "2.a.b"]);
   });
+
   it('should deep equal', () => {
     const obj1 = { a: 1, b: 2, c: 3 };
     const obj2 = { a: 1, b: 2, c: 3 };
@@ -55,6 +58,7 @@ describe('utils', () => {
     expect(deepEqual(obj1, obj2)).toEqual(true);
     expect(deepEqual(obj1, obj3)).toEqual(false);
   });
+
   it('should deep clone', () => {
     const date = new Date();
     const obj1 = { a: 1, b: 2, c: 3, d: BigInt(12121212), e: date };
@@ -77,6 +81,7 @@ describe('utils', () => {
     expect(deepEqual(deepClone(obj6), ref6)).toEqual(false);
     expect(deepEqual(deepClone(obj7), ref7)).toEqual(false);
   });
+
   it('boxed', () => {
     const obj1 = { a: 1, b: 2, c: 3 };
     const obj2 = false;
@@ -103,6 +108,7 @@ describe('utils', () => {
     expect(boxed(obj11)).toEqual(false);
 
   });
+
   it('should return the difference', () => {
     const obj1 = { a: 4, b: 5, d: 7, e: [1] };
     const obj2 = { a: 1, b: 2, c: 3, e: [1, 2]};
@@ -111,6 +117,7 @@ describe('utils', () => {
     expect(difference(obj1, obj2)).toEqual({"added": {"c": 3}, "changed": {"a": 1, "b": 2, "e": [1, 2]}, "removed": {"d": 7}} );
     expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, 2]}});
   });
+
   it('should deep freeze an object', () => {
 
     const obj1 = { a: 1, b: 2, c: 3, e: [1, 2]};

@@ -38,10 +38,11 @@ import {
   tap
 } from 'rxjs';
 import {
-  NGYNC_CONFIG_DEFAULT,
-  NGYNC_CONFIG_TOKEN,
+  NYGMA_CONFIG_DEFAULT,
+  NYGMA_CONFIG_TOKEN,
   deepEqual,
   getValue,
+  selectValue,
   setValue
 } from '.';
 import {
@@ -58,10 +59,10 @@ import {
   UpdateStatus
 } from './actions';
 import { Queue } from './queue';
-import { actionQueues, selectFormCast } from './reducers';
+import { actionQueues } from './reducers';
 
 
-export interface NgyncConfig {
+export interface NygmaConfig {
   slice: string;
   debounceTime?: number;
   enableQueue?: boolean;
@@ -75,10 +76,10 @@ export interface NgyncConfig {
   exportAs: 'nygma',
 })
 export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
-  @Input('nygma') config!: string | NgyncConfig;
+  @Input('nygma') config!: string | NygmaConfig;
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
-  split!: string;
+  slice!: string;
   debounceTime!: number;
   enableQueue!: boolean;
   updateOn!: string;
@@ -95,13 +96,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   blurCallback = (control: NgControl) => (value: any) => {
     if(this.updateOn === 'blur' && control.path) {
-      this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: control.value }));
+      this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: control.value }));
     }
   }
 
   inputCallback = (control: NgControl) => (value : any) => {
     if(this.updateOn === 'change' && control.path) {
-      this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: value }));
+      this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: value }));
     }
   }
 
@@ -125,21 +126,21 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ngOnInit() {
     this.dir = this.injector.get(FormGroupDirective, null) ?? (this.injector.get(NgForm, null) as any);
 
-    let config = this.injector.get<any>(NGYNC_CONFIG_TOKEN, {});
-    config = Object.assign(NGYNC_CONFIG_DEFAULT, config);
+    let config = this.injector.get<any>(NYGMA_CONFIG_TOKEN, {});
+    config = Object.assign(NYGMA_CONFIG_DEFAULT, config);
 
     if(typeof this.config === 'string') {
-      this.split = this.config;
+      this.slice = this.config;
     } else {
       config = Object.assign(config, this.config);
-      this.split = config.slice;
+      this.slice = config.slice;
     }
 
     this.enableQueue = config.enableQueue;
     this.debounceTime = config.debounceTime;
     this.updateOn = config.updateOn;
 
-    if (!this.split) {
+    if (!this.slice) {
       throw new Error('Misuse of sync directive');
     }
 
@@ -148,41 +149,38 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
 
     if(this.enableQueue) {
-      actionQueues.set(this.split, new Queue());
+      actionQueues.set(this.slice, new Queue());
     }
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.dir.form.valid),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      switchMap(() => from(this.store.select(selectFormCast(this.split))).pipe(take(1))),
-      tap((value) => {
+      tap(() => {
 
         if(this.updateOn === 'submit') {
-          this.store.dispatch(UpdateForm({split: this.split, formCast: value }));
+          this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
         }
 
-        this.submittedState = value;
+        this.submittedState = this.formValue;
 
         if (this.dir.form.dirty) {
           this.dir.form.markAsPristine();
           this.cdr.markForCheck();
         }
       }),
-      tap(() => ( this.store.dispatch(AutoSubmit({ split: this.split })))),
+      tap(() => ( this.store.dispatch(AutoSubmit({ path: this.slice })))),
       takeWhile(() => !this.destoyed)
     );
 
     this.onUpdateField$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split?.startsWith(this.split) && action.type === FormActions.UpdateField),
+      filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         const state = this.submittedState ?? this.initialState;
-        const split = action.split.split('::');
-        const property = split.slice(0, split.lenght - 1);
-        const savedState = getValue(state, property);
+        const savedState = getValue(state, action.property);
 
-        const path = property.split('.');
+        const path = action.property.split('.');
         const control = path.reduce((acc: any, key: string, index: number) => acc[key], this.dir.form.controls);
         control.setValue(action.value, { emitEvent: false });
 
@@ -191,7 +189,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         !(savedState === control.value) ? control.markAsDirty() : control.markAsPristine();
 
         if(this.dir.form.dirty !== dirty) {
-          this.store.dispatch(UpdateDirty({ split: this.split, dirty: this.dir.form.dirty }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
         }
 
         control.updateValueAndValidity();
@@ -201,23 +199,23 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split === this.split && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
+      filter((action: any) => action && action.path === this.slice && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!this.enableQueue || action.deferred)),
       tap((action) => {
 
-        this.dir.form.patchValue(action.formCast.value, {emitEvent: false});
+        this.dir.form.patchValue(action?.value, {emitEvent: false});
 
         const initialized = this.initialized$.value;
-        const dirty = !initialized ? (action.formCast.dirty ?? false) : !deepEqual(action.formCast, this.submittedState ?? this.initialState);
+        const dirty = !initialized ? false : !deepEqual(action?.value, this.submittedState ?? this.initialState);
 
         if(!initialized) {
-          this.initialState = action.formCast;
+          this.initialState = action?.value;
           this.initialized$.next(true);
         }
 
         if(this.dir.form.dirty !== dirty || !initialized) {
           dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
-          this.store.dispatch(UpdateDirty({ split: this.split, dirty: dirty }));
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
         }
 
         this.dir.form.updateValueAndValidity();
@@ -227,8 +225,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      switchMap(() => from(this.store.select(selectFormCast(this.split))).pipe(take(1))),
-      map((value) => value ? value : {value: this.formValue}),
+      switchMap(() => from(this.store.select(selectValue(this.slice))).pipe(take(1))),
+      map((value) => value ? value : this.formValue),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
@@ -237,27 +235,27 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         });
       }),
-      tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ split: this.split, formCast: value })); } }),
+      tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ path: this.slice, value: value })); } }),
       scan((acc, _) => acc + 1, 0),
-      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ split: this.split, formCast: { value: this.formValue } })); } }),
+      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue })); } }),
       takeWhile(() => !this.destoyed),
     );
 
     this.onReset$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split === this.split && action.type === FormActions.ResetForm),
+      filter((action: any) => action && action.path === this.slice && action.type === FormActions.ResetForm),
       filter((action) => (!this.enableQueue || action.deferred)),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         if(action.state){
           switch(action.state) {
             case 'initial':
-              this.store.dispatch(UpdateForm({ split: this.split, formCast: this.initialState || {} }));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.initialState || {} }));
               break;
             case 'submitted':
-              this.store.dispatch(UpdateForm({ split: this.split, formCast: this.submittedState || {} }));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState || {} }));
               break;
             case 'blank':
-              this.store.dispatch(UpdateForm({ split: this.split, formCast: {value: this.reset()}}));
+              this.store.dispatch(UpdateForm({ path: this.slice, value: this.reset()}));
               break;
           }
         }
@@ -270,8 +268,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
       tap((value) => {
         if(value.status !== 'PENDING') {
-          this.store.dispatch(UpdateStatus({ split: this.split, status: value.status }));
-          this.store.dispatch(UpdateErrors({ split: this.split, errors: value.errors }));
+          this.store.dispatch(UpdateStatus({ path: this.slice, status: value.status }));
+          this.store.dispatch(UpdateErrors({ path: this.slice, errors: value.errors }));
         }
       }),
       takeWhile(() => !this.destoyed),
@@ -279,7 +277,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onActionQueued$ = of(this.enableQueue).pipe(
       filter((value) => value),
-      switchMap(() => actionQueues.get(this.split)?.updated$ || of(null)),
+      switchMap(() => actionQueues.get(this.slice)?.updated$ || of(null)),
       filter((value) => value !== null),
       observeOn(asyncScheduler),
       tap((queue) => {
@@ -291,14 +289,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       }),
       takeWhile(() => document.contains(this.elRef.nativeElement)),
       finalize(() => {
-        const queue = actionQueues.get(this.split) as Queue<Action>;
+        const queue = actionQueues.get(this.slice) as Queue<Action>;
         if(queue.initialized$.value) {
           while(queue.length > 0) {
             this.store.dispatch(queue.dequeue() as Action);
           }
-          this.store.dispatch(new Deferred(FormDestroyed({ split: this.split })));
+          this.store.dispatch(new Deferred(FormDestroyed({ path: this.slice })));
         }
-        actionQueues.delete(this.split);
+        actionQueues.delete(this.slice);
       }),
     );
   }
@@ -315,7 +313,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   ngOnDestroy() {
     if(!this.enableQueue) {
-      this.store.dispatch(FormDestroyed({ split: this.split }));
+      this.store.dispatch(FormDestroyed({ path: this.slice }));
     }
 
     for (const sub of Object.keys(this.subs)) {
@@ -339,7 +337,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   get formValue(): any {
-    if(!this.controls) { return {}; }
 
     let value = {};
     for (const control of this.controls.toArray()) {
