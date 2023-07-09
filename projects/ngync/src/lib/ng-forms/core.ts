@@ -18,7 +18,6 @@ import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
-  asyncScheduler,
   defer,
   distinctUntilChanged,
   filter,
@@ -262,14 +261,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    asyncScheduler.schedule(() => {
-      this.subs.a = this.onStatusChanges$.subscribe();
-      this.subs.b = this.onUpdateField$.subscribe();
-      this.subs.c = this.onInitOrUpdate$.subscribe();
-      this.subs.d = this.onSubmit$.subscribe();
-      this.subs.e = this.onReset$.subscribe();
-      this.subs.f = this.onControlsChanges$.subscribe();
-    });
+    this.subs.a = this.onStatusChanges$.subscribe();
+    this.subs.b = this.onUpdateField$.subscribe();
+    this.subs.c = this.onInitOrUpdate$.subscribe();
+    this.subs.d = this.onSubmit$.subscribe();
+    this.subs.e = this.onReset$.subscribe();
+    this.subs.f = this.onControlsChanges$.subscribe();
   }
 
   ngOnDestroy() {

@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
 import { firstValueFrom } from 'rxjs';
+import { FormCast, selectFormCast } from "../lib/ng-forms";
 import { NGYNC_CONFIG_DEFAULT, NgFormsModule } from "../lib/ng-forms/module";
 import { AutoInit, AutoSubmit, ResetForm, SyncDirective, UpdateForm, forms, selectValue } from "../public-api";
 
@@ -71,13 +72,11 @@ describe('core', () => {
       const auto = jest.fn();
       subs.a = directive.initialized$.subscribe(auto);
 
-      const stub = jest.fn();
-      subs.b = directive.onStatusChanges$.subscribe(stub);
-
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      expect(stub).toHaveBeenCalledTimes(1);
+      const form: FormCast<any> = await firstValueFrom(directive.store.select(selectFormCast('slice')));
+      expect(form.status).toBeDefined();
       expect(directive.dir.form.value).toEqual({ firstName: 'John' });
     });
 
@@ -341,7 +340,7 @@ describe('core', () => {
       template: ``
     })
     class TestComponent {
-      firstName = 'John';
+      model = { firstName: 'John' };
     }
 
     let fixture: ComponentFixture<TestComponent>;
@@ -352,7 +351,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
@@ -360,7 +359,7 @@ describe('core', () => {
         set: {
           template: `
           <form #form="ngForm" ngync="slice">
-            <input type="text" [(ngModel)]="firstName" name="firstName"/>
+            <input type="text" [(ngModel)]="model.firstName" name="firstName"/>
             <button type="submit">Submit</button>
           </form>`
         }
@@ -396,13 +395,11 @@ describe('core', () => {
       const auto = jest.fn();
       subs.a = directive.initialized$.subscribe(auto);
 
-      const stub = jest.fn();
-      subs.b = directive.onStatusChanges$.subscribe(stub);
-
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      expect(stub).toHaveBeenCalledTimes(1);
+      const form: FormCast<any> = await firstValueFrom(directive.store.select(selectFormCast('slice')));
+      expect(form.status).toBeDefined();
       expect(directive.dir.form.value).toEqual({ firstName: 'John' });
     });
 
@@ -609,7 +606,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       const button = fixture.debugElement.nativeElement.querySelector('button') as HTMLButtonElement;
-        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
