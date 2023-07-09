@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
 export enum FormActions {
-  UpdateForm = '@forms/form/update',
+  UpdateForm = '@forms/update',
 }
 
 export const UpdateForm = createAction(
