@@ -22,7 +22,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   profile$!: Observable<any>;
   slice = "model";
-  formCast = "model::form";
+  formCast = "model.form";
   model = initialModelPage.form.value;
 
   a: any; b: any;
