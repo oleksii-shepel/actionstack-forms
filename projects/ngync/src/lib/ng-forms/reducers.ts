@@ -112,11 +112,14 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
   return metaReducer;
 }
 
-export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean}) => (reducer: ActionReducer<any>): any => {
+export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (reducer: ActionReducer<any>): any => {
   settings = Object.assign({showAll: false, showRegular: false, showDeferred: false, showOnlyModifiers: true}, settings);
 
   function filter(action: any, difference: any): boolean {
     let show = false;
+    if(settings.showMatch && action.type.match(settings.showMatch)) {
+      show = true;
+    }
     if(settings.showRegular && !action.deferred) {
       show = true;
     }
