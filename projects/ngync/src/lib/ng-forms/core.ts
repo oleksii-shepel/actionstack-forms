@@ -183,9 +183,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           control.setValue(action.value, { emitEvent: false });
           const dirty = !deepEqual(this.formValue, this.submittedState ?? this.initialState);
 
-          dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
-
           if(this.dir.form.dirty !== dirty) {
+            dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
             this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
           }
 
