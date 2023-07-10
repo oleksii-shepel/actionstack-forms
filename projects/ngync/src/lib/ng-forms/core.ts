@@ -197,7 +197,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.path === this.slice && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
+      filter((action: any) => action && action.path === this.slice && [FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!this.enableQueue || action.deferred)),
       tap((action) => {
 
@@ -261,7 +261,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destoyed));
 
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
-      filter(() => this.initialized$.value),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
       distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
       tap((value) => {
@@ -335,6 +335,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   get formValue(): any {
+    if(!this.controls) { return {}; }
 
     let value = {};
     for (const control of this.controls.toArray()) {
