@@ -53,6 +53,7 @@ import {
   UpdateForm,
   UpdateStatus
 } from './actions';
+import { selectDirty } from './reducers';
 
 
 export interface NgyncConfig {
@@ -93,6 +94,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   inputCallback = (control: NgControl) => (value : any) => {
+    if(control.value !== value && control.control) {
+      control.control.setValue(value, { emitEvent: false });
+
+      const state = this.submittedState ?? this.initialState;
+      const savedState = control.path ? getValue(state, control.path.join('.')) : undefined;
+      !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
+    }
     if(this.updateOn === 'change' && control.path) {
       this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: value }));
     }
@@ -114,7 +122,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ) {
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.dir = this.injector.get(FormGroupDirective, null) ?? (this.injector.get(NgForm, null) as any);
 
     let config = this.injector.get<any>(NGYNC_CONFIG_TOKEN, {});
@@ -143,15 +151,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap(() => {
 
-        if(this.updateOn === 'submit') {
-          this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
-        }
-
         this.submittedState = this.formValue;
 
-        if (this.dir.form.dirty) {
-          this.dir.form.markAsPristine();
-          this.cdr.markForCheck();
+        if(this.updateOn === 'submit') {
+          this.store.dispatch(UpdateForm({path: this.slice, value: this.formValue}));
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ path: this.slice })))),
@@ -162,37 +165,35 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      tap((action: any) => {
+      mergeMap((value) => this.store.select(selectDirty(this.slice)).pipe(take(1), map((dirty) => ({action: value, dirty: dirty})))),
+      tap(({action, dirty}) => {
         const path = action.property.split('.');
-        const control = path.reduce((acc: any, key: string, index: number) => acc[key], this.dir.form.controls);
+        const control = path.reduce((acc: any, key: string, index: number) => acc.controls[key], this.dir.form);
 
-        if(action.value !== control.value) {
-          control.setValue(action.value, { emitEvent: false });
-          const dirty = !deepEqual(this.formValue, this.submittedState ?? this.initialState);
+        const notEqual = !deepEqual(this.formValue, this.submittedState ?? this.initialState);
 
-          if(this.dir.form.dirty !== dirty) {
-            dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
-            this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
-          }
-
-          control.updateValueAndValidity();
-          this.cdr.markForCheck();
+        if(dirty !== notEqual) {
+          notEqual ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
+          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: notEqual }));
         }
+
+        control.updateValueAndValidity();
+        this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.path === this.slice && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
+      filter((action: any) => action && action.path === this.slice && [FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       tap((action) => {
 
-        this.dir.form.patchValue(action?.value, {emitEvent: false});
+        this.dir.form.patchValue(action.value, {emitEvent: false});
 
         const initialized = this.initialized$.value;
-        const dirty = !initialized ? false : !deepEqual(action?.value, this.submittedState ?? this.initialState);
+        const dirty = !initialized ? false : !deepEqual(action.value, this.submittedState ?? this.initialState);
 
         if(!initialized) {
-          this.initialState = action?.value;
+          this.initialState = action.value;
           this.initialized$.next(true);
         }
 
