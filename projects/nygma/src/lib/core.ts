@@ -72,11 +72,11 @@ export interface NygmaConfig {
 
 @Directive({
   selector:
-    `form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]`,
-  exportAs: 'ngync',
+    `form:not([ngNoForm]):not([formGroup])[nygma],ng-form[nygma],[ngForm][nygma],[formGroup][nygma]`,
+  exportAs: 'nygma',
 })
 export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
-  @Input('ngync') config!: string | NygmaConfig;
+  @Input('nygma') config!: string | NygmaConfig;
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   split!: string;
