@@ -41,7 +41,6 @@ import {
   NGYNC_CONFIG_DEFAULT,
   NGYNC_CONFIG_TOKEN,
   deepEqual,
-  getValue,
   selectValue,
   setValue
 } from '.';
@@ -177,23 +176,22 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
-        const state = this.submittedState ?? this.initialState;
-        const savedState = getValue(state, action.property);
-
         const path = action.property.split('.');
         const control = path.reduce((acc: any, key: string, index: number) => acc[key], this.dir.form.controls);
-        control.setValue(action.value, { emitEvent: false });
 
-        const dirty = this.dir.form.dirty;
+        if(action.value !== control.value) {
+          control.setValue(action.value, { emitEvent: false });
+          const dirty = !deepEqual(this.formValue, this.submittedState ?? this.initialState);
 
-        !(savedState === control.value) ? control.markAsDirty() : control.markAsPristine();
+          dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
 
-        if(this.dir.form.dirty !== dirty) {
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
+          if(this.dir.form.dirty !== dirty) {
+            this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
+          }
+
+          control.updateValueAndValidity();
+          this.cdr.markForCheck();
         }
-
-        control.updateValueAndValidity();
-        this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
     );
