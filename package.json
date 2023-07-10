@@ -68,10 +68,5 @@
   "bugs": {
     "url": "https://github.com/oleksii-shepel/angular-ngrx-forms/issues"
   },
-  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme",
-  "workspaces": [
-    "packages\\v14",
-    "packages\\v15",
-    "packages\\v16"
-  ]
+  "homepage": "https://github.com/oleksii-shepel/angular-ngrx-forms#readme"
 }
