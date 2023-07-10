@@ -59,7 +59,7 @@ import {
   UpdateStatus
 } from './actions';
 import { Queue } from './queue';
-import { actionQueues } from './reducers';
+import { actionQueues, selectDirty } from './reducers';
 
 
 export interface NygmaConfig {
@@ -72,11 +72,11 @@ export interface NygmaConfig {
 
 @Directive({
   selector:
-    `form:not([ngNoForm]):not([formGroup])[nygma],ng-form[nygma],[ngForm][nygma],[formGroup][nygma]`,
-  exportAs: 'nygma',
+    `form:not([ngNoForm]):not([formGroup])[ngync],ng-form[ngync],[ngForm][ngync],[formGroup][ngync]`,
+  exportAs: 'ngync',
 })
 export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
-  @Input('nygma') config!: string | NygmaConfig;
+  @Input('ngync') config!: string | NygmaConfig;
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   split!: string;
@@ -101,6 +101,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   inputCallback = (control: NgControl) => (value : any) => {
+    if(control.value !== value && control.control) {
+      control.control.setValue(value, { emitEvent: false });
+
+      const state = this.submittedState ?? this.initialState;
+      const savedState = control.path ? getValue(state, control.path.join('.')) : undefined;
+      !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
+    }
     if(this.updateOn === 'change' && control.path) {
       this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: value }));
     }
@@ -157,15 +164,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap(() => {
 
-        if(this.updateOn === 'submit') {
-          this.store.dispatch(UpdateForm({split: this.split, value: this.formValue}));
-        }
-
         this.submittedState = this.formValue;
 
-        if (this.dir.form.dirty) {
-          this.dir.form.markAsPristine();
-          this.cdr.markForCheck();
+        if(this.updateOn === 'submit') {
+          this.store.dispatch(UpdateForm({split: this.split, value: this.formValue}));
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ split: this.split })))),
@@ -176,20 +178,16 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action && action.split?.startsWith(this.split) && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      tap((action: any) => {
-        const state = this.submittedState ?? this.initialState;
-        const savedState = getValue(state, action.property);
-
+      mergeMap((value) => this.store.select(selectDirty(this.split)).pipe(take(1), map((dirty) => ({action: value, dirty: dirty})))),
+      tap(({action, dirty}) => {
         const path = action.property.split('.');
-        const control = path.reduce((acc: any, key: string, index: number) => acc[key], this.dir.form.controls);
-        control.setValue(action.value, { emitEvent: false });
+        const control = path.reduce((acc: any, key: string, index: number) => acc.controls[key], this.dir.form);
 
-        const dirty = this.dir.form.dirty;
+        const notEqual = !deepEqual(this.formValue, this.submittedState ?? this.initialState);
 
-        !(savedState === control.value) ? control.markAsDirty() : control.markAsPristine();
-
-        if(this.dir.form.dirty !== dirty) {
-          this.store.dispatch(UpdateDirty({ split: this.split, dirty: this.dir.form.dirty }));
+        if(dirty !== notEqual) {
+          notEqual ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
+          this.store.dispatch(UpdateDirty({ split: this.split, dirty: notEqual }));
         }
 
         control.updateValueAndValidity();
@@ -199,17 +197,17 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split === this.split && [FormActions.UpdateForm, FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
+      filter((action: any) => action && action.split === this.split && [FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!this.enableQueue || action.deferred)),
       tap((action) => {
 
-        this.dir.form.patchValue(action?.value, {emitEvent: false});
+        this.dir.form.patchValue(action.value, {emitEvent: false});
 
         const initialized = this.initialized$.value;
-        const dirty = !initialized ? false : !deepEqual(action?.value, this.submittedState ?? this.initialState);
+        const dirty = !initialized ? false : !deepEqual(action.value, this.submittedState ?? this.initialState);
 
         if(!initialized) {
-          this.initialState = action?.value;
+          this.initialState = action.value;
           this.initialized$.next(true);
         }
 
@@ -263,7 +261,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destoyed));
 
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
-      filter(() => this.initialized$.value),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
       distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
       tap((value) => {
@@ -337,6 +335,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   get formValue(): any {
+    if(!this.controls) { return {}; }
 
     let value = {};
     for (const control of this.controls.toArray()) {
