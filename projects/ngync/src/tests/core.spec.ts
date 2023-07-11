@@ -134,7 +134,7 @@ describe('core', () => {
     it('should call subscription when InitForm action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onInitOrUpdate$.subscribe(stub);
+      subs.a = directive.onUpdate$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -158,7 +158,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+      subs.b = directive.onUpdate$.subscribe(stub);
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -222,7 +222,7 @@ describe('core', () => {
       const stub = jest.fn();
 
       subs.b = directive.onStatusChanges$.subscribe(stub);
-      subs.c = directive.onInitOrUpdate$.subscribe(stub);
+      subs.c = directive.onUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
       subs.e = directive.onReset$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
@@ -245,7 +245,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
-    it('onInitOrUpdate', async () => {
+    it('onUpdate', async () => {
       const auto = jest.fn();
 
       subs.a = directive.initialized$.subscribe(auto);
@@ -257,7 +257,7 @@ describe('core', () => {
 
       const stub = jest.fn();
 
-      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+      subs.b = directive.onUpdate$.subscribe(stub);
 
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
@@ -454,7 +454,7 @@ describe('core', () => {
     it('should call subscription when InitForm action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onInitOrUpdate$.subscribe(stub);
+      subs.a = directive.onUpdate$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -478,7 +478,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+      subs.b = directive.onUpdate$.subscribe(stub);
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -542,7 +542,7 @@ describe('core', () => {
       const stub = jest.fn();
 
       subs.b = directive.onStatusChanges$.subscribe(stub);
-      subs.c = directive.onInitOrUpdate$.subscribe(stub);
+      subs.c = directive.onUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
       subs.e = directive.onReset$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
@@ -566,7 +566,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
-    it('onInitOrUpdate', async () => {
+    it('onUpdate', async () => {
       const auto = jest.fn();
 
       subs.a = directive.initialized$.subscribe(auto);
@@ -578,7 +578,7 @@ describe('core', () => {
 
       const stub = jest.fn();
 
-      subs.b = directive.onInitOrUpdate$.subscribe(stub);
+      subs.b = directive.onUpdate$.subscribe(stub);
 
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
