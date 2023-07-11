@@ -28,7 +28,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
