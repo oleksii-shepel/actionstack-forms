@@ -102,7 +102,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   inputCallback = (control: NgControl) => (value : any) => {
     if(control.value !== value && control.control) {
-      control.control.setValue(value, { emitEvent: false });
+      control.control.setValue(value);
 
       const state = this.submittedState ?? this.initialState;
       const savedState = control.path ? getValue(state, control.path.join('.')) : undefined;
@@ -178,10 +178,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action && action.split?.startsWith(this.split) && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      mergeMap((value) => this.store.select(selectDirty(this.split)).pipe(take(1), map((dirty) => ({action: value, dirty: dirty})))),
-      tap(({action, dirty}) => {
-        const path = action.property.split('.');
-        const control = path.reduce((acc: any, key: string, index: number) => acc.controls[key], this.dir.form);
+      mergeMap(() => this.store.select(selectDirty(this.split)).pipe(take(1), map((dirty) => dirty))),
+      tap((dirty) => {
 
         const notEqual = !deepEqual(this.formValue, this.submittedState ?? this.initialState);
 
@@ -189,9 +187,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           notEqual ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
           this.store.dispatch(UpdateDirty({ split: this.split, dirty: notEqual }));
         }
-
-        control.updateValueAndValidity();
-        this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
     );
