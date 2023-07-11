@@ -1,18 +1,18 @@
 import { Action, createAction, props } from '@ngrx/store';
 
 export enum FormActions {
-  UpdateForm = '@forms/update',
-  UpdateField = '@forms/field/update',
-  ResetForm = '@forms/reset',
+  UpdateForm = '@forms/form/update',
+  UpdateField = '@forms/form/field/update',
+  ResetForm = '@forms/form/reset',
 }
 
 export enum FormActionsInternal {
   UpdateStatus = '@forms/internal/status/update',
   UpdateDirty = '@forms/internal/dirty/update',
   UpdateErrors = '@forms/internal/errors/update',
-  AutoInit = '@forms/internal/init',
-  AutoSubmit = '@forms/internal/submit',
-  FormDestroyed = '@forms/internal/destroyed',
+  AutoInit = '@forms/internal/form/init',
+  AutoSubmit = '@forms/internal/form/submit',
+  FormDestroyed = '@forms/internal/form/destroyed',
 }
 
 export const UpdateForm = createAction(
