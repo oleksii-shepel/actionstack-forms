@@ -14,25 +14,18 @@ import {
   Self
 } from '@angular/core';
 import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { Action, ActionsSubject, Store } from '@ngrx/store';
+import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
-  asyncScheduler,
   defer,
   distinctUntilChanged,
   filter,
-  finalize,
   from,
   fromEvent,
   map,
   mergeMap,
-  observeOn,
-  of,
   sampleTime,
-  scan,
-  startWith,
-  switchMap,
   take,
   takeWhile,
   tap
@@ -48,9 +41,7 @@ import {
 import {
   AutoInit,
   AutoSubmit,
-  Deferred,
   FormActions,
-  FormActionsInternal,
   FormDestroyed,
   UpdateDirty,
   UpdateErrors,
@@ -58,8 +49,7 @@ import {
   UpdateForm,
   UpdateStatus
 } from './actions';
-import { Queue } from './queue';
-import { actionQueues, selectDirty } from './reducers';
+import { selectDirty } from './reducers';
 
 
 export interface NygmaConfig {
@@ -81,7 +71,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   split!: string;
   debounceTime!: number;
-  enableQueue!: boolean;
   updateOn!: string;
 
   dir!: NgForm | FormGroupDirective;
@@ -113,12 +102,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
   }
 
-  onInitOrUpdate$!: Observable<any>;
+  onInit$!: Observable<any>;
+  onUpdate$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
   onSubmit$!: Observable<any>;
   onReset$!: Observable<any>;
   onStatusChanges$!: Observable<any>;
-  onActionQueued$!: Observable<any>;
   onUpdateField$!: Observable<any>;
 
   constructor(
@@ -143,7 +132,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       this.split = config.slice;
     }
 
-    this.enableQueue = config.enableQueue;
     this.debounceTime = config.debounceTime;
     this.updateOn = config.updateOn;
 
@@ -155,9 +143,29 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    if(this.enableQueue) {
-      actionQueues.set(this.split, new Queue());
-    }
+    this.onInit$ = this.store.select(selectValue(this.split)).pipe(
+      take(1),
+      tap(value => {
+
+        if(value) {
+          this.dir.form.patchValue(value, {emitEvent: false});
+          this.dir.form.markAsPristine();
+
+          this.store.dispatch(AutoInit({ split: this.split, value: value }));
+          this.store.dispatch(UpdateDirty({ split: this.split, dirty: false }));
+
+        } else {
+          this.store.dispatch(AutoInit({ split: this.split, value: this.formValue }));
+          this.store.dispatch(UpdateDirty({ split: this.split, dirty: this.dir.form.dirty }));
+        }
+
+        this.dir.form.updateValueAndValidity();
+        this.cdr.markForCheck();
+
+        this.initialState = value ?? this.formValue;
+        this.initialized$.next(true);
+      }),
+    )
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.dir.form.valid),
@@ -191,22 +199,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destoyed)
     );
 
-    this.onInitOrUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split === this.split && [FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
-      filter((action: any) => (!this.enableQueue || action.deferred)),
+    this.onUpdate$ = this.actionsSubject.pipe(
+      filter((action: any) => action && action.split === this.split && action.type === FormActions.UpdateForm),
       tap((action) => {
 
         this.dir.form.patchValue(action.value, {emitEvent: false});
 
-        const initialized = this.initialized$.value;
-        const dirty = !initialized ? false : !deepEqual(action.value, this.submittedState ?? this.initialState);
+        const dirty = !deepEqual(action.value, this.submittedState ?? this.initialState);
 
-        if(!initialized) {
-          this.initialState = action.value;
-          this.initialized$.next(true);
-        }
-
-        if(this.dir.form.dirty !== dirty || !initialized) {
+        if(this.dir.form.dirty !== dirty) {
           dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
           this.store.dispatch(UpdateDirty({ split: this.split, dirty: dirty }));
         }
@@ -217,26 +218,20 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destoyed)
     );
 
-    this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      switchMap(() => from(this.store.select(selectValue(this.split))).pipe(take(1))),
-      map((value) => value ? value : this.formValue),
+    this.onControlsChanges$ = defer(() => this.controls.changes).pipe(
       tap(() => {
         this.controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
             control.valueAccessor.registerOnChange(this.inputCallback(control));
-            control.valueAccessor.registerOnTouched(this.blurCallback(control));
           }
         });
       }),
-      tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ split: this.split, value: value })); } }),
-      scan((acc, _) => acc + 1, 0),
-      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ split: this.split, value: this.formValue })); } }),
-      takeWhile(() => !this.destoyed),
+      tap(() => { this.store.dispatch(UpdateForm({ split: this.split, value: this.formValue })); }),
+      takeWhile(() => !this.destoyed)
     );
 
     this.onReset$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.split === this.split && action.type === FormActions.ResetForm),
-      filter((action) => (!this.enableQueue || action.deferred)),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         if(action.state){
@@ -268,46 +263,20 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destoyed),
     );
 
-    this.onActionQueued$ = of(this.enableQueue).pipe(
-      filter((value) => value),
-      switchMap(() => actionQueues.get(this.split)?.updated$ || of(null)),
-      filter((value) => value !== null),
-      observeOn(asyncScheduler),
-      tap((queue) => {
-        if(queue.initialized$.value) {
-          while(queue.length > 0) {
-            this.store.dispatch(queue.dequeue());
-          }
-        }
-      }),
-      takeWhile(() => document.contains(this.elRef.nativeElement)),
-      finalize(() => {
-        const queue = actionQueues.get(this.split) as Queue<Action>;
-        if(queue.initialized$.value) {
-          while(queue.length > 0) {
-            this.store.dispatch(queue.dequeue() as Action);
-          }
-          this.store.dispatch(new Deferred(FormDestroyed({ split: this.split })));
-        }
-        actionQueues.delete(this.split);
-      }),
-    );
+    this.subs.a = this.onStatusChanges$.subscribe();
+    this.subs.b = this.onUpdateField$.subscribe();
+    this.subs.c = this.onInit$.subscribe();
+    this.subs.d = this.onUpdate$.subscribe();
+    this.subs.e = this.onSubmit$.subscribe();
+    this.subs.f = this.onReset$.subscribe();
   }
 
   ngAfterContentInit() {
-    this.subs.a = this.onActionQueued$.subscribe();
-    this.subs.b = this.onStatusChanges$.subscribe();
-    this.subs.c = this.onUpdateField$.subscribe();
-    this.subs.d = this.onInitOrUpdate$.subscribe();
-    this.subs.e = this.onSubmit$.subscribe();
-    this.subs.f = this.onReset$.subscribe();
     this.subs.g = this.onControlsChanges$.subscribe();
   }
 
   ngOnDestroy() {
-    if(!this.enableQueue) {
-      this.store.dispatch(FormDestroyed({ split: this.split }));
-    }
+    this.store.dispatch(FormDestroyed({ split: this.split }));
 
     for (const sub of Object.keys(this.subs)) {
       this.subs[sub].unsubscribe();
