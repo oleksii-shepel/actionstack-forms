@@ -52,9 +52,6 @@ export interface NgyncConfig {
 }
 ```
 <p align="justify">
-<i>*** I highly recommend you to enable the action queue as it is made by default. It is a new feature of ngync that will save you a lot of time and efforts by developing. It helps to solve the problem associated with the unpreparedness of the directive to process actions at the start, until the moment of its initialization. Keep in mind that all internal action listeners are only available after ngAfterContentInit has been called.</i>
-</p>
-<p align="justify">
 Additionally, you have to import ngync module to your application and set up meta-reducers. They are core functions that orchestrate all main functionality of the library. Before reaping the benefits of their power, these components must be registered with the NgRx store module. Don't worry, it's just another pint-sized prerequisite. Once registered, they take charge of handling the Redux action set, relieving you from the burden of implementing repetitive boilerplate functionality time and again.
 </p>
 <p align="justify">

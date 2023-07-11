@@ -1,3 +1,4 @@
+import { ValidationErrors } from '@angular/forms';
 import { Action, createAction, props } from '@ngrx/store';
 
 export enum FormActions {
@@ -42,7 +43,7 @@ export const UpdateDirty = createAction(
 
 export const UpdateErrors = createAction(
   FormActionsInternal.UpdateErrors,
-  props<{ path: string; errors: Record<string, string>; }>()
+  props<{ path: string; errors: ValidationErrors | null }>()
 );
 
 export const AutoInit = createAction(
