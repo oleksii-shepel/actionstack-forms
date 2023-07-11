@@ -102,7 +102,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   inputCallback = (control: NgControl) => (value : any) => {
     if(control.value !== value && control.control) {
-      control.control.setValue(value, { emitEvent: false });
+      control.control.setValue(value);
 
       const state = this.submittedState ?? this.initialState;
       const savedState = control.path ? getValue(state, control.path.join('.')) : undefined;
@@ -189,9 +189,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           notEqual ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
           this.store.dispatch(UpdateDirty({ path: this.slice, dirty: notEqual }));
         }
-
-        control.updateValueAndValidity();
-        this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
     );
