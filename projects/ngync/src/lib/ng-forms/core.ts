@@ -178,10 +178,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateField),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      mergeMap((value) => this.store.select(selectDirty(this.slice)).pipe(take(1), map((dirty) => ({action: value, dirty: dirty})))),
-      tap(({action, dirty}) => {
-        const path = action.property.split('.');
-        const control = path.reduce((acc: any, key: string, index: number) => acc.controls[key], this.dir.form);
+      mergeMap(() => this.store.select(selectDirty(this.slice)).pipe(take(1), map((dirty) => dirty))),
+      tap((dirty) => {
 
         const notEqual = !deepEqual(this.formValue, this.submittedState ?? this.initialState);
 
