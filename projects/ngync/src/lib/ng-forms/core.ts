@@ -155,14 +155,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this.store.dispatch(UpdateDirty({ path: this.slice, dirty: false }));
 
         } else {
-          this.store.dispatch(AutoInit({ path: this.slice, value: this.formValue }));
+          this.store.dispatch(AutoInit({ path: this.slice, value: this.dir.form.value }));
           this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
         }
 
         this.dir.form.updateValueAndValidity();
         this.cdr.markForCheck();
 
-        this.initialState = value ?? this.formValue;
+        this.initialState = value ?? this.dir.form.value;
         this.initialized$.next(true);
       }),
     )
