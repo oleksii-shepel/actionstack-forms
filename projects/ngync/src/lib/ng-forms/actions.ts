@@ -1,5 +1,5 @@
 import { ValidationErrors } from '@angular/forms';
-import { Action, createAction, props } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 
 export enum FormActions {
   UpdateForm = '@forms/form/update',
@@ -67,12 +67,3 @@ export const FormDestroyed = createAction(
   FormActionsInternal.FormDestroyed,
   props<{ path: string; }>()
 );
-
-export class Deferred implements Action {
-  type!: string;
-  deferred = true;
-
-  constructor(action: Action) {
-    Object.assign(this, action);
-  }
-}

@@ -26,6 +26,7 @@ import {
   map,
   mergeMap,
   sampleTime,
+  skip,
   startWith,
   switchMap,
   take,
@@ -208,6 +209,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onUpdate$ = this.actionsSubject.pipe(
+      skip(1),
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateForm),
       mergeMap(() => this.store.select(selectFormCast(this.slice)).pipe(take(1), map((formCast) => formCast))),
       tap((formCast) => {
