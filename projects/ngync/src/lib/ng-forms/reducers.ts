@@ -6,6 +6,7 @@ import { deepClone, difference, getValue, setValue } from './utils';
 
 export interface FormCast<T> {
   value: T;
+  reference?: T;
   errors?: Record<string, string>;
   dirty?: boolean;
   status?: string;
@@ -16,6 +17,7 @@ export interface FormCast<T> {
 
 export const selectFormCast = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
 export const selectValue = (slice: string) => createSelector(selectFormCast(slice), state => state?.value);
+export const selectReference = (slice: string) => createSelector(selectFormCast(slice), state => state?.reference);
 export const selectErrors = (slice: string) => createSelector(selectFormCast(slice), state => state?.errors);
 export const selectDirty = (slice: string) => createSelector(selectFormCast(slice), state => state?.dirty);
 export const selectStatus = (slice: string) => createSelector(selectFormCast(slice), state => state?.status);
@@ -24,6 +26,7 @@ export const selectSubmitted = (slice: string) => createSelector(selectFormCast(
 
 
 export const propValue = 'value';
+export const propReference = 'reference';
 export const propErrors = 'errors';
 export const propDirty = 'dirty';
 export const propStatus = 'status';
@@ -52,6 +55,9 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
           feature = setValue(feature,`${propValue}.${action.property}`, action.value);
           break;
         case FormActions.ResetForm:
+          break;
+        case FormActionsInternal.UpdateReference:
+          feature = setValue(feature, propReference, action.value);
           break;
         case FormActionsInternal.UpdateStatus:
           feature = setValue(feature, propStatus, action.status);

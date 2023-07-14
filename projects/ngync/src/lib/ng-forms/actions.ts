@@ -8,6 +8,7 @@ export enum FormActions {
 }
 
 export enum FormActionsInternal {
+  UpdateReference = '@forms/internal/reference/update',
   UpdateStatus = '@forms/internal/status/update',
   UpdateDirty = '@forms/internal/dirty/update',
   UpdateErrors = '@forms/internal/errors/update',
@@ -30,6 +31,12 @@ export const ResetForm = createAction(
   FormActions.ResetForm,
   props<{ path: string; state: 'initial' | 'submitted' | 'blank'}>()
 );
+
+export const UpdateReference = createAction(
+  FormActionsInternal.UpdateReference,
+  props<{ path: string; value: any; }>()
+);
+
 
 export const UpdateStatus = createAction(
   FormActionsInternal.UpdateStatus,
