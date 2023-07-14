@@ -47,6 +47,7 @@ import {
 import {
   AutoInit,
   AutoSubmit,
+  Deferred,
   FormActions,
   FormDestroyed,
   UpdateDirty,
