@@ -1,3 +1,4 @@
+import { ValidationErrors } from '@angular/forms';
 import { Action, createAction, props } from '@ngrx/store';
 
 export enum FormActions {
@@ -7,6 +8,7 @@ export enum FormActions {
 }
 
 export enum FormActionsInternal {
+  UpdateReference = '@forms/internal/reference/update',
   UpdateStatus = '@forms/internal/status/update',
   UpdateDirty = '@forms/internal/dirty/update',
   UpdateErrors = '@forms/internal/errors/update',
@@ -30,6 +32,12 @@ export const ResetForm = createAction(
   props<{ path: string; state: 'initial' | 'submitted' | 'blank'}>()
 );
 
+export const UpdateReference = createAction(
+  FormActionsInternal.UpdateReference,
+  props<{ path: string; value: any; }>()
+);
+
+
 export const UpdateStatus = createAction(
   FormActionsInternal.UpdateStatus,
   props<{ path: string; status: string; }>()
@@ -42,7 +50,7 @@ export const UpdateDirty = createAction(
 
 export const UpdateErrors = createAction(
   FormActionsInternal.UpdateErrors,
-  props<{ path: string; errors: Record<string, string>; }>()
+  props<{ path: string; errors: ValidationErrors | null }>()
 );
 
 export const AutoInit = createAction(
