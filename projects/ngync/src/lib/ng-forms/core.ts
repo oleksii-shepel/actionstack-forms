@@ -206,6 +206,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onUpdateField$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateField),
+      filter((action: any) => (!this.enableQueue || action.deferred)),
       sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormCast(this.slice)).pipe(take(1), map((formCast) => formCast))),
@@ -224,6 +225,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onUpdate$ = this.actionsSubject.pipe(
       skip(1),
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateForm),
+      filter((action: any) => (!this.enableQueue || action.deferred)),
       mergeMap(() => this.store.select(selectFormCast(this.slice)).pipe(take(1), map((formCast) => formCast))),
       tap((formCast) => {
 
@@ -259,6 +261,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onReset$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.path === this.slice && action.type === FormActions.ResetForm),
+      filter((action: any) => (!this.enableQueue || action.deferred)),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap((action: any) => {
         if(action.state){

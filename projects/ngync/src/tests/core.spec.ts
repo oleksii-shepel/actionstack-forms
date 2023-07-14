@@ -227,9 +227,13 @@ describe('core', () => {
       subs.e = directive.onReset$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
 
-      const numberOfCalls = stub.mock.calls.length;
       document.body.removeChild(fixture.debugElement.nativeElement);
       directive.ngOnDestroy();
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      const numberOfCalls = stub.mock.calls.length;
 
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
@@ -547,10 +551,13 @@ describe('core', () => {
       subs.e = directive.onReset$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
 
-      const numberOfCalls = stub.mock.calls.length;
-
       document.body.removeChild(fixture.debugElement.nativeElement);
       directive.ngOnDestroy();
+
+      jest.advanceTimersByTime(3000);
+      await fixture.whenStable();
+
+      const numberOfCalls = stub.mock.calls.length;
 
       directive.store.dispatch(AutoInit({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(AutoSubmit({ path:'slice' }));
