@@ -1,16 +1,29 @@
 import { CommonModule } from "@angular/common";
-import { CUSTOM_ELEMENTS_SCHEMA, Component } from "@angular/core";
+import { CUSTOM_ELEMENTS_SCHEMA, Component, ViewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { AsyncValidator, FormArray, FormControl, FormsModule, NgForm, NgModel, ReactiveFormsModule, ValidationErrors } from "@angular/forms";
+import { Observable } from "rxjs";
 import { FormGroupMixin } from '../lib/ng-model-array/mixin';
 import { NgModelArray } from "../lib/ng-model-array/ngmodelarray";
 import { NgFormsModule, NgModelArrayModule } from "../public-api";
 
+class AsyncValidatorDirective implements AsyncValidator {
+  constructor(private expected: string, private error: any) {}
+
+  validate(c: any): Observable<ValidationErrors> {
+    return new Observable((obs: any) => {
+      const error = this.expected !== c.value ? this.error : null;
+      obs.next(error);
+      obs.complete();
+    });
+  }
+}
 @Component({
   selector: 'test-component',
   template: ``
 })
 export class TestComponent {
+  @ViewChild('form', {read: NgForm}) ngForm!: NgForm;
   model = {
     aliases: ['Johny', 'Johnny']
   };
@@ -53,7 +66,68 @@ describe('core', () => {
     expect(directive.form.controls.length).toBe(2);
     expect(directive.form.value).toEqual(['Johny', 'Johnny']);
   });
+  it('should return a form array', async() => {
+    fixture.detectChanges();
+    await fixture.whenStable();
 
+    expect(directive.control instanceof FormArray).toBe(true);
+    expect(directive.control.length).toEqual(2);
+  });
+  it('should throw an exception when path or name of the control is null', async() => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const parent = directive._parent;
+    const name = directive.name;
+
+    expect(() => directive.path).not.toThrow();
+
+    directive._parent = { get path(): any {return null;} } as any;
+    expect(() => directive.path).toThrowError();
+    directive._parent = parent;
+
+    Object.assign(directive, {name: null});
+    expect(() => directive.path).toThrowError();
+
+    directive._parent = { get path(): any {return null;} } as any;
+    Object.assign(directive, {name: null});
+    expect(() => directive.path).toThrowError();
+
+    directive.name = name;
+    directive._parent = parent;
+  });
+  it('should return root ngForm directive', async() => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(directive.ngForm instanceof NgForm).toBe(true);
+    expect(directive.ngForm).toBe(fixture.componentRef.instance.ngForm);
+  });
+  it('should add and remove NgModel controls', async() => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const control = new NgModel(directive, null as any, null as any, null as any, null as any);
+    control.name = '2';
+
+    directive.addControl(control);
+    expect(directive.control.length).toEqual(3);
+    expect(directive.ngForm.form.get(control.path)).toBe(control.control);
+    expect(directive.control.controls.includes(control.control)).toBe(true);
+
+    directive.removeControl(control);
+    expect(directive.control.length).toEqual(2);
+    expect(directive.control.controls.includes(control.control)).toBe(false);
+
+    expect(directive.ngForm).toBe(fixture.componentRef.instance.ngForm);
+  });
+  it('should normalize validators', async() => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const array = directive.normalizeValidators([AsyncValidatorDirective, () => {return null;}]);
+    expect(array.length).toBe(2);
+  })
   it("should extend FormGroupMixin", async() => {
     fixture.detectChanges();
     await fixture.whenStable();
