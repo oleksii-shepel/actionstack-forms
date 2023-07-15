@@ -1,18 +1,20 @@
-import { Action, createAction, props } from '@ngrx/store';
+import { ValidationErrors } from '@angular/forms';
+import { createAction, props } from '@ngrx/store';
 
 export enum FormActions {
-  UpdateForm = '@forms/update',
-  UpdateField = '@forms/field/update',
-  ResetForm = '@forms/reset',
+  UpdateForm = '@forms/form/update',
+  UpdateField = '@forms/form/field/update',
+  ResetForm = '@forms/form/reset',
 }
 
 export enum FormActionsInternal {
+  UpdateReference = '@forms/internal/reference/update',
   UpdateStatus = '@forms/internal/status/update',
   UpdateDirty = '@forms/internal/dirty/update',
   UpdateErrors = '@forms/internal/errors/update',
-  AutoInit = '@forms/internal/init',
-  AutoSubmit = '@forms/internal/submit',
-  FormDestroyed = '@forms/internal/destroyed',
+  AutoInit = '@forms/internal/form/init',
+  AutoSubmit = '@forms/internal/form/submit',
+  FormDestroyed = '@forms/internal/form/destroyed',
 }
 
 export const UpdateForm = createAction(
@@ -30,6 +32,12 @@ export const ResetForm = createAction(
   props<{ split: string; state: 'initial' | 'submitted' | 'blank'}>()
 );
 
+export const UpdateReference = createAction(
+  FormActionsInternal.UpdateReference,
+  props<{ split: string; value: any; }>()
+);
+
+
 export const UpdateStatus = createAction(
   FormActionsInternal.UpdateStatus,
   props<{ split: string; status: string; }>()
@@ -42,7 +50,7 @@ export const UpdateDirty = createAction(
 
 export const UpdateErrors = createAction(
   FormActionsInternal.UpdateErrors,
-  props<{ split: string; errors: Record<string, string>; }>()
+  props<{ split: string; errors: ValidationErrors | null }>()
 );
 
 export const AutoInit = createAction(
@@ -59,12 +67,3 @@ export const FormDestroyed = createAction(
   FormActionsInternal.FormDestroyed,
   props<{ split: string; }>()
 );
-
-export class Deferred implements Action {
-  type!: string;
-  deferred = true;
-
-  constructor(action: Action) {
-    Object.assign(this, action);
-  }
-}
