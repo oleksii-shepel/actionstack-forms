@@ -79,6 +79,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   dir!: NgForm | FormGroupDirective;
 
   initialState: any = undefined;
+  referenceState: any = undefined;
   submittedState: any = undefined;
   destoyed = false;
 
@@ -96,8 +97,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     if(control.value !== value && control.control) {
       control.control.setValue(value);
 
-      const state = this.submittedState ?? this.initialState;
-      const savedState = control.path ? getValue(state, control.path.join('.')) : undefined;
+      const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
       !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
     }
     if(this.updateOn === 'change' && control.path) {
@@ -152,7 +152,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
         if(formCast.value) {
           this.dir.form.patchValue(formCast.value, {emitEvent: false});
-          this.dir.form.markAsPristine();
+          formCast.dirty? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
 
           this.store.dispatch(AutoInit({ path: this.slice, value: formCast.value }));
           this.store.dispatch(UpdateDirty({ path: this.slice, dirty: formCast.dirty }));
@@ -166,12 +166,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this.cdr.markForCheck();
 
         this.initialState = formCast.value ?? this.dir.form.value;
+        this.initialized$.next(true);
 
         if(!formCast.reference) {
-          this.store.dispatch(UpdateReference({ path: this.slice, value: this.initialState }));
+          this.referenceState = this.initialState;
+          this.store.dispatch(UpdateReference({ path: this.slice, value: this.referenceState }));
         }
-
-        this.initialized$.next(true);
       }),
     )
 
@@ -181,9 +181,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(() => {
 
         this.submittedState = this.formValue;
+        this.referenceState = this.submittedState;
 
         if(this.updateOn === 'submit') {
-          this.store.dispatch(UpdateReference({ path: this.slice, value: this.submittedState }));
+          this.store.dispatch(UpdateReference({ path: this.slice, value: this.referenceState }));
           this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState }));
         }
       }),

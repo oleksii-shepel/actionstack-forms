@@ -673,7 +673,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
@@ -724,14 +724,14 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [ngync]="{slice: 'slice', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
+          <form [formGroup]="form" [ngync]="{slice: 'slice', debounce: 125, updateOn: 'blur', autoSubmit: false }">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -809,7 +809,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
