@@ -17,7 +17,7 @@ import { FormControlStatus, FormGroupDirective, NgControl, NgForm } from '@angul
 import { Store } from '@ngrx/store';
 import {
   sampleTime,
-  scan,
+  skip,
   startWith,
   take, takeWhile, tap
 } from 'rxjs';
@@ -36,11 +36,14 @@ export class SyncDirective implements OnInit, AfterContentInit, OnDestroy {
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   dir: NgForm | FormGroupDirective;
-  debounceTime = 100;
+
+  debounceTime = 500;
+  eventListeners = new Map<NgControl, any>();
 
   _subs = {} as any;
 
-  inputCallback = (control: NgControl) => (value : any) => {
+  inputCallback = (control: NgControl) => (event : Event) => {
+    const value = (event.target as any)?.value;
     if(control.path) {
       this.dir.form.patchValue(setValue(this.dir.form.value, control.path.join('.'), value));
     }
@@ -81,15 +84,23 @@ export class SyncDirective implements OnInit, AfterContentInit, OnDestroy {
 
   ngAfterContentInit() {
     this._subs.c = this.controls.changes.pipe(startWith(this.controls)).pipe(
-      scan((acc, _) => acc + 1, 0),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
-          if(control.valueAccessor) {
-            control.valueAccessor.registerOnChange(this.inputCallback(control));
+          const nativeElement = (control.valueAccessor as any)?._elementRef?.nativeElement;
+          if(nativeElement) {
+            let listeners = this.eventListeners.get(control);
+            if(listeners) {
+              nativeElement.removeEventListener('input', listeners['input']);
+            }
+
+            listeners = {'input': this.inputCallback(control)};
+            nativeElement.addEventListener('input', listeners['input']);
+            this.eventListeners.set(control, listeners);
           }
         });
       }),
-      tap((value) => { if (value > 1) { this.dir.form.patchValue(this.formValue); this.cdr.detectChanges(); } }),
+      skip(1),
+      tap(() => { this.dir.form.patchValue(this.formValue); this.cdr.detectChanges(); }),
     ).subscribe();
   }
 
