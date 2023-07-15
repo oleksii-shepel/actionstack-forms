@@ -77,6 +77,7 @@ export interface NgyncConfig {
 export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   @Input('ngync') config!: string | NgyncConfig;
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
+  eventListeners = new Map<NgControl, any>();
 
   slice!: string;
   debounceTime!: number;
@@ -94,13 +95,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   subs = {} as any;
 
-  blurCallback = (control: NgControl) => (value: any) => {
+  blurCallback = (control: NgControl) => (event: Event) => {
     if(this.updateOn === 'blur' && control.path) {
       this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: control.value }));
     }
   }
 
-  inputCallback = (control: NgControl) => (value : any) => {
+  inputCallback = (control: NgControl) => (event : Event) => {
+    const value = (event.target as any)?.value;
     if(control.value !== value && control.control) {
       control.control.setValue(value);
 
@@ -231,14 +233,23 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       map((value) => value ? value : this.formValue),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
-          if(control.valueAccessor) {
-            control.valueAccessor.registerOnChange(this.inputCallback(control));
-            control.valueAccessor.registerOnTouched(this.blurCallback(control));
+          const nativeElement = (control.valueAccessor as any)?._elementRef?.nativeElement;
+          if(nativeElement) {
+            let listeners = this.eventListeners.get(control);
+            if(listeners) {
+              nativeElement.removeEventListener('input', listeners['input']);
+              nativeElement.removeEventListener('blur', listeners['blur']);
+            }
+
+            listeners = {'input': this.inputCallback(control), 'blur': this.blurCallback(control)};
+            nativeElement.addEventListener('input', listeners['input']);
+            nativeElement.addEventListener('blur', listeners['blur']);
+            this.eventListeners.set(control, listeners);
           }
         });
       }),
       tap(value => { if(!this.initialized$.value) { this.store.dispatch(AutoInit({ path: this.slice, value: value })); }
-      else { this.store.dispatch(UpdateForm({ path: this.slice, value: value } )) }}),
+      else { this.store.dispatch(UpdateForm({ path: this.slice, value: this.formValue } )) }}),
       takeWhile(() => !this.destoyed),
     );
 
