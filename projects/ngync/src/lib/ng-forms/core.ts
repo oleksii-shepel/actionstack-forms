@@ -97,11 +97,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     if(control.value !== value && control.control) {
       control.control.setValue(value);
 
-      const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
+      const controlPath = control.path ? control.path.join('.') : undefined;
+      const savedState = controlPath ? getValue(this.referenceState, controlPath) : undefined;
       !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
-    }
-    if(this.updateOn === 'change' && control.path) {
-      this.store.dispatch(UpdateField({ path: this.slice, property: control.path.join('.'), value: value }));
+
+      if(this.updateOn === 'change' && controlPath) {
+        this.store.dispatch(UpdateField({ path: this.slice, property: controlPath, value: value }));
+      }
     }
   }
 
@@ -199,7 +201,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       mergeMap(() => this.store.select(selectFormCast(this.slice)).pipe(take(1), map((formCast) => formCast))),
       tap((formCast) => {
 
-        const notEqual = !deepEqual(this.formValue, formCast.reference);
+        const notEqual = !deepEqual(formCast.value, formCast.reference);
 
         if(formCast.dirty !== notEqual) {
           notEqual ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
