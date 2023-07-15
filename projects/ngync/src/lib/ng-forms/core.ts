@@ -28,7 +28,6 @@ import {
   sampleTime,
   skip,
   startWith,
-  switchMap,
   take,
   takeWhile,
   tap
@@ -232,7 +231,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      switchMap(() => from(this.store.select(selectValue(this.slice))).pipe(take(1))),
+      mergeMap(() => from(this.store.select(selectValue(this.slice))).pipe(take(1))),
       map((value) => value ? value : this.formValue),
       tap(() => {
         this.controls.forEach((control: NgControl) => {
