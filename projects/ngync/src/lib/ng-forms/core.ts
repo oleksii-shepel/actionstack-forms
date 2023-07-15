@@ -30,7 +30,6 @@ import {
   observeOn,
   of,
   sampleTime,
-  skip,
   startWith,
   switchMap,
   take,
@@ -49,6 +48,7 @@ import {
   AutoSubmit,
   Deferred,
   FormActions,
+  FormActionsInternal,
   FormDestroyed,
   UpdateDirty,
   UpdateErrors,
@@ -86,6 +86,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   dir!: NgForm | FormGroupDirective;
 
   initialState: any = undefined;
+  referenceState: any = undefined;
   submittedState: any = undefined;
   destoyed = false;
 
@@ -103,8 +104,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     if(control.value !== value && control.control) {
       control.control.setValue(value);
 
-      const state = this.submittedState ?? this.initialState;
-      const savedState = control.path ? getValue(state, control.path.join('.')) : undefined;
+      const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
       !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
     }
     if(this.updateOn === 'change' && control.path) {
@@ -112,8 +112,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
   }
 
-  onInit$!: Observable<any>;
-  onUpdate$!: Observable<any>;
+  onInitOrUpdate$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
   onSubmit$!: Observable<any>;
   onReset$!: Observable<any>;
@@ -159,44 +158,16 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       actionQueues.set(this.slice, new Queue());
     }
 
-    this.onInit$ = this.store.select(selectFormCast(this.slice)).pipe(
-      take(1),
-      tap(formCast => {
-
-        if(formCast.value) {
-          this.dir.form.patchValue(formCast.value, {emitEvent: false});
-          this.dir.form.markAsPristine();
-
-          this.store.dispatch(AutoInit({ path: this.slice, value: formCast.value }));
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: formCast.dirty }));
-
-        } else {
-          this.store.dispatch(AutoInit({ path: this.slice, value: this.dir.form.value }));
-          this.store.dispatch(UpdateDirty({ path: this.slice, dirty: this.dir.form.dirty }));
-        }
-
-        this.dir.form.updateValueAndValidity();
-        this.cdr.markForCheck();
-
-        this.initialState = formCast.value ?? this.dir.form.value;
-
-        if(!formCast.reference) {
-          this.store.dispatch(UpdateReference({ path: this.slice, value: this.initialState }));
-        }
-
-        this.initialized$.next(true);
-      }),
-    )
-
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.dir.form.valid),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap(() => {
 
         this.submittedState = this.formValue;
+        this.referenceState = this.submittedState;
 
         if(this.updateOn === 'submit') {
-          this.store.dispatch(UpdateReference({ path: this.slice, value: this.submittedState }));
+          this.store.dispatch(UpdateReference({ path: this.slice, value: this.referenceState }));
           this.store.dispatch(UpdateForm({ path: this.slice, value: this.submittedState }));
         }
       }),
@@ -222,17 +193,29 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destoyed)
     );
 
-    this.onUpdate$ = this.actionsSubject.pipe(
-      skip(1),
-      filter((action: any) => action && action.path === this.slice && action.type === FormActions.UpdateForm),
+    this.onInitOrUpdate$ = this.actionsSubject.pipe(
+      filter((action: any) => action && action.path === this.slice && [FormActions.UpdateForm, FormActionsInternal.AutoInit].includes(action.type)),
       filter((action: any) => (!this.enableQueue || action.deferred)),
-      mergeMap(() => this.store.select(selectFormCast(this.slice)).pipe(take(1), map((formCast) => formCast))),
+      switchMap(() => from(this.store.select(selectFormCast(this.slice))).pipe(take(1))),
       tap((formCast) => {
 
         this.dir.form.patchValue(formCast.value, {emitEvent: false});
-        const dirty = !deepEqual(formCast.value, formCast.reference);
 
-        if(this.dir.form.dirty !== dirty) {
+        const initialized = this.initialized$.value;
+
+        if(!initialized) {
+          this.initialState = formCast.value;
+          this.initialized$.next(true);
+
+          if(!this.referenceState) {
+            this.referenceState = this.initialState;
+            this.store.dispatch(UpdateReference({ path: this.slice, value: this.referenceState }));
+          }
+        }
+
+        const dirty = !initialized ? formCast.dirty : !deepEqual(formCast.value, this.referenceState);
+
+        if(this.dir.form.dirty !== dirty || !initialized) {
           dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
           this.store.dispatch(UpdateDirty({ path: this.slice, dirty: dirty }));
         }
@@ -278,7 +261,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
       }),
-      takeWhile(() => !this.destoyed));
+      takeWhile(() => !this.destoyed)
+    );
 
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
@@ -320,15 +304,14 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.subs.a = this.onStatusChanges$.subscribe();
     this.subs.b = this.onUpdateField$.subscribe();
-    this.subs.c = this.onInit$.subscribe();
-    this.subs.d = this.onUpdate$.subscribe();
-    this.subs.e = this.onSubmit$.subscribe();
-    this.subs.f = this.onReset$.subscribe();
-    this.subs.g = this.onActionQueued$.subscribe();
+    this.subs.c = this.onInitOrUpdate$.subscribe();
+    this.subs.d = this.onSubmit$.subscribe();
+    this.subs.e = this.onReset$.subscribe();
+    this.subs.f = this.onActionQueued$.subscribe();
   }
 
   ngAfterContentInit() {
-    this.subs.h = this.onControlsChanges$.subscribe();
+    this.subs.g = this.onControlsChanges$.subscribe();
   }
 
   ngOnDestroy() {

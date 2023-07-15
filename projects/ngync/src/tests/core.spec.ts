@@ -134,7 +134,7 @@ describe('core', () => {
     it('should call subscription when InitForm action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onUpdate$.subscribe(stub);
+      subs.a = directive.onInitOrUpdate$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -158,7 +158,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onUpdate$.subscribe(stub);
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -222,7 +222,7 @@ describe('core', () => {
       const stub = jest.fn();
 
       subs.b = directive.onStatusChanges$.subscribe(stub);
-      subs.c = directive.onUpdate$.subscribe(stub);
+      subs.c = directive.onInitOrUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
       subs.e = directive.onReset$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
@@ -249,7 +249,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
-    it('onUpdate', async () => {
+    it('onInitOrUpdate', async () => {
       const auto = jest.fn();
 
       subs.a = directive.initialized$.subscribe(auto);
@@ -261,7 +261,7 @@ describe('core', () => {
 
       const stub = jest.fn();
 
-      subs.b = directive.onUpdate$.subscribe(stub);
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
 
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
@@ -458,7 +458,7 @@ describe('core', () => {
     it('should call subscription when InitForm action dispatched', async() => {
       const stub = jest.fn();
 
-      subs.a = directive.onUpdate$.subscribe(stub);
+      subs.a = directive.onInitOrUpdate$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -482,7 +482,7 @@ describe('core', () => {
 
       expect(stub).toHaveBeenCalled();
 
-      subs.b = directive.onUpdate$.subscribe(stub);
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
 
       jest.advanceTimersByTime(3000);
@@ -546,7 +546,7 @@ describe('core', () => {
       const stub = jest.fn();
 
       subs.b = directive.onStatusChanges$.subscribe(stub);
-      subs.c = directive.onUpdate$.subscribe(stub);
+      subs.c = directive.onInitOrUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
       subs.e = directive.onReset$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
@@ -573,7 +573,7 @@ describe('core', () => {
       expect(stub).toHaveBeenCalledTimes(numberOfCalls);
     });
 
-    it('onUpdate', async () => {
+    it('onInitOrUpdate', async () => {
       const auto = jest.fn();
 
       subs.a = directive.initialized$.subscribe(auto);
@@ -585,7 +585,7 @@ describe('core', () => {
 
       const stub = jest.fn();
 
-      subs.b = directive.onUpdate$.subscribe(stub);
+      subs.b = directive.onInitOrUpdate$.subscribe(stub);
 
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Jane' } }));
       directive.store.dispatch(UpdateForm({ path:'slice', value: { firstName: 'Helen' } }));
@@ -680,7 +680,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
@@ -731,7 +731,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
@@ -777,7 +777,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
@@ -816,7 +816,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({'slice': {}})]
+          metaReducers: [forms({'slice': {value: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
