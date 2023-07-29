@@ -1,4 +1,4 @@
-import { AutoInit, AutoSubmit, FormDestroyed, ResetForm, UpdateDirty, UpdateErrors, UpdateField, UpdateForm, UpdateStatus } from '../lib/actions';
+import { AutoInit, AutoSubmit, FormDestroyed, UpdateDirty, UpdateErrors, UpdateField, UpdateForm, UpdateStatus } from '../lib/actions';
 import { forms, logger } from '../lib/reducers';
 import { deepClone } from '../public-api';
 
@@ -52,9 +52,6 @@ describe('reducers', () => {
     newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({split: "slice::form::email", value: model.email}));
     expected = deepClone(initialState); (expected as any)['slice']['form'].value = model;
     expect(newState).toEqual(expected);
-
-    newState = f((state: any, action: any) => { return state; })(initialState, ResetForm({split: "slice::form", state: 'initial'}));
-    expect(newState).toEqual(newState);
 
     newState = f((state: any, action: any) => { return state; })(initialState, UpdateStatus({split: "slice::form", status: "VALID"}));
     expected = deepClone(initialState); (expected as any)['slice']['form'].status = "VALID";

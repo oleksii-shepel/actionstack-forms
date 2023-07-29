@@ -4,7 +4,6 @@ import { createAction, props } from '@ngrx/store';
 export enum FormActions {
   UpdateForm = '@forms/form/update',
   UpdateField = '@forms/form/field/update',
-  ResetForm = '@forms/form/reset',
 }
 
 export enum FormActionsInternal {
@@ -25,11 +24,6 @@ export const UpdateForm = createAction(
 export const UpdateField = createAction(
   FormActions.UpdateField,
   props<{ split: string; value: any; }>()
-);
-
-export const ResetForm = createAction(
-  FormActions.ResetForm,
-  props<{ split: string; state: 'initial' | 'submitted' | 'blank'}>()
 );
 
 export const UpdateReference = createAction(

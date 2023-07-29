@@ -62,8 +62,6 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
         case FormActions.UpdateField:
           formCast = setValue(formCast,`${propValue}.${property}`, action.value);
           break;
-        case FormActions.ResetForm:
-          break;
         case FormActionsInternal.UpdateReference:
           formCast = setValue(formCast, propReference, action.value);
           break;

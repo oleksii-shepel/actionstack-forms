@@ -77,9 +77,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   dir!: NgForm | FormGroupDirective;
 
-  initialState: any = undefined;
   referenceState: any = undefined;
-  submittedState: any = undefined;
   destoyed = false;
 
   eventListeners = new Map<NgControl, any>();
@@ -110,7 +108,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   onUpdate$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
   onSubmit$!: Observable<any>;
-  onReset$!: Observable<any>;
   onStatusChanges$!: Observable<any>;
   onUpdateField$!: Observable<any>;
 
@@ -166,10 +163,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this.dir.form.updateValueAndValidity();
         this.cdr.markForCheck();
 
-        this.initialState = formCast.value ?? this.dir.form.value;
-
         if(!formCast.reference) {
-          this.referenceState = this.initialState;
+          this.referenceState = formCast.value ?? this.dir.form.value;
           this.store.dispatch(UpdateReference({ split: this.split, value: this.referenceState }));
         }
 
@@ -182,12 +177,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap(() => {
 
-        this.submittedState = this.formValue;
-        this.referenceState = this.submittedState;
+        this.referenceState = this.formValue;
 
         if(this.updateOn === 'submit') {
           this.store.dispatch(UpdateReference({ split: this.split, value: this.referenceState }));
-          this.store.dispatch(UpdateForm({ split: this.split, value: this.submittedState }));
+          this.store.dispatch(UpdateForm({ split: this.split, value: this.referenceState }));
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ split: this.split })))),
@@ -254,27 +248,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destoyed),
     );
 
-    this.onReset$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split === this.split && action.type === FormActions.ResetForm),
-      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      tap((action: any) => {
-        if(action.state){
-          switch(action.state) {
-            case 'initial':
-              this.store.dispatch(UpdateForm({ split: this.split, value: this.initialState || {} }));
-              break;
-            case 'submitted':
-              this.store.dispatch(UpdateForm({ split: this.split, value: this.submittedState || {} }));
-              break;
-            case 'blank':
-              this.store.dispatch(UpdateForm({ split: this.split, value: this.reset() }));
-              break;
-          }
-        }
-      }),
-      takeWhile(() => !this.destoyed)
-    );
-
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
@@ -293,7 +266,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.subs.c = this.onInit$.subscribe();
     this.subs.d = this.onUpdate$.subscribe();
     this.subs.e = this.onSubmit$.subscribe();
-    this.subs.f = this.onReset$.subscribe();
   }
 
   ngAfterContentInit() {
@@ -337,20 +309,5 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   get formStatus(): FormControlStatus {
     return this.dir.form.status;
-  }
-
-  reset(): any {
-    if(!this.controls) { return {}; }
-
-    let value = {};
-    for (const control of this.controls.toArray()) {
-      control.reset((control.valueAccessor as any)?._elementRef?.nativeElement.defaultValue);
-
-      if(control.path) {
-        value = setValue(value, control.path.join('.'), control.value);
-      }
-    }
-
-    return value;
   }
 }
