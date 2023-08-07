@@ -4,7 +4,7 @@
     <main>
       <pre *ngIf="!collapsed" [@occurence]>{{profile$ | async | json}}</pre>
 
-      <form #heroForm="ngForm" autocomplete="off" [nygma]="formCast">
+      <form #heroForm="ngForm" autocomplete="off" [nygma]="formCast" [ngFormOptions]="{updateOn: 'blur'}">
         <h2>{{caption}}</h2>
         <label for="firstName">First Name: </label>
         <input id="firstName" type="text" ngField="firstName">

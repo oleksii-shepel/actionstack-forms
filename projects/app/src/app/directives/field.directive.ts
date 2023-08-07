@@ -25,7 +25,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   @Input("ngField") override name = '';
   @Output('ngFieldChange') override update = new EventEmitter();
 
-  override control: FormControl<string | null>;
+  override control!: FormControl<string | null>;
   override valueAccessor: ControlValueAccessor | null;
   override viewModel: any = undefined;
 
@@ -100,7 +100,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
       const value = getValue(model, this.path.join('.'));
       if(value !== this.control.value) {
         this.valueAccessor?.writeValue(value);
-        this.control.setValue(value);
+        this.control.setValue(value, {emitEvent: false});
       }
     });
 

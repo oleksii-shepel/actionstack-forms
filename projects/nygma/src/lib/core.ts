@@ -86,7 +86,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   subs = {} as any;
 
   blurCallback = (control: NgControl) => (event: Event) => {
-    if(this.updateOn === 'blur' && control.path) {
+    if(this.updateOn === 'blur' && control.path && control.control) {
+      control.control.setValue(control.value, {emitEvent: false});
       this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: control.value }));
     }
   }
@@ -94,7 +95,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   inputCallback = (control: NgControl) => (event : Event) => {
     const value = (event.target as any)?.value;
     if(control.value !== value && control.control) {
-      control.control.setValue(value);
+      control.control.setValue(value, {emitEvent: false});
 
       const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
       !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
@@ -160,9 +161,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this.store.dispatch(UpdateDirty({ split: this.split, dirty: this.dir.form.dirty }));
         }
 
-        this.dir.form.updateValueAndValidity();
-        this.cdr.markForCheck();
-
         if(!formCast.reference) {
           this.referenceState = formCast.value ?? this.dir.form.value;
           this.store.dispatch(UpdateReference({ split: this.split, value: this.referenceState }));
@@ -180,6 +178,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         this.referenceState = this.formValue;
 
         if(this.updateOn === 'submit') {
+          this.dir.form.updateOn === 'submit' ? this.dir.form.updateValueAndValidity() : null;
           this.store.dispatch(UpdateReference({ split: this.split, value: this.referenceState }));
           this.store.dispatch(UpdateForm({ split: this.split, value: this.referenceState }));
         }
@@ -218,9 +217,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
           this.store.dispatch(UpdateDirty({ split: this.split, dirty: dirty }));
         }
-
-        this.dir.form.updateValueAndValidity();
-        this.cdr.markForCheck();
       }),
       takeWhile(() => !this.destoyed)
     );
@@ -249,6 +245,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onStatusChanges$ = this.dir.form.statusChanges.pipe(
+      sampleTime(this.debounceTime),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       map((value) => ({ status: value as any, errors: this.dir.form.errors as any})),
       distinctUntilChanged((a, b) => a.status === b.status && deepEqual(a.errors, b.errors)),
