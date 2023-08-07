@@ -87,7 +87,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   blurCallback = (control: NgControl) => (event: Event) => {
     if(this.updateOn === 'blur' && control.path && control.control) {
-      control.control.setValue(control.value, {emitEvent: false});
+      control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
       this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: control.value }));
     }
   }
@@ -95,7 +95,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   inputCallback = (control: NgControl) => (event : Event) => {
     const value = (event.target as any)?.value;
     if(control.value !== value && control.control) {
-      control.control.setValue(value, {emitEvent: false});
+      control.control.setValue(value, {emitEvent: control.control.updateOn === 'change'});
 
       const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
       !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
@@ -150,7 +150,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap(formCast => {
 
         if(formCast.value) {
-          this.dir.form.patchValue(formCast.value, {emitEvent: false});
+          this.dir.form.patchValue(formCast.value, {emitEvent: this.dir.form.updateOn === 'change'});
           formCast.dirty? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
 
           this.store.dispatch(AutoInit({ split: this.split, value: formCast.value }));
@@ -210,7 +210,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       mergeMap(() => this.store.select(selectFormCast(this.split)).pipe(take(1), map((formCast) => formCast))),
       tap((formCast) => {
 
-        this.dir.form.patchValue(formCast.value, {emitEvent: false});
+        this.dir.form.patchValue(formCast.value, {emitEvent: this.dir.form.updateOn === 'change'});
         const dirty = !deepEqual(formCast.value, formCast.reference);
 
         if(this.dir.form.dirty !== dirty) {
