@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { UpdateForm, deepClone, selectFormCast } from 'nygma';
+import { UpdateForm, deepClone, selectFormState } from 'nygma';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialHeroPage } from '../../models/profile';
@@ -22,7 +22,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   profile$!: Observable<any>;
   slice = "hero";
   formCast = "hero::form";
-  model = initialHeroPage.form.value;
+  model = initialHeroPage.form;
   a: any; b: any;
 
   _collapsed = true;
@@ -39,14 +39,14 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   async ngAfterViewInit() {
-    const state: any = await firstValueFrom(this.store.select(selectFormCast(this.formCast)));
+    const state: any = await firstValueFrom(this.store.select(selectFormState(this.formCast)));
 
     if(!state) {
       this.store.dispatch(UpdateForm({value: initialHeroPage.form, split: this.formCast}));
       this.collapsed = true;
     }
 
-    this.model = state ? deepClone(state.value) : initialHeroPage.form.value;
+    this.model = state ? deepClone(state) : initialHeroPage.form;
     this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
     const scrollable = this.elementRef.nativeElement.querySelector('.scrollable');

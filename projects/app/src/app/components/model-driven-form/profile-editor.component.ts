@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { deepClone, selectFormCast } from 'nygma';
+import { deepClone, selectFormState } from 'nygma';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialModelPage } from '../../models/profile';
@@ -23,7 +23,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   profile$!: Observable<any>;
   slice = "model";
   formCast = "model::form";
-  model = initialModelPage.form.value;
+  model = initialModelPage.form;
 
   a: any; b: any;
 
@@ -42,9 +42,9 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   async ngAfterViewInit() {
 
-    const state = await firstValueFrom(this.store.select(selectFormCast(this.formCast)));
+    const state = await firstValueFrom(this.store.select(selectFormState(this.formCast)));
 
-    this.model = state ? deepClone(state.value) : initialModelPage.form.value;
+    this.model = state ? deepClone(state) : initialModelPage.form;
     this.collapsed = true;
 
     this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());

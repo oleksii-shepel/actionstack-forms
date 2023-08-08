@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Directive, EventEmitter, Host, Inject, Input, OnDestroy, OnInit, Optional, Output, Provider, Self, forwardRef } from '@angular/core';
 import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, Validator, ValidatorFn } from '@angular/forms';
-import { SyncDirective, getValue, selectValue } from 'nygma';
+import { SyncDirective, getValue, selectFormState } from 'nygma';
 import { Subject, distinctUntilChanged, map, takeUntil } from 'rxjs';
 import { CALL_SET_DISABLED_STATE, SetDisabledStateOption, composeAsyncValidators, composeValidators, selectValueAccessor } from '../utils';
 import { FieldArrayDirective } from './array.directive';
@@ -95,7 +95,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     this._ngStore?.store.select((state: any) => state).pipe(
       distinctUntilChanged(),
       takeUntil(this._destroyed$),
-      map(state => selectValue(this._ngStore.split)(state)))
+      map(state => selectFormState(this._ngStore.split)(state)))
     .subscribe((model: any) => {
       const value = getValue(model, this.path.join('.'));
       if(value !== this.control.value) {
