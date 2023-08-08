@@ -1,4 +1,3 @@
-import { FormCast } from "nygma";
 import { FormOptions } from "../utils/types";
 export interface ProfileForm {
   bookmark: boolean;
@@ -15,32 +14,30 @@ export interface ProfileForm {
   aliases: string[];
 }
 export interface ProfilePage {
-  form: FormCast<ProfileForm>;
+  form: ProfileForm;
   books: string[];
   collapsed: boolean;
 }
 
 export const initialProfilePage: ProfilePage = {
   form: {
-    value : {
-      bookmark: false,
-      firstName: 'Ian',
-      lastName: 'Fleming',
-      address: {
-        street: 'Mayfair',
-        city: 'London',
-        state: 'England',
-        zip: 'W1J'
-      },
-      selected: 0,
-      quotes:
-  `❝ Never say 'no' to adventures. Always say 'yes,' otherwise, you'll lead a very dull life.
-  ❝ The distance between insanity and genius is measured only by success.
-  ❝ A woman can put up with almost anything; anything but indifference.
-  ❝ I think it's the same with all the relationships between a man and a woman. They can survive anything so long as some kind of basic humanity exists between the two people. When all kindness has gone, when one person obviously and sincerely doesn't care if the other is alive or dead, then it's just no good.
-  ❝ Everyone has the revolver of resignation in his pocket.`,
-      aliases: [''],
-    }
+    bookmark: false,
+    firstName: 'Ian',
+    lastName: 'Fleming',
+    address: {
+      street: 'Mayfair',
+      city: 'London',
+      state: 'England',
+      zip: 'W1J'
+    },
+    selected: 0,
+    quotes:
+`❝ Never say 'no' to adventures. Always say 'yes,' otherwise, you'll lead a very dull life.
+❝ The distance between insanity and genius is measured only by success.
+❝ A woman can put up with almost anything; anything but indifference.
+❝ I think it's the same with all the relationships between a man and a woman. They can survive anything so long as some kind of basic humanity exists between the two people. When all kindness has gone, when one person obviously and sincerely doesn't care if the other is alive or dead, then it's just no good.
+❝ Everyone has the revolver of resignation in his pocket.`,
+    aliases: [''],
   },
   books: [
     'Casino Royale',
@@ -87,23 +84,21 @@ export interface HeroForm {
 }
 
 export interface HeroPage {
-  form: FormCast<HeroForm>;
+  form: HeroForm;
   collapsed: boolean;
 }
 
 export const initialHeroPage: HeroPage = {
   form: {
-    value: {
-      firstName: 'James',
-      lastName: 'Bond',
-      address: {
-        street: '',
-        city: 'Ao Phang Nga National Park',
-        state: 'Phangnga',
-        zip: '82130'
-      },
-      aliases: ['Mr Fisher', 'Robert Sterling', 'St. John Smyth'],
-    }
+    firstName: 'James',
+    lastName: 'Bond',
+    address: {
+      street: '',
+      city: 'Ao Phang Nga National Park',
+      state: 'Phangnga',
+      zip: '82130'
+    },
+    aliases: ['Mr Fisher', 'Robert Sterling', 'St. John Smyth'],
   },
   collapsed: true
 }
@@ -132,23 +127,21 @@ export interface ModelForm {
   aliases: string[];
 }
 export interface ModelPage {
-  form: FormCast<ModelForm>;
+  form: ModelForm;
   collapsed: boolean;
 }
 
 export const initialModelPage: ModelPage = {
   form: {
-    value: {
-      firstName: 'Dominique',
-      lastName: 'Derval',
-      address: {
-        street: '',
-        city: 'Nassau',
-        state: 'The Bahamas, New Providence Island',
-        zip: '00000'
-      },
-      aliases: ['Domino'],
-    }
+    firstName: 'Dominique',
+    lastName: 'Derval',
+    address: {
+      street: '',
+      city: 'Nassau',
+      state: 'The Bahamas, New Providence Island',
+      zip: '00000'
+    },
+    aliases: ['Domino'],
   },
   collapsed: true
 }
