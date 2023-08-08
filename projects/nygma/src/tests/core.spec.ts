@@ -4,9 +4,9 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
 import { StoreModule } from "@ngrx/store";
 import { firstValueFrom } from 'rxjs';
-import { FormCast, selectFormCast } from "../lib";
+import { selectFormState } from "../lib";
 import { NYGMA_CONFIG_DEFAULT, NgFormsModule } from "../lib/module";
-import { AutoInit, AutoSubmit, SyncDirective, UpdateForm, forms, selectValue } from "../public-api";
+import { AutoInit, AutoSubmit, SyncDirective, UpdateForm, forms } from "../public-api";
 
 describe('core', () => {
   describe('FormGroupDirective', () => {
@@ -28,7 +28,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({slice: {form: {value: {firstName: 'John'}}}})]
+          metaReducers: [forms({slice: {form: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
@@ -68,36 +68,7 @@ describe('core', () => {
       expect(directive.debounceTime).toBe(NYGMA_CONFIG_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(NYGMA_CONFIG_DEFAULT.updateOn);
     });
-    it('should dispatch check status after AutoInit action', async() => {
-      const auto = jest.fn();
-      subs.a = directive.initialized$.subscribe(auto);
 
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      const form: FormCast<any> = await firstValueFrom(directive.store.select(selectFormCast('slice::form')));
-      expect(form.status).toBeDefined();
-      expect(directive.dir.form.value).toEqual({ firstName: 'John' });
-    });
-
-    it('should dispatch check status after UpdateForm action', async() => {
-      const stub = jest.fn();
-      subs.b = directive.onStatusChanges$.subscribe(stub);
-
-      const auto = jest.fn();
-      subs.a = directive.initialized$.subscribe(auto);
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      directive.store.dispatch(UpdateForm({ split: 'slice::form', value: { firstName: 'Jane' } }));
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      expect(stub).toHaveBeenCalledTimes(1);
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-    });
     it('should dispatch AutoInit action', async() => {
       const stub = jest.fn();
 
@@ -221,7 +192,6 @@ describe('core', () => {
       fixture.detectChanges();
       const stub = jest.fn();
 
-      subs.b = directive.onStatusChanges$.subscribe(stub);
       subs.c = directive.onUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
@@ -264,7 +234,7 @@ describe('core', () => {
       jest.advanceTimersByTime(5000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(selectValue('slice::form')))).resolves.toEqual({ firstName: 'John' });
+      await expect(firstValueFrom(directive.store.select(selectFormState('slice::form')))).resolves.toEqual({ firstName: 'John' });
       expect(stub).toHaveBeenCalledTimes(3);
     });
     it('formStatus and formValue', async () => {
@@ -282,11 +252,10 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(selectValue('slice::form')))).resolves.toEqual({ firstName: 'Jane' });
+      await expect(firstValueFrom(directive.store.select(selectFormState('slice::form')))).resolves.toEqual({ firstName: 'Jane' });
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
       expect(directive.dir.form.dirty).toBe(true);
 
-      await expect(directive.formStatus).toEqual("VALID");
       await expect(directive.formValue).toEqual({ firstName: 'Jane' });
     });
   });
@@ -307,7 +276,7 @@ describe('core', () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
-          metaReducers: [forms({slice: {form: {value: {firstName: 'John'}}}})]
+          metaReducers: [forms({slice: {form: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
 
@@ -347,33 +316,7 @@ describe('core', () => {
       expect(directive.debounceTime).toBe(NYGMA_CONFIG_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(NYGMA_CONFIG_DEFAULT.updateOn);
     });
-    it('should dispatch check status after AutoInit action', async() => {
-      const auto = jest.fn();
-      subs.a = directive.initialized$.subscribe(auto);
 
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      const form: FormCast<any> = await firstValueFrom(directive.store.select(selectFormCast('slice::form')));
-      expect(form.status).toBeDefined();
-      expect(directive.dir.form.value).toEqual({ firstName: 'John' });
-    });
-
-    it('should dispatch check status after UpdateForm action', async() => {
-      const auto = jest.fn();
-      subs.a = directive.initialized$.subscribe(auto);
-
-      const stub = jest.fn();
-      subs.b = directive.onStatusChanges$.subscribe(stub);
-
-      directive.store.dispatch(UpdateForm({ split: 'slice::form', value: { firstName: 'Jane' } }));
-
-      jest.advanceTimersByTime(3000);
-      await fixture.whenStable();
-
-      expect(stub).toHaveBeenCalledTimes(1);
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-    });
     it('should dispatch AutoInit action', async() => {
       const stub = jest.fn();
 
@@ -497,7 +440,6 @@ describe('core', () => {
       fixture.detectChanges();
       const stub = jest.fn();
 
-      subs.b = directive.onStatusChanges$.subscribe(stub);
       subs.c = directive.onUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
       subs.f = directive.onControlsChanges$.subscribe(stub);
@@ -541,7 +483,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(selectValue('slice::form')))).resolves.toEqual({ firstName: 'John' });
+      await expect(firstValueFrom(directive.store.select(selectFormState('slice::form')))).resolves.toEqual({ firstName: 'John' });
       expect(stub).toHaveBeenCalledTimes(3);
     });
     it('formStatus and formValue', async () => {
@@ -559,11 +501,10 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      await expect(firstValueFrom(directive.store.select(selectValue('slice::form')))).resolves.toEqual({ firstName: 'Jane' });
+      await expect(firstValueFrom(directive.store.select(selectFormState('slice::form')))).resolves.toEqual({ firstName: 'Jane' });
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
       expect(directive.dir.form.dirty).toBe(true);
 
-      await expect(directive.formStatus).toEqual("VALID");
       await expect(directive.formValue).toEqual({ firstName: 'Jane' });
     });
   });

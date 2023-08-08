@@ -4,37 +4,15 @@ import { deepClone, difference, getValue, setValue } from './utils';
 
 
 
-export interface FormCast<T> {
-  value: T;
-  reference?: T;
-  errors?: Record<string, string>;
-  dirty?: boolean;
-  status?: string;
-  submitted?: boolean;
-}
+export type FormState = any;
 
 
 
 
-export const selectFormCast = (split: string) => createSelector((state: any) => {
-  const paths = split?.split('::'); const formCast = paths && paths[0]; const form = paths && paths[1];
-  return formCast && form && getValue(state[formCast], form);
+export const selectFormState = (split: string) => createSelector((state: any) => {
+  const paths = split?.split('::'); const feature = paths && paths[0]; const form = paths && paths[1];
+  return feature && form && getValue(state[feature], form);
 }, state => state);
-export const selectValue = (slice: string) => createSelector(selectFormCast(slice), state => state?.value);
-export const selectReference = (slice: string) => createSelector(selectFormCast(slice), state => state?.reference);
-export const selectErrors = (slice: string) => createSelector(selectFormCast(slice), state => state?.errors);
-export const selectDirty = (slice: string) => createSelector(selectFormCast(slice), state => state?.dirty);
-export const selectStatus = (slice: string) => createSelector(selectFormCast(slice), state => state?.status);
-export const selectSubmitted = (slice: string) => createSelector(selectFormCast(slice), state => state?.submitted);
-
-
-
-export const propValue = 'value';
-export const propReference = 'reference';
-export const propErrors = 'errors';
-export const propDirty = 'dirty';
-export const propStatus = 'status';
-export const propSubmitted = 'submitted';
 
 
 
@@ -53,38 +31,25 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
     if(slice) {
 
       nextState = reducer(state, action);
-      let formCast = getValue(nextState[feature], form);
+      let formState = getValue(nextState[feature], form);
 
       switch(action.type) {
         case FormActions.UpdateForm:
-          formCast = setValue(formCast, propValue, action.value);
+          formState = action.value;
           break;
         case FormActions.UpdateField:
-          formCast = setValue(formCast,`${propValue}.${property}`, action.value);
-          break;
-        case FormActionsInternal.UpdateReference:
-          formCast = setValue(formCast, propReference, action.value);
-          break;
-        case FormActionsInternal.UpdateStatus:
-          formCast = setValue(formCast, propStatus, action.status);
-          break;
-        case FormActionsInternal.UpdateErrors:
-          formCast = setValue(formCast, propErrors, deepClone(action.errors));
-          break;
-        case FormActionsInternal.UpdateDirty:
-          formCast = setValue(formCast, propDirty, action.dirty);
+          formState = setValue(formState, property, action.value);
           break;
         case FormActionsInternal.AutoInit:
-          formCast = setValue(formCast, propValue, action.value);
+          formState = action.value;
           break;
         case FormActionsInternal.AutoSubmit:
-          formCast = setValue(formCast, propSubmitted, true);
           break;
         case FormActionsInternal.FormDestroyed:
           break;
       }
 
-      nextState = {...nextState, [feature]: setValue(nextState[feature], form, formCast)};
+      nextState = {...nextState, [feature]: setValue(nextState[feature], form, formState)};
       return nextState;
     }
 
