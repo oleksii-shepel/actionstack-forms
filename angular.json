@@ -3,23 +3,23 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "@nygma/forms": {
+    "nygma-forms": {
       "projectType": "library",
-      "root": "projects/nygma/src",
-      "sourceRoot": "projects/nygma/src/lib",
+      "root": "projects/nygma/forms/src",
+      "sourceRoot": "projects/nygma/forms/src/lib",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/nygma/src/ng-package.json"
+            "project": "projects/nygma/forms/src/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -28,8 +28,8 @@
     },
     "@nygma/v16": {
       "projectType": "library",
-      "root": "projects/nygma/src",
-      "sourceRoot": "projects/nygma/src/lib",
+      "root": "projects/nygma/forms/src",
+      "sourceRoot": "projects/nygma/forms/src/lib",
       "prefix": "lib",
       "architect": {
         "build": {
@@ -39,10 +39,10 @@
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -51,8 +51,8 @@
     },
     "@nygma/v15": {
       "projectType": "library",
-      "root": "projects/nygma/src",
-      "sourceRoot": "projects/nygma/src/lib",
+      "root": "projects/nygma/forms/src",
+      "sourceRoot": "projects/nygma/forms/src/lib",
       "prefix": "lib",
       "architect": {
         "build": {
@@ -62,10 +62,10 @@
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -74,8 +74,8 @@
     },
     "@nygma/v14": {
       "projectType": "library",
-      "root": "projects/nygma/src",
-      "sourceRoot": "projects/nygma/src/lib",
+      "root": "projects/nygma/forms/src",
+      "sourceRoot": "projects/nygma/forms/src/lib",
       "prefix": "lib",
       "architect": {
         "build": {
@@ -85,10 +85,10 @@
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.prod.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/nygma/src/tsconfig.lib.json"
+              "tsConfig": "projects/nygma/forms/src/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"

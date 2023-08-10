@@ -52,23 +52,24 @@ import { selectFormState } from './reducers';
 export interface NygmaConfig {
   slice: string;
   debounceTime?: number;
-  enableQueue?: boolean;
+  resetOnDestroy?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
 
 @Directive({
   selector:
-    `form:not([ngNoForm]):not([formGroup])[nygma],ng-form[nygma],[ngForm][nygma],[formGroup][nygma]`,
-  exportAs: 'nygma',
+    `form:not([ngNoForm]):not([formGroup])[sync],ng-form[sync],[ngForm][sync],[formGroup][sync]`,
+  exportAs: 'sync',
 })
 export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
-  @Input('nygma') config!: string | NygmaConfig;
+  @Input('sync') config!: string | NygmaConfig;
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
   split!: string;
   debounceTime!: number;
   updateOn!: string;
+  resetOnDestroy!: boolean;
 
   dir!: NgForm | FormGroupDirective;
 
@@ -89,7 +90,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   inputCallback = (control: NgControl) => (event : Event) => {
     const value = (event.target as any)?.value;
-    if(control.value !== value && control.control) {
+    if(control.control) {
       control.control.setValue(value, {emitEvent: control.control.updateOn === 'change'});
 
       const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
@@ -130,6 +131,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.debounceTime = config.debounceTime;
     this.updateOn = config.updateOn;
+    this.resetOnDestroy = config.resetOnDestroy;
 
     if (!this.split) {
       throw new Error('Misuse of sync directive');
@@ -245,6 +247,10 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
 
     this.initialized$.complete();
+
+    if(this.resetOnDestroy) {
+      this.store.dispatch(UpdateForm({ split: this.split, value: this.referenceState }));
+    }
 
     this.destroyed = true;
   }

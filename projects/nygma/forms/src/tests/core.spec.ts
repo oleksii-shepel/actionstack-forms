@@ -35,7 +35,7 @@ describe('core', () => {
       fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" nygma="slice::form">
+          <form [formGroup]="form" sync="slice::form">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -181,7 +181,7 @@ describe('core', () => {
     });
     it('should not call subscriptions when component destroyed', async () => {
       const auto = jest.fn();
-
+      directive.resetOnDestroy = false;
       subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
@@ -283,7 +283,7 @@ describe('core', () => {
       fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form #form="ngForm" nygma="slice::form">
+          <form #form="ngForm" sync="slice::form">
             <input type="text" [(ngModel)]="model.firstName" name="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -430,6 +430,7 @@ describe('core', () => {
     it('should not call subscriptions when component destroyed', async () => {
       const auto = jest.fn();
 
+      directive.resetOnDestroy = false;
       subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
@@ -533,7 +534,7 @@ describe('core', () => {
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [nygma]="'slice::form'">
+          <form [formGroup]="form" [sync]="'slice::form'">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -584,7 +585,7 @@ describe('core', () => {
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [nygma]="{slice: 'slice::form', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
+          <form [formGroup]="form" [sync]="{slice: 'slice::form', debounce: 125, resetOnDestroy: 'initial', updateOn: 'blur', autoSubmit: false }">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`
@@ -630,7 +631,7 @@ describe('core', () => {
       const fixture = TestBed.overrideComponent(TestComponent, {
         set: {
           template: `
-          <form [formGroup]="form" [nygma]="{}">
+          <form [formGroup]="form" [sync]="{}">
             <input type="text" formControlName="firstName"/>
             <button type="submit">Submit</button>
           </form>`

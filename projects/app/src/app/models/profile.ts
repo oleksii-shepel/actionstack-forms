@@ -58,8 +58,8 @@ export const initialProfilePage: ProfilePage = {
 
 export const profileOptions: FormOptions<ProfileForm> = {
   bookmark: {},
-  firstName: {},
-  lastName: {},
+  firstName: {updateOn: 'blur'},
+  lastName: {updateOn: 'change'},
   address: {
     street: {},
     city: {},
@@ -68,7 +68,9 @@ export const profileOptions: FormOptions<ProfileForm> = {
   },
   selected: {},
   quotes: {},
-  aliases: {}
+  aliases: {},
+  __group: {updateOn: 'change'}
+
 }
 
 export interface HeroForm {

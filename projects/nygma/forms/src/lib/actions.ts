@@ -6,9 +6,9 @@ export enum FormActions {
 }
 
 export enum FormActionsInternal {
-  AutoInit = '@forms/internal/form/init',
-  AutoSubmit = '@forms/internal/form/submit',
-  FormDestroyed = '@forms/internal/form/destroyed',
+  AutoInit = '@forms/form/internal/init',
+  AutoSubmit = '@forms/form/internal/submit',
+  FormDestroyed = '@forms/form/internal/destroyed',
 }
 
 export const UpdateForm = createAction(

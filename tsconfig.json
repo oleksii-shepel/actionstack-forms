@@ -3,9 +3,9 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "nygma": [
-        "dist/nygma",
-        "projects/nygma/src/lib"
+      "nygma-forms": [
+        "dist/nygma/forms",
+        "projects/nygma/forms/src/lib"
       ],
     },
     "baseUrl": "./",

@@ -1,5 +1,5 @@
 {
-  "name": "@nygma/forms",
+  "name": "nygma-forms",
   "version": "15.0.0",
   "description": "Forms Add-On for NgRx store",
   "license": "MIT",
