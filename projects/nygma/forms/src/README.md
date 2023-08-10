@@ -1,14 +1,14 @@
 <h1>nygma-forms</h1>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/master/projects/nygma/forms/emblem.png" alt="nygma" width="400"/>
+  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/nygma/projects/nygma/forms/src/emblem.png" alt="nygma" width="400"/>
 </p>
 
-  ![npm version](https://badge.fury.io/js/nygma.svg)
+  ![npm version](https://badge.fury.io/js/nygma-forms.svg)
   ![Build Status](https://github.com/oleksii-shepel/angular-ngrx-forms/workflows/build/badge.svg)
   ![Coverage Status](https://coveralls.io/repos/github/oleksii-shepel/angular-ngrx-forms/badge.svg?branch=master)
-  ![npm](https://img.shields.io/npm/dt/nygma.svg)
-  ![npm](https://img.shields.io/npm/l/nygma.svg)
+  ![npm](https://img.shields.io/npm/dt/nygma-forms.svg)
+  ![npm](https://img.shields.io/npm/l/nygma-forms.svg)
 
 <h2>Introduction</h2>
 <p>
