@@ -3,7 +3,7 @@
   <div class="scrollable" [class.collapsed]="collapsed">
     <main>
       <pre *ngIf="!collapsed" [@occurence]>{{profile$ | async | json}}</pre>
-s
+
       <form #modelForm="ngForm" autocomplete="off" [sync]="formCast">
         <h2>{{caption}}</h2>
         <label for="firstName">First Name: </label>

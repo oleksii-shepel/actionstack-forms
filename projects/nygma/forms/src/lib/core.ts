@@ -18,6 +18,7 @@ import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
+  asyncScheduler,
   defer,
   filter,
   from,
@@ -76,21 +77,19 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   referenceState: any = undefined;
   destroyed = false;
 
-  eventListeners = new Map<NgControl, any>();
   initialized$ = new BehaviorSubject<boolean>(false);
 
   subs = {} as any;
 
-  blurCallback = (control: NgControl) => (event: Event) => {
+  blurCallback = (control: NgControl) => (value: any) => {
     if(this.updateOn === 'blur' && control.path && control.control) {
       control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
       this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: control.value }));
     }
   }
 
-  inputCallback = (control: NgControl) => (event : Event) => {
-    const value = (event.target as any)?.value;
-    if(control.control) {
+  inputCallback = (control: NgControl) => (value: any) => {
+    if(control.value !== value && control.control) {
       control.control.setValue(value, {emitEvent: control.control.updateOn === 'change'});
 
       const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
@@ -209,18 +208,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
       tap(() => {
         this.controls.forEach((control: NgControl) => {
-          const nativeElement = (control.valueAccessor as any)?._elementRef?.nativeElement;
-          if(nativeElement) {
-            let listeners = this.eventListeners.get(control);
-            if(listeners) {
-              nativeElement.removeEventListener('input', listeners['input']);
-              nativeElement.removeEventListener('blur', listeners['blur']);
-            }
-
-            listeners = {'input': this.inputCallback(control), 'blur': this.blurCallback(control)};
-            nativeElement.addEventListener('input', listeners['input']);
-            nativeElement.addEventListener('blur', listeners['blur']);
-            this.eventListeners.set(control, listeners);
+          if(control.valueAccessor) {
+            control.valueAccessor.registerOnChange(this.inputCallback(control));
+            control.valueAccessor.registerOnTouched(this.blurCallback(control));
           }
         });
       }),
@@ -236,7 +226,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.subs.e = this.onControlsChanges$.subscribe();
+    // this subscription has to be called after ngAfterContentInit method completes
+    // to disable collisions by control updates
+    asyncScheduler.schedule(() => { this.subs.e = this.onControlsChanges$.subscribe(); });
   }
 
   ngOnDestroy() {
