@@ -5,7 +5,7 @@ import { StoreModule } from '@ngrx/store';
 import { NygmaConfig, SyncDirective } from './core';
 
 export const NYGMA_CONFIG_TOKEN = new InjectionToken<string>('NYGMA_CONFIG_TOKEN');
-export const NYGMA_CONFIG_DEFAULT: Omit<NygmaConfig, 'slice'> = { debounceTime: 100, updateOn: 'change', resetOnDestroy: true };
+export const NYGMA_CONFIG_DEFAULT: Omit<NygmaConfig, 'slice'> = { debounceTime: 500, updateOn: 'change' };
 
 @NgModule({
   imports: [FormsModule, StoreModule],

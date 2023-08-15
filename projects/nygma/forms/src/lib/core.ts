@@ -25,7 +25,6 @@ import {
   fromEvent,
   map,
   mergeMap,
-  sampleTime,
   skip,
   startWith,
   take,
@@ -35,8 +34,7 @@ import {
 import {
   NYGMA_CONFIG_DEFAULT,
   NYGMA_CONFIG_TOKEN,
-  deepEqual,
-  getValue,
+  sampleTime,
   setValue
 } from '.';
 import {
@@ -53,7 +51,6 @@ import { selectFormState } from './reducers';
 export interface NygmaConfig {
   slice: string;
   debounceTime?: number;
-  resetOnDestroy?: boolean;
   updateOn?: 'change' | 'blur' | 'submit';
 }
 
@@ -70,11 +67,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   split!: string;
   debounceTime!: number;
   updateOn!: string;
-  resetOnDestroy!: boolean;
 
   dir!: NgForm | FormGroupDirective;
 
-  referenceState: any = undefined;
   destroyed = false;
 
   initialized$ = new BehaviorSubject<boolean>(false);
@@ -88,23 +83,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
   }
 
+  func = this.setControlValue.bind(this);
   inputCallback = (control: NgControl) => (value: any) => {
-    if(control.value !== value && control.control) {
-      control.control.setValue(value, {emitEvent: control.control.updateOn === 'change'});
-
-      const savedState = control.path ? getValue(this.referenceState, control.path.join('.')) : undefined;
-      !(savedState === control.value) ? control.control.markAsDirty() : control.control.markAsPristine();
-    }
-    if(this.updateOn === 'change' && control.path) {
-      this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: value }));
-    }
+    sampleTime(this.func, this.debounceTime)(control, value);
   }
 
   onInit$!: Observable<any>;
   onUpdate$!: Observable<any>;
   onControlsChanges$!: Observable<any>;
   onSubmit$!: Observable<any>;
-  onUpdateField$!: Observable<any>;
 
   constructor(
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
@@ -130,7 +117,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.debounceTime = config.debounceTime;
     this.updateOn = config.updateOn;
-    this.resetOnDestroy = config.resetOnDestroy;
 
     if (!this.split) {
       throw new Error('Misuse of sync directive');
@@ -151,8 +137,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           this.store.dispatch(AutoInit({ split: this.split, value: this.dir.form.value }));
         }
 
-        this.dir.form.markAsPristine();
-        this.referenceState = formState ?? this.dir.form.value;
         this.initialized$.next(true);
       }),
     )
@@ -161,31 +145,12 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter(() => this.dir.form.valid),
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap(() => {
-
-        this.referenceState = this.formValue;
-
         if(this.updateOn === 'submit') {
           this.dir.form.updateOn === 'submit' ? this.dir.form.updateValueAndValidity() : null;
-          this.store.dispatch(UpdateForm({ split: this.split, value: this.referenceState }));
+          this.store.dispatch(UpdateForm({ split: this.split, value: this.formValue }));
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ split: this.split })))),
-      takeWhile(() => !this.destroyed)
-    );
-
-    this.onUpdateField$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.split?.startsWith(this.split) && action.type === FormActions.UpdateField),
-      sampleTime(this.debounceTime),
-      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      mergeMap(() => this.store.select(selectFormState(this.split)).pipe(take(1), map((formState) => formState))),
-      tap((formState) => {
-
-        const notEqual = !deepEqual(formState, this.referenceState);
-
-        if(this.dir.form.dirty !== notEqual) {
-          notEqual ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
-        }
-      }),
       takeWhile(() => !this.destroyed)
     );
 
@@ -196,11 +161,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((formState) => {
 
         this.dir.form.patchValue(formState, {emitEvent: this.dir.form.updateOn === 'change'});
-        const dirty = !deepEqual(formState, this.referenceState);
 
-        if(this.dir.form.dirty !== dirty) {
-          dirty ? this.dir.form.markAsDirty() : this.dir.form.markAsPristine();
-        }
       }),
       takeWhile(() => !this.destroyed)
     );
@@ -219,16 +180,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed),
     );
 
-    this.subs.a = this.onUpdateField$.subscribe();
-    this.subs.b = this.onInit$.subscribe();
-    this.subs.c = this.onUpdate$.subscribe();
-    this.subs.d = this.onSubmit$.subscribe();
+    this.subs.a = this.onInit$.subscribe();
+    this.subs.b = this.onUpdate$.subscribe();
+    this.subs.c = this.onSubmit$.subscribe();
   }
 
   ngAfterContentInit() {
-    // this subscription has to be called after ngAfterContentInit method completes
-    // to disable collisions by control updates
-    asyncScheduler.schedule(() => { this.subs.e = this.onControlsChanges$.subscribe(); });
+    // this subscription has to be made after ngAfterContentInit method completion
+    // to avoid collisions by control updates
+    asyncScheduler.schedule(() => { this.subs.d = this.onControlsChanges$.subscribe(); });
   }
 
   ngOnDestroy() {
@@ -239,12 +199,16 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
 
     this.initialized$.complete();
-
-    if(this.resetOnDestroy) {
-      this.store.dispatch(UpdateForm({ split: this.split, value: this.referenceState }));
-    }
-
     this.destroyed = true;
+  }
+
+  setControlValue(control: NgControl, value: any) {
+    if(control.value !== value && control.control) {
+      control.control.setValue(value, {emitEvent: control.control.updateOn === 'change'});
+    }
+    if(this.updateOn === 'change' && control.path) {
+      this.store.dispatch(UpdateField({ split: `${this.split}::${control.path.join('.')}`, value: value }));
+    }
   }
 
   get activeControl(): NgControl | undefined {

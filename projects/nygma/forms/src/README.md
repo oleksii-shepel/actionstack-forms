@@ -1,7 +1,7 @@
 <h1>nygma-forms</h1>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/nygma/projects/nygma/forms/src/emblem.png" alt="nygma" width="400"/>
+  <img src="https://raw.githubusercontent.com/oleksii-shepel/angular-ngrx-forms/nygma/projects/nygma/forms/src/emblem.png" alt="nygma" width="600"/>
 </p>
 
   ![npm version](https://badge.fury.io/js/nygma-forms.svg)
@@ -27,11 +27,11 @@ Within the vast <a href="https://angular.io/">Angular</a> ecosystem, you'll disc
 Curious about bridging these worlds? Allow me to unveil a remarkable solution: the ingenious <b>nygma</b> library. Prepare to be captivated as I unravel its unique characteristics and describe how it sets itself apart from other available alternatives. Let me introduce it to you. Application example is available at <a href="https://oleksii-shepel.github.io/angular-ngrx-forms/">Github Pages</a>.</p>
 <h2>Usage</h2>
 <p align="justify">
-If you know how to work with NgRx, you will also be comfortable using nygma. All you need to do is declare Nygma directive on the form and provide it with the store path. This magic spell ensures that your form data finds a safe place throughout your application's execution. Here is an example of common form definition:
+If you know how to work with NgRx, you will also be comfortable using nygma. All you need to do is declare sync directive on the form and provide it with the store path. This magic spell ensures that your form data finds a safe place throughout your application's execution. Here is an example of common form definition:
 </p>
 
 ```typescript
-<form #form="ngForm" autocomplete="off" sync="model::form">
+<form #form="ngForm" autocomplete="off" sync="<feature.slice>::<relative.path.to.form>">
   ...
 </form>
 ```
@@ -48,7 +48,6 @@ export interface NygmaConfig {
   slice: string;
   debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
-  resetOnDestroy?: boolean;
 }
 ```
 <p align="justify">

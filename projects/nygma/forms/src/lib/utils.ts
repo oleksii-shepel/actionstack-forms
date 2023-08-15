@@ -9,6 +9,8 @@ export const getValue = (obj: any, prop?: string) => {
 
 
 export const setValue = (obj: any, prop: string, val: any): any => {
+  if(!prop) { return val; }
+
   const isArray = (split: string[]) => split.length >= 2 && !isNaN(+split[1]);
 
   const split = prop.split('.');
