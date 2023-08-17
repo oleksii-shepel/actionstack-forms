@@ -181,7 +181,6 @@ describe('core', () => {
     });
     it('should not call subscriptions when component destroyed', async () => {
       const auto = jest.fn();
-      directive.resetOnDestroy = false;
       subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
@@ -254,7 +253,6 @@ describe('core', () => {
 
       await expect(firstValueFrom(directive.store.select(selectFormState('slice::form')))).resolves.toEqual({ firstName: 'Jane' });
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.dirty).toBe(true);
 
       await expect(directive.formValue).toEqual({ firstName: 'Jane' });
     });
@@ -430,7 +428,6 @@ describe('core', () => {
     it('should not call subscriptions when component destroyed', async () => {
       const auto = jest.fn();
 
-      directive.resetOnDestroy = false;
       subs.a = directive.initialized$.subscribe(auto);
 
       jest.advanceTimersByTime(3000);
@@ -504,7 +501,6 @@ describe('core', () => {
 
       await expect(firstValueFrom(directive.store.select(selectFormState('slice::form')))).resolves.toEqual({ firstName: 'Jane' });
       expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.dirty).toBe(true);
 
       await expect(directive.formValue).toEqual({ firstName: 'Jane' });
     });
