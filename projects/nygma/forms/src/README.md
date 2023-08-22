@@ -31,7 +31,7 @@ If you know how to work with NgRx, you will also be comfortable using nygma. All
 </p>
 
 ```typescript
-<form #form="ngForm" autocomplete="off" sync="<feature.slice>::<relative.path.to.form>">
+<form #form="ngForm" autocomplete="off" sync="<feature.slice>.<relative.path.to.form>">
   ...
 </form>
 ```
@@ -40,11 +40,11 @@ If you know how to work with NgRx, you will also be comfortable using nygma. All
 sync directive expects from user a string that consists of a sequence of property names separated by dots. The first property name is the feature slice. The last property name is the name of the property that will contain form data. All intermediate property names are the names of the properties that will be created in the store if they do not exist.
 </p>
 <p align="justify">
-<i>*** In more sophisticated scenarios you may probably need to parametrize each separate nygma directive with additional parameters. You can do it by setting up the global config token NYGMA_CONFIG_TOKEN or by passing on a config object to the directive directly. There are following config options available for you:</i>
+<i>*** In more sophisticated scenarios you may probably need to parametrize each separate nygma directive with additional parameters. You can do it by setting up the global config token SYNC_OPTIONS_TOKEN or by passing on a config object to the directive directly. There are following config options available for you:</i>
 </p>
 
 ```typescript
-export interface NygmaConfig {
+export interface SyncOptions {
   slice: string;
   debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
@@ -58,7 +58,7 @@ The code snippet of main NgModule shows how the import looks like:
 </p>
 
 ```typescript
-import { NgFormsModule, forms, logger } from 'nygma';
+import { NgFormsModule, forms, logger } from 'nygma-forms';
 
 @NgModule({
   declarations: [
@@ -104,8 +104,8 @@ export enum FormActions {
 As you can see you are freed from the tedious task of implementing the various parts of the Redux pattern. Anyway NgRx offers comprehensive documentation to support you throughout your work. This is foreign parish and we have to deal with it with all our passion and devotion.
 </p>
 <p align="justify">
-At present, the readme is the primary source of documentation for Nygma, but rest assured that more resources may emerge in the future with growing interest. As an advocate for the belief that the code itself serves as the finest documentation, I have high hopes that it has been crafted to be concise and self-descriptive. To help you grasp the concepts, the library comes with a sample application that serves as a useful reference. You can find the source repository for the project at <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>. If you have any questions or suggestions, I will respond as soon as possible.
+At present, the readme is the primary source of documentation for Nygma, but rest assured that more resources may emerge in the future with growing interest. As an advocate for the belief that the code itself serves as the finest documentation, I have high hopes that it has been crafted to be concise and self-descriptive. To help you grasp the concepts, the library comes with a sample application that serves as a useful reference. You can find the source repository for the project at <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>.
 </p>
 <p align="justify">
-I sincerely hope that your experience with <b>nygma-forms</b> brings you great joy and empowers you to develop highly robust and maintainable applications. Embrace the knowledge that the journey has just begun, and there are even greater advancements on the horizon. State management can indeed be made effortless. Stay tuned, as there's much more to come!</p>
+I sincerely hope that your experience with <b>nygma-forms</b> brings you great joy and empowers you to develop highly robust and maintainable applications. I must admit that this simple synchronization of state took a lot of debugging time. Unpredictability accompanied me all the way and for you this journey just begins. Be aware, you need to be persistent. Stay tuned and have fun by programming!</p>
 

@@ -9,7 +9,7 @@ describe('reducers', () => {
     const state = { test: 'test' };
     log((state: any, action: any) => {
       return { ...state, test: 'test2' };
-    })(state, UpdateForm({split: 'test::form', value: 'test'}));
+    })(state, UpdateForm({path: 'test.form', value: 'test'}));
     expect(logSpy).toHaveBeenCalledTimes(2);
   });
   it('should handle actions', () => {
@@ -35,20 +35,20 @@ describe('reducers', () => {
     const f = forms(initialState);
     let expected = {} as any;
 
-    let newState = f((state: any, action: any) => { return state; })(initialState, AutoInit({split: "slice::form", value: model}));
+    let newState = f((state: any, action: any) => { return state; })(initialState, AutoInit({path: "slice.form", value: model}));
     expected = { slice: { form: { model }} };
     expect(newState.model).toEqual(expected.model);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, UpdateForm({split: "slice::form", value: model}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateForm({path: "slice.form", value: model}));
     expected = deepClone(initialState); (expected as any)['slice']['form'] = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({split: "slice::form::email", value: model.email}));
+    newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({path: "slice.form.email", value: model.email}));
     expected = deepClone(initialState); (expected as any)['slice']['form'] = model;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, AutoSubmit({split: "slice::form"}));
+    newState = f((state: any, action: any) => { return state; })(initialState, AutoSubmit({path: "slice.form"}));
 
-    newState = f((state: any, action: any) => { return state; })(initialState, FormDestroyed({split: "slice::form"}));
+    newState = f((state: any, action: any) => { return state; })(initialState, FormDestroyed({path: "slice.form"}));
   });
 });

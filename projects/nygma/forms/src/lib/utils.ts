@@ -11,17 +11,17 @@ export const getValue = (obj: any, prop?: string) => {
 export const setValue = (obj: any, prop: string, val: any): any => {
   if(!prop) { return val; }
 
-  const isArray = (split: string[]) => split.length >= 2 && !isNaN(+split[1]);
+  const isArray = (path: string[]) => path.length >= 2 && !isNaN(+path[1]);
 
-  const split = prop.split('.');
+  const path = prop.split('.');
   const root = Array.isArray(obj)? [...obj] : {...obj};
-  if(split.length === 1) { root[prop] = val; return root; }
+  if(path.length === 1) { root[prop] = val; return root; }
 
-  let item = root; let key = split[0];
-  while(split.length > 1) {
-    item[key] = isArray(split) ? [...(item[key] || [])] : {...item[key]};
+  let item = root; let key = path[0];
+  while(path.length > 1) {
+    item[key] = isArray(path) ? [...(item[key] || [])] : {...item[key]};
     item = item[key];
-    split.shift(); key = split[0];
+    path.shift(); key = path[0];
   }
   item[key] = val;
   return root;
