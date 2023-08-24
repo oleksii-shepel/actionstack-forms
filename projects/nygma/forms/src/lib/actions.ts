@@ -18,7 +18,7 @@ export const UpdateForm = createAction(
 
 export const UpdateField = createAction(
   FormActions.UpdateField,
-  props<{ path: string; value: any; }>()
+  props<{ path: string; property: string; value: any; }>()
 );
 
 export const AutoInit = createAction(

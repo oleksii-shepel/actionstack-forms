@@ -20,12 +20,12 @@ import {
   Observable,
   asyncScheduler,
   defer,
-  delay,
   filter,
   from,
   fromEvent,
   map,
   mergeMap,
+  observeOn,
   scan,
   skip,
   startWith,
@@ -81,7 +81,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   blurCallback = (control: NgControl) => (value: any) => {
     if(this.updateOn === 'blur' && control.path && control.control) {
       control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
-      this.store.dispatch(UpdateField({ path: `${this.path}.${control.path.join('.')}`, value: control.value }));
+      this.store.dispatch(UpdateField({ path: this.path, property: control.path.join('.'), value: control.value }));
     }
   }
 
@@ -169,7 +169,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      delay(0), // to avoid collisions by control addition
+      observeOn(asyncScheduler), // to avoid collisions by control addition
       tap((controls) => {
         controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
@@ -210,7 +210,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       control.control.setValue(value, {emitEvent: control.control.updateOn === 'change'});
     }
     if(this.updateOn === 'change' && control.path) {
-      this.store.dispatch(UpdateField({ path: `${this.path}.${control.path.join('.')}`, value: value }));
+      this.store.dispatch(UpdateField({ path: this.path, property: control.path.join('.'), value: value }));
     }
   }
 
