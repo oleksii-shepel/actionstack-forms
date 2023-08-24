@@ -9,10 +9,7 @@ export type FormState = any;
 
 
 
-export const selectFormState = (path: string) => createSelector((state: any) => {
-  const paths = path?.split('.'); const feature = paths && paths[0]; const form = paths && paths?.slice(1).join('.');
-  return feature && form && getValue(state[feature], form);
-}, state => state);
+export const selectFormState = (path: string) => createSelector((state: any) => getValue(state, path), state => state);
 
 
 
@@ -32,13 +29,13 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
       switch(action.type) {
         case FormActions.UpdateForm:
-          form = action.value;
+          form = deepClone(action.value);
           break;
         case FormActions.UpdateField:
           form = setValue(form, action.property, action.value);
           break;
         case FormActionsInternal.AutoInit:
-          form = action.value;
+          form = deepClone(action.value);
           break;
         case FormActionsInternal.AutoSubmit:
           break;

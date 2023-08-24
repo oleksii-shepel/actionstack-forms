@@ -45,7 +45,7 @@ import {
   FormActions,
   FormDestroyed,
   UpdateField,
-  UpdateForm,
+  UpdateForm
 } from './actions';
 import { selectFormState } from './reducers';
 
