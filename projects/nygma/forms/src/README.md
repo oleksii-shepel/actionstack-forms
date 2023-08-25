@@ -31,7 +31,7 @@ If you know how to work with NgRx, you will also be comfortable using nygma. All
 </p>
 
 ```typescript
-<form #form="ngForm" autocomplete="off" sync="<feature.slice>.<relative.path.to.form>">
+<form #form="ngForm" autocomplete="off" sync="path.to.form">
   ...
 </form>
 ```
