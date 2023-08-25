@@ -1,6 +1,5 @@
 import { AutoInit, AutoSubmit, FormDestroyed, UpdateField, UpdateForm } from '../lib/actions';
 import { forms, logger } from '../lib/reducers';
-import { deepClone } from '../public-api';
 
 describe('reducers', () => {
   it('should log', () => {
@@ -26,7 +25,7 @@ describe('reducers', () => {
       aliases: ['Johny', 'Johnny'],
     };
 
-    const initialState = {
+    let initialState = {
       slice: {
         form: model
       }
@@ -36,15 +35,15 @@ describe('reducers', () => {
     let expected = {} as any;
 
     let newState = f((state: any, action: any) => { return state; })(initialState, AutoInit({path: "slice.form", value: model}));
-    expected = { slice: { form: { ...model }} };
+    expected = { slice: { form: { ...model, __form: true }} }; initialState = newState;
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => { return state; })(initialState, UpdateForm({path: "slice.form", value: model}));
-    expected = deepClone(initialState); (expected as any)['slice']['form'] = model;
+    expected = { slice: { form: { ...model, __form: true }} };
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({path: "slice.form", property: "email", value: model.email}));
-    expected = deepClone(initialState); (expected as any)['slice']['form'] = model;
+    expected = { slice: { form: { ...model, __form: true }} }
     expect(newState).toEqual(expected);
 
     newState = f((state: any, action: any) => { return state; })(initialState, AutoSubmit({path: "slice.form"}));

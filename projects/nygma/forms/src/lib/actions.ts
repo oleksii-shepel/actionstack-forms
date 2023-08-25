@@ -13,7 +13,7 @@ export enum FormActionsInternal {
 
 export const UpdateForm = createAction(
   FormActions.UpdateForm,
-  props<{ path: string; value: any; }>()
+  props<{ path: string; value: any; noclone?: boolean}>()
 );
 
 export const UpdateField = createAction(
@@ -23,7 +23,7 @@ export const UpdateField = createAction(
 
 export const AutoInit = createAction(
   FormActionsInternal.AutoInit,
-  props<{ path: string; value: any; }>()
+  props<{ path: string; value: any; noclone?: boolean}>()
 );
 
 export const AutoSubmit = createAction(

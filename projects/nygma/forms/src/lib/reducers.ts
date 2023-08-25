@@ -9,7 +9,12 @@ export type FormState = any;
 
 
 
-export const selectFormState = (path: string) => createSelector((state: any) => getValue(state, path), state => state);
+export const selectFormState = (path: string, nocheck?: boolean) => createSelector((state: any) => {
+  const form = deepClone(getValue(state, path));
+  if(!form.__form && !nocheck) { console.warn(`You are trying to read form state from the store by path '${path}', but it is not marked as such`); }
+  else { delete form.__form; }
+  return form;
+}, state => state);
 
 
 
@@ -18,7 +23,7 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
   const metaReducer = (state: any, action: any) => {
 
     state = state ?? deepClone(initialState);
-    //console.log(JSON.stringify(state));
+
     let nextState = state;
     const slice = action.path;
 
@@ -29,13 +34,24 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
       switch(action.type) {
         case FormActions.UpdateForm:
-          form = deepClone(action.value);
+          if(!form.__form) {
+            console.warn(`You are trying to update form state in the store by path '${slice}', but it is not marked as such`);
+            console.warn(`Probably sync directive is not initialized at this time, consider updates in ngAfterViewInit lifehook`);
+          }
+          form = !action.noclone ? deepClone(action.value) : {...action.value};
+          form.__form = true;
           break;
         case FormActions.UpdateField:
+          if(!form.__form) {
+            console.warn(`You are trying to update form state in the store by path '${slice}', but it is not marked as such`);
+            console.warn(`Probably sync directive is not initialized at this time, consider updates in ngAfterViewInit lifehook`);
+          }
           form = setValue(form, action.property, action.value);
+          form.__form = true;
           break;
         case FormActionsInternal.AutoInit:
-          form = deepClone(action.value);
+          form = !action.noclone ? deepClone(action.value) : {...action.value};
+          form.__form = true;
           break;
         case FormActionsInternal.AutoSubmit:
           break;

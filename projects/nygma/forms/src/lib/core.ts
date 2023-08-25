@@ -36,6 +36,7 @@ import {
 import {
   SYNC_OPTIONS_DEFAULT,
   SYNC_OPTIONS_TOKEN,
+  deepClone,
   sampleTime,
   setValue
 } from '.';
@@ -128,17 +129,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Supported form control directive not found');
     }
 
-    this.onInit$ = this.store.select(selectFormState(this.path)).pipe(
+    this.onInit$ = this.store.select(selectFormState(this.path, true)).pipe(
       take(1),
       tap(formState => {
 
         if(formState) {
+          formState = deepClone(formState);
           this.dir.form.patchValue(formState, {emitEvent: this.dir.form.updateOn === 'change'});
-          this.store.dispatch(AutoInit({ path: this.path, value: formState }));
         } else {
-          this.store.dispatch(AutoInit({ path: this.path, value: this.dir.form.value }));
+          formState = deepClone(this.dir.form.value);
         }
 
+        this.store.dispatch(AutoInit({ path: this.path, value: formState, noclone: true }));
         this.initialized$.next(true);
       }),
     )
@@ -148,8 +150,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       tap(() => {
         if(this.updateOn === 'submit') {
-          this.dir.form.updateOn === 'submit' ? this.dir.form.updateValueAndValidity() : null;
-          this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue }));
+          this.dir.form.updateOn === 'submit' && this.dir.form.updateValueAndValidity();
+          this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true }));
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ path: this.path })))),
@@ -161,9 +163,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
-
         this.dir.form.patchValue(formState, {emitEvent: this.dir.form.updateOn === 'change'});
-
       }),
       takeWhile(() => !this.destroyed)
     );
@@ -179,7 +179,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         });
       }),
       scan((acc, _) => acc + 1, 0),
-      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue })); }}),
+      tap((value) => { if (value > 1) { this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true })); }}),
       takeWhile(() => !this.destroyed),
     );
 
@@ -228,7 +228,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   get formValue(): any {
     if(!this.controls) { return {}; }
 
-    let value = {};
+    let value = {} as any;
     for (const control of this.controls.toArray()) {
       if(control.path) {
         value = setValue(value, control.path.join('.'), control.value);
