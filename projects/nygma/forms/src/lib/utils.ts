@@ -101,29 +101,6 @@ export function deepClone(objectToClone: any) {
 
 
 
-export function deepFreeze(objectToFreeze: any) {
-  if (primitive(objectToFreeze)) return objectToFreeze;
-
-  let obj = undefined;
-  if (boxed(objectToFreeze)) {
-    if (objectToFreeze instanceof Date) { obj = new Date(objectToFreeze.valueOf()); }
-    else { obj = {...objectToFreeze.constructor(objectToFreeze.valueOf())}; }
-  }
-  else if(objectToFreeze instanceof Map) { obj = new Map(objectToFreeze); }
-  else if(objectToFreeze instanceof Set) { obj = new Set(objectToFreeze); }
-  else if(Array.isArray(objectToFreeze)) { obj = [...objectToFreeze]; }
-  else if (typeof objectToFreeze === 'object') { obj = {...objectToFreeze}; }
-
-  for (const key in obj) {
-    const value = objectToFreeze[key];
-    obj[key] = typeof value === 'object' ? deepFreeze(value) : value;
-  }
-
-  return Object.freeze(obj);
-}
-
-
-
 export function difference(x: any, y: any) : { added?: any, removed?: any, changed?: any } {
   const diff = {} as any;
 
