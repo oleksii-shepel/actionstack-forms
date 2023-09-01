@@ -100,11 +100,7 @@ export enum FormActions {
 }
 ```
 <p align="justify">
-I must admit that this simple synchronization of state took a lot of debugging time. Unpredictability accompanied me all the way and for you this journey just begins. Be aware, you still need to be persistent.
-</p>
-
-<p align="justify">
-By now the readme is the primary source of documentation for the library. As an advocate for the belief that the code itself serves as the finest documentation, I have high hopes that it has been crafted to be concise and self-descriptive. To help you grasp the concepts, the library comes with a sample application that serves as a useful reference. You can find the source repository for the project on Github at <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>.
+To help you grasp the concepts, the library comes with a sample application that serves as a useful reference. You can find the source repository for the project on Github at <a href="https://github.com/oleksii-shepel/angular-ngrx-forms.git">angular-ngrx-forms</a>.
 </p>
 <p align="justify">
 I sincerely hope that your experience with the library brings you great joy and empowers you to develop highly robust and maintainable applications. Stay tuned and have fun by programming!</p>

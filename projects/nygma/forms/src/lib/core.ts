@@ -214,17 +214,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
   }
 
-  get activeControl(): NgControl | undefined {
-    const activeElement = document.activeElement;
-    if(activeElement) {
-      return this.controls.find((control: NgControl) => {
-        return (control.valueAccessor as any)?._elementRef?.nativeElement === activeElement;
-      });
-    } else {
-      return undefined;
-    }
-  }
-
   get formValue(): any {
     if(!this.controls) { return {}; }
 
