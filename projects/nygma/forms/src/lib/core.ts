@@ -122,11 +122,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.updateOn = config.updateOn;
 
     if (!this.path) {
-      throw new Error('Misuse of sync directive');
+      throw new Error('The path property is not provided for the directive');
     }
 
     if (!this.dir) {
-      throw new Error('Supported form control directive not found');
+      throw new Error('Form group directive not found');
     }
 
     this.onInit$ = this.store.select(selectFormState(this.path, true)).pipe(
@@ -169,7 +169,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      observeOn(asyncScheduler), // to avoid collisions by control addition
+      observeOn(asyncScheduler), // to avoid collisions by callback method registration
       tap((controls) => {
         controls.forEach((control: NgControl) => {
           if(control.valueAccessor) {
@@ -189,8 +189,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    // this subscription has to be made after ngAfterContentInit method completion
-    // to avoid collisions by control updates
+    // the subscription has to be made after the ngAfterContentInit method completion
+    // to avoid collisions by callback method registration
     asyncScheduler.schedule(() => { this.subs.d = this.onControlsChanges$.subscribe(); });
   }
 

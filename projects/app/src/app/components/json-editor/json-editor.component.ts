@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { deepEqual, difference, findProps, getValue } from 'nygma-forms';
+import { deepEqual, findProps, getValue } from 'nygma-forms';
 import { BehaviorSubject, sampleTime } from 'rxjs';
+import { difference } from '../../utils/utils';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
 

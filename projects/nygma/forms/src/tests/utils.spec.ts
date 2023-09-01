@@ -1,4 +1,4 @@
-import { boxed, deepClone, deepEqual, difference, findProps, getValue, setValue } from '../lib/utils';
+import { boxed, deepClone, deepEqual, findProps, getValue, setValue } from '../lib/utils';
 describe('utils', () => {
   it('should get value', () => {
     const obj1 = { a: { b: { c: 1 } } };
@@ -107,14 +107,5 @@ describe('utils', () => {
     expect(boxed(obj10)).toEqual(false);
     expect(boxed(obj11)).toEqual(false);
 
-  });
-
-  it('should return the difference', () => {
-    const obj1 = { a: 4, b: 5, d: 7, e: [1] };
-    const obj2 = { a: 1, b: 2, c: 3, e: [1, 2]};
-    const obj3 = { a: 1, b: 2, c: 3, e: [2, 2]};
-
-    expect(difference(obj1, obj2)).toEqual({"added": {"c": 3}, "changed": {"a": 1, "b": 2, "e": [1, 2]}, "removed": {"d": 7}} );
-    expect(difference(obj2, obj3)).toEqual({"changed": {"e": [2, 2]}});
   });
 });

@@ -1,6 +1,7 @@
 import { ActionReducer, createSelector } from '@ngrx/store';
 import { FormActions, FormActionsInternal } from './actions';
-import { deepClone, difference, getValue, setValue } from './utils';
+import { deepClone, deepEqual, getValue, setValue } from './utils';
+
 
 
 
@@ -11,7 +12,7 @@ export type FormState = any;
 
 export const selectFormState = (path: string, nocheck?: boolean) => createSelector((state: any) => {
   const form = deepClone(getValue(state, path));
-  if(!form.__form && !nocheck) { console.warn(`You are trying to read form state from the store by path '${path}', but it is not marked as such`); }
+  if(!form.__form && !nocheck) { console.warn(`You are trying to read form state from the store by path '${path}', but it is not marked as such. Is the sync directive at this point in time initialized? Consider putting your code in a ngAfterViewInit hook`); }
   else { delete form.__form; }
   return form;
 }, state => state);
@@ -35,16 +36,14 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
       switch(action.type) {
         case FormActions.UpdateForm:
           if(!form.__form) {
-            console.warn(`You are trying to update form state in the store by path '${slice}', but it is not marked as such`);
-            console.warn(`Probably sync directive is not initialized at this time, consider updates in ngAfterViewInit lifehook`);
+            console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
           }
           form = !action.noclone ? deepClone(action.value) : {...action.value};
           form.__form = true;
           break;
         case FormActions.UpdateField:
           if(!form.__form) {
-            console.warn(`You are trying to update form state in the store by path '${slice}', but it is not marked as such`);
-            console.warn(`Probably sync directive is not initialized at this time, consider updates in ngAfterViewInit lifehook`);
+            console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
           }
           form = setValue(form, action.property, action.value);
           form.__form = true;
@@ -73,12 +72,12 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 export const logger = (settings: {showAll?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (reducer: ActionReducer<any>): any => {
   settings = Object.assign({showAll: false, showOnlyModifiers: true}, settings);
 
-  function filter(action: any, diff: any): boolean {
+  function filter(action: any, equal: boolean): boolean {
     let show = false;
     if(settings.showMatch && action.type.match(settings.showMatch)) {
       show = true;
     }
-    if(settings.showOnlyModifiers && Object.keys(diff).length > 0) {
+    if(settings.showOnlyModifiers && !equal) {
       show = true;
     }
     if(settings.showAll) {
@@ -97,11 +96,11 @@ export const logger = (settings: {showAll?: boolean, showOnlyModifiers?: boolean
 
     const previous = actionPath.length > 0 ? getValue(state, actionPath) : state;
     const current = actionPath.length > 0 ? getValue(result, actionPath) : result;
-    const diff = difference(previous, current);
-    if(filter(action, diff)) {
+    const equal = deepEqual(previous, current);
+    if(filter(action, equal)) {
       console.groupCollapsed("%c%s%c", "color: black;", action.type, "color: black;");
       console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
-      console.log('added: %o, removed: %o, changed: %o', diff.added || {}, diff.removed || {}, diff.changed || {});
+      console.log('changed: %o', current);
       console.groupEnd();
     }
     return result;
