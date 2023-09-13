@@ -24,10 +24,11 @@ function getAllFiles(dirPath) {
 
 async function minifyFiles(filePaths) {
   for (const filePath of filePaths) {
-    let sourcemapFile = path.basename(`${filePath}.map`);
+    let sourcemapFile = filePath + '.map';
     let sourcemap = fs.existsSync(sourcemapFile);
-    let ecma = filePath.match(/.*[f]?esm2020.*/) ? '2020' : filePath.match(/.*[f]?esm2015.*/) ? '2015' : 'es6';
-    let terser = await Terser.minify(fs.readFileSync(filePath, "utf8"), { ecma, compress: true, mangle: true, sourceMap: sourcemap ? {content: fs.readFileSync(sourcemapFile, "utf8"), url: sourcemapFile, includeSources: true} : true });
+    let match = (filePath.match(/.*[f]?esm(\d+).*/));
+    let ecma = match && match.length > 1 ? match[1] : 'es6';
+    let terser = await Terser.minify(fs.readFileSync(filePath, "utf8"), { ecma, compress: true, mangle: true, sourceMap: sourcemap });
     fs.writeFileSync(filePath, terser.code);
     if(sourcemap) {
       fs.writeFileSync(sourcemapFile, terser.map);
