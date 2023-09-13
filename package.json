@@ -22,7 +22,7 @@
     "test:coverage": "jest --coverage --watchAll=false",
     "test:watch": "jest --watch",
     "deploy": "ng deploy --base-href=/angular-ngrx-forms/",
-    "eslint": "eslint ./projects/nygma/src/lib --ext .ts"
+    "eslint": "eslint ./projects/nygma/forms/src/lib --ext .ts"
   },
   "dependencies": {
     "@angular/animations": "~14.0.0",
