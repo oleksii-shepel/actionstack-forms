@@ -49,8 +49,8 @@ async function deleteFiles(filePaths) {
 
 let allFiles = getAllFiles("./dist");
 
-//let maps = allFiles.filter(path => path.match(/\.map$/));
-//await deleteFiles(maps);
+let maps = allFiles.filter(path => path.match(/\.map$/));
+await deleteFiles(maps);
 
 let js = allFiles.filter(path => path.match(/\.[mc]?js$/));
 await minifyFiles(js);
