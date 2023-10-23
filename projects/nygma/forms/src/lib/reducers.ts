@@ -12,7 +12,7 @@ export type FormState = any;
 
 export const selectFormState = (path: string, nocheck?: boolean) => createSelector((state: any) => {
   const form = deepClone(getValue(state, path));
-  if(!form.__form && !nocheck) { console.warn(`You are trying to read form state from the store by path '${path}', but it is not marked as such. Is the sync directive at this point in time initialized? Consider putting your code in a ngAfterViewInit hook`); }
+  if(!form.__form) { !nocheck && console.warn(`You are trying to read form state from the store by path '${path}', but it is not marked as such. Is the sync directive at this point in time initialized? Consider putting your code in a ngAfterViewInit hook`); }
   else { delete form.__form; }
   return form;
 }, state => state);

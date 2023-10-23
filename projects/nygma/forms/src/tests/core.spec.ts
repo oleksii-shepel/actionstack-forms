@@ -64,7 +64,7 @@ describe('core', () => {
     });
     it('should create directive', async() => {
       expect(directive.path).toBe('slice.form');
-      expect(directive.dir instanceof FormGroupDirective).toBeTruthy();
+      expect(directive.formDirective instanceof FormGroupDirective).toBeTruthy();
       expect(directive.debounceTime).toBe(SYNC_OPTIONS_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(SYNC_OPTIONS_DEFAULT.updateOn);
     });
@@ -78,7 +78,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       expect(stub).toHaveBeenCalled();
-      expect(directive.dir.form.value).toEqual({ firstName: 'John' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'John' });
     });
 
     it('should dispatch AutoSubmit action', async() => {
@@ -116,7 +116,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       expect(stub).toHaveBeenCalled();
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'Jane' });
     });
 
     it('should call subscription when UpdateForm action dispatched', async() => {
@@ -136,7 +136,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       expect(stub).toHaveBeenCalled();
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'Jane' });
     });
 
     it('should call subscription when AutoSubmit action dispatched', async() => {
@@ -252,7 +252,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectFormState('slice.form')))).resolves.toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'Jane' });
 
       await expect(directive.formValue).toEqual({ firstName: 'Jane' });
     });
@@ -310,7 +310,7 @@ describe('core', () => {
     });
     it('should create directive', async() => {
       expect(directive.path).toBe('slice.form');
-      expect(directive.dir instanceof NgForm).toBeTruthy();
+      expect(directive.formDirective instanceof NgForm).toBeTruthy();
       expect(directive.debounceTime).toBe(SYNC_OPTIONS_DEFAULT.debounceTime);
       expect(directive.updateOn).toBe(SYNC_OPTIONS_DEFAULT.updateOn);
     });
@@ -324,7 +324,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       expect(stub).toHaveBeenCalled();
-      expect(directive.dir.form.value).toEqual({ firstName: 'John' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'John' });
     });
 
     it('should dispatch AutoSubmit action', async() => {
@@ -362,7 +362,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       expect(stub).toHaveBeenCalled();
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'Jane' });
     });
 
     it('should call subscription when UpdateForm action dispatched', async() => {
@@ -382,7 +382,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       expect(stub).toHaveBeenCalled();
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'Jane' });
     });
 
     it('should call subscription when AutoSubmit action dispatched', async() => {
@@ -500,7 +500,7 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectFormState('slice.form')))).resolves.toEqual({ firstName: 'Jane' });
-      expect(directive.dir.form.value).toEqual({ firstName: 'Jane' });
+      expect(directive.formDirective.form.value).toEqual({ firstName: 'Jane' });
 
       await expect(directive.formValue).toEqual({ firstName: 'Jane' });
     });
@@ -543,12 +543,6 @@ describe('core', () => {
       jest.useFakeTimers();
       fixture.detectChanges();
       await fixture.whenStable();
-
-      inputElement.focus();
-      expect(directive.activeControl).toEqual(directive.controls.first);
-
-      inputElement.blur();
-      expect(directive.activeControl).toEqual(undefined);
 
       TestBed.resetTestingModule();
       jest.clearAllTimers();

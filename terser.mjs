@@ -38,12 +38,7 @@ async function minifyFiles(filePaths) {
 
 async function deleteFiles(filePaths) {
   for (const filePath of filePaths) {
-    try{
-      fs.rmSync(filePath);
-    }
-    catch(e) {
-      console.log(e);
-    }
+    fs.rmSync(filePath);
   }
 }
 
