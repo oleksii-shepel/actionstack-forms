@@ -13,25 +13,25 @@ export enum FormActionsInternal {
 
 export const UpdateForm = createAction(
   FormActions.UpdateForm,
-  props<{ path: string; value: any; noclone?: boolean}>()
+  props<{ path: string; value: any; source?: any; noclone?: boolean}>()
 );
 
 export const UpdateField = createAction(
   FormActions.UpdateField,
-  props<{ path: string; property: string; value: any; }>()
+  props<{ path: string; property: string; value: any; source?: any; }>()
 );
 
 export const AutoInit = createAction(
   FormActionsInternal.AutoInit,
-  props<{ path: string; value: any; noclone?: boolean}>()
+  props<{ path: string; value: any; source?: any; noclone?: boolean}>()
 );
 
 export const AutoSubmit = createAction(
   FormActionsInternal.AutoSubmit,
-  props<{ path: string; }>()
+  props<{ path: string; source?: any; }>()
 );
 
 export const FormDestroyed = createAction(
   FormActionsInternal.FormDestroyed,
-  props<{ path: string; }>()
+  props<{ path: string; source?: any; }>()
 );
