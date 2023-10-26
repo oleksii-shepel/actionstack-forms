@@ -21,7 +21,6 @@ import {
   asyncScheduler,
   defer,
   filter,
-  finalize,
   from,
   fromEvent,
   map,
@@ -32,7 +31,8 @@ import {
   startWith,
   take,
   takeWhile,
-  tap
+  tap,
+  withLatestFrom
 } from 'rxjs';
 import {
   SYNC_OPTIONS_DEFAULT,
@@ -60,20 +60,6 @@ export interface SyncOptions {
 }
 
 
-
-enum InitBitmap {
-  Reset = 0,
-  Init_0 = 1,
-  Init_1 = 2,
-  Init_2 = 4 ,
-  Init_3 = 8,
-  Init_4 = 16,
-  Init_5 = 32,
-  Complete = 63
-}
-
-
-
 @Directive({
   selector:
     `form:not([ngNoForm]):not([formGroup])[sync],ng-form[sync],[ngForm][sync],[formGroup][sync]`,
@@ -94,10 +80,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   onInit$!: Observable<any>;
   onUpdate$!: Observable<any>;
-  onControlsChanges$!: Observable<any>;
   onSubmit$!: Observable<any>;
 
-  private initBitmap$ = new BehaviorSubject<InitBitmap>(InitBitmap.Reset) as any;
   private subs = {} as any;
 
   private blurCallback = (control: NgControl) => (value: any) => {
@@ -119,11 +103,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Inject(Store) public store: Store,
     @Inject(ActionsSubject) public actionsSubject: ActionsSubject,
   ) {
-    this.initBitmap$ = Object.assign(this.initBitmap$, {
-      reset: () => this.initBitmap$.next(InitBitmap.Reset),
-      completed: () => this.initBitmap$.value === InitBitmap.Complete,
-      set: (value: number) => { this.initBitmap$.next(this.initBitmap$.value | value); if(this.initBitmap$.value === InitBitmap.Complete) { this.initBitmap$.complete(); }}
-    });
   }
 
   ngOnInit() {
@@ -150,8 +129,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       throw new Error('Form group directive not found');
     }
 
-    this.subs.internal_a = this.initBitmap$.pipe(finalize(() => this.initBitmap$.completed() ? this.initialized$.next(true) : this.initialized$.error('Error during initialization'))).subscribe();
-
     this.onInit$ = this.store.select(selectFormState(this.path, true)).pipe(
       take(1),
       tap(formState => {
@@ -164,8 +141,21 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
 
         this.store.dispatch(AutoInit({ path: this.path, value: formState, noclone: true }));
-        this.initBitmap$.set(InitBitmap.Init_0);
       }),
+      withLatestFrom(defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
+        observeOn(asyncScheduler), // to avoid collisions by callback method registration
+        tap((controls) => {
+          controls.forEach((control: NgControl) => {
+            if(control.valueAccessor) {
+              control.valueAccessor.registerOnChange(this.inputCallback(control));
+              control.valueAccessor.registerOnTouched(this.blurCallback(control));
+            }
+          });
+        }),
+        scan((acc, _) => acc + 1, 0),
+        tap((value) => { if(value === 1) { this.initialized$.next(true); this.initialized$.complete(); } else { this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true })); }}),
+      )),
+      takeWhile(() => !this.destroyed$.value),
     )
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
@@ -191,35 +181,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed$.value)
     );
 
-    this.onControlsChanges$ = defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
-      observeOn(asyncScheduler), // to avoid collisions by callback method registration
-      tap((controls) => {
-        controls.forEach((control: NgControl) => {
-          if(control.valueAccessor) {
-            control.valueAccessor.registerOnChange(this.inputCallback(control));
-            control.valueAccessor.registerOnTouched(this.blurCallback(control));
-          }
-        });
-      }),
-      scan((acc, _) => acc + 1, 0),
-      tap((value) => { if(value === 1) { this.initBitmap$.set(InitBitmap.Init_5); } else { this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true })); }}),
-      takeWhile(() => !this.destroyed$.value),
-    );
-
-    this.subs.a = this.onInit$.subscribe();
-    this.initBitmap$.set(InitBitmap.Init_1);
-    this.subs.b = this.onUpdate$.subscribe();
-    this.initBitmap$.set(InitBitmap.Init_2);
-    this.subs.c = this.onSubmit$.subscribe();
-    this.initBitmap$.set(InitBitmap.Init_3);
+    this.subs.a = this.onUpdate$.subscribe();
+    this.subs.b = this.onSubmit$.subscribe();
   }
 
   ngAfterContentInit() {
     // the subscription has to be made after the ngAfterContentInit method completion
     // to avoid collisions by callback method registration
     asyncScheduler.schedule(() => {
-      this.subs.d = this.onControlsChanges$.subscribe();
-      this.initBitmap$.set(InitBitmap.Init_4)
+      this.subs.c = this.onInit$.subscribe();
     });
   }
 
@@ -231,8 +201,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
 
     this.destroyed$.next(true);
-
-    this.initialized$.complete();
     this.destroyed$.complete();
   }
 
