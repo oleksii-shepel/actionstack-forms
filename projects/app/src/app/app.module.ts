@@ -41,7 +41,7 @@ import { NgModelArrayModule } from './utils';
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     StoreModule.forRoot(reducer, {
-      metaReducers: [logger({showOnlyModifiers: true}), forms(initialState), global()]
+      metaReducers: [logger({showAll: true}), forms(initialState), global()]
     }),
 
     NgModelArrayModule

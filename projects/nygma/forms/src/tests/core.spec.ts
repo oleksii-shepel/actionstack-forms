@@ -166,7 +166,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      subs.a = directive.initialized$.subscribe(stub);
+      subs.a = directive.onInit$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -193,7 +193,6 @@ describe('core', () => {
 
       subs.c = directive.onUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
-      subs.f = directive.onControlsChanges$.subscribe(stub);
 
       const numberOfCalls = stub.mock.calls.length;
       document.body.removeChild(fixture.debugElement.nativeElement);
@@ -412,7 +411,7 @@ describe('core', () => {
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
 
-      subs.a = directive.initialized$.subscribe(stub);
+      subs.a = directive.onInit$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
       await fixture.whenStable();
@@ -440,7 +439,6 @@ describe('core', () => {
 
       subs.c = directive.onUpdate$.subscribe(stub);
       subs.d = directive.onSubmit$.subscribe(stub);
-      subs.f = directive.onControlsChanges$.subscribe(stub);
 
       const numberOfCalls = stub.mock.calls.length;
 

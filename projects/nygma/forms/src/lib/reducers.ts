@@ -1,5 +1,6 @@
-import { ActionReducer, createSelector } from '@ngrx/store';
-import { FormActions, FormActionsInternal } from './actions';
+import { Action, ActionReducer, createSelector } from '@ngrx/store';
+import { Deferred, FormActions, FormActionsInternal } from './actions';
+import { Queue } from './queue';
 import { deepClone, deepEqual, getValue, setValue } from './utils';
 
 
@@ -19,16 +20,21 @@ export const selectFormState = (path: string, nocheck?: boolean) => createSelect
 
 
 
+export const actionQueues = new Map<string, Queue<Action>>();
+
+
+
 export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
 
   const metaReducer = (state: any, action: any) => {
 
-    state = state ?? deepClone(initialState);
+  state = state ?? deepClone(initialState);
 
-    let nextState = state;
-    const slice = action.path;
+  let nextState = state;
+  const slice = action.path;
 
-    if(slice) {
+  if(slice) {
+    if(!actionQueues.has(slice) || actionQueues.get(slice)?.initialized$.value || action.type === FormActionsInternal.AutoInit || action.deferred) {
 
       nextState = reducer(state, action);
       let form = getValue(nextState, slice);
@@ -49,6 +55,11 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
           form.__form = true;
           break;
         case FormActionsInternal.AutoInit:
+          if(actionQueues.has(slice)) {
+            const queue = actionQueues.get(slice) as Queue<Action>;
+            queue.initialized$.next(true);
+            queue.initialized$.complete();
+          }
           form = !action.noclone ? deepClone(action.value) : {...action.value};
           form.__form = true;
           break;
@@ -60,6 +71,11 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 
       nextState = setValue(nextState, slice, form);
       return nextState;
+    } else {
+        const queue = actionQueues.get(slice) as Queue<Action>;
+        queue.enqueue(new Deferred(action));
+        return nextState;
+      }
     }
 
     nextState = reducer(state, action);
@@ -69,15 +85,21 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
   return metaReducer;
 }
 
-export const logger = (settings: {showAll?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (reducer: ActionReducer<any>): any => {
-  settings = Object.assign({showAll: false, showOnlyModifiers: true}, settings);
+export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (reducer: ActionReducer<any>): any => {
+  settings = Object.assign({showAll: false, showRegular: false, showDeferred: false, showOnlyModifiers: true}, settings);
 
-  function filter(action: any, equal: boolean): boolean {
+  function filter(action: any, difference: any): boolean {
     let show = false;
     if(settings.showMatch && action.type.match(settings.showMatch)) {
       show = true;
     }
-    if(settings.showOnlyModifiers && !equal) {
+    if(settings.showRegular && !action.deferred) {
+      show = true;
+    }
+    if(settings.showDeferred && action.deferred) {
+      show = true;
+    }
+    if(settings.showOnlyModifiers && Object.keys(difference).length > 0) {
       show = true;
     }
     if(settings.showAll) {
@@ -97,8 +119,9 @@ export const logger = (settings: {showAll?: boolean, showOnlyModifiers?: boolean
     const previous = actionPath.length > 0 ? getValue(state, actionPath) : state;
     const current = actionPath.length > 0 ? getValue(result, actionPath) : result;
     const equal = deepEqual(previous, current);
+
     if(filter(action, equal)) {
-      console.groupCollapsed("%c%s%c", "color: black;", action.type, "color: black;");
+      console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
       console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
       console.log('changed: %o', current);
       console.groupEnd();

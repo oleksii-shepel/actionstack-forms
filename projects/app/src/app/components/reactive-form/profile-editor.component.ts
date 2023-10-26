@@ -49,7 +49,6 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   ngAfterViewInit() {
     this.collapsed = true;
-
     this.profile$ = this.store.select(selectSlice(this.slice)).pipe(shareReplay());
 
     const scrollable = this.elementRef.nativeElement.querySelector('.scrollable');

@@ -48,6 +48,7 @@ export interface SyncOptions {
   slice: string;
   debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
+  enableQueue?: boolean;
 }
 ```
 <p align="justify">

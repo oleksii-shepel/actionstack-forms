@@ -1,4 +1,4 @@
-import { createAction, props } from '@ngrx/store';
+import { Action, createAction, props } from '@ngrx/store';
 
 export enum FormActions {
   UpdateForm = '@forms/form/update',
@@ -13,25 +13,34 @@ export enum FormActionsInternal {
 
 export const UpdateForm = createAction(
   FormActions.UpdateForm,
-  props<{ path: string; value: any; source?: any; noclone?: boolean}>()
+  props<{ path: string; value: any; noclone?: boolean}>()
 );
 
 export const UpdateField = createAction(
   FormActions.UpdateField,
-  props<{ path: string; property: string; value: any; source?: any; }>()
+  props<{ path: string; property: string; value: any; }>()
 );
 
 export const AutoInit = createAction(
   FormActionsInternal.AutoInit,
-  props<{ path: string; value: any; source?: any; noclone?: boolean}>()
+  props<{ path: string; value: any; noclone?: boolean}>()
 );
 
 export const AutoSubmit = createAction(
   FormActionsInternal.AutoSubmit,
-  props<{ path: string; source?: any; }>()
+  props<{ path: string; }>()
 );
 
 export const FormDestroyed = createAction(
   FormActionsInternal.FormDestroyed,
-  props<{ path: string; source?: any; }>()
+  props<{ path: string; }>()
 );
+
+export class Deferred implements Action {
+  type!: string;
+  deferred = true;
+
+  constructor(action: Action) {
+    Object.assign(this, action);
+  }
+}

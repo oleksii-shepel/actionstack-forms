@@ -39,7 +39,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   async ngAfterViewInit() {
-    const state: any = await firstValueFrom(this.store.select(selectFormState(this.formCast)));
+    const state: any = await firstValueFrom(this.store.select(selectFormState(this.formCast, true)));
 
     if(!state) {
       this.store.dispatch(UpdateForm({value: initialHeroPage.form, path: this.formCast}));

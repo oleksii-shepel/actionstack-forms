@@ -1,7 +1,8 @@
 import { ChangeDetectorRef, Directive, EventEmitter, Host, Inject, Input, OnDestroy, OnInit, Optional, Output, Provider, Self, forwardRef } from '@angular/core';
 import { AsyncValidator, AsyncValidatorFn, ControlContainer, ControlValueAccessor, DefaultValueAccessor, FormControl, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgModel, Validator, ValidatorFn } from '@angular/forms';
 import { SyncDirective, getValue, selectFormState } from 'nygma-forms';
-import { Subject, distinctUntilChanged, map, takeUntil } from 'rxjs';
+import { Subject, distinctUntilChanged, filter, takeUntil } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { CALL_SET_DISABLED_STATE, SetDisabledStateOption, composeAsyncValidators, composeValidators, selectValueAccessor } from '../utils';
 import { FieldArrayDirective } from './array.directive';
 import { FieldGroupDirective } from './group.directive';
@@ -30,7 +31,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   override viewModel: any = undefined;
 
   _parent: ControlContainer;
-  _ngStore: SyncDirective;
+  sync: SyncDirective;
   _rawValidators!: (ValidatorFn | Validator)[];
   _rawAsyncValidators!: (AsyncValidator | AsyncValidatorFn)[];
   _composedValidator!: ValidatorFn | null;
@@ -52,7 +53,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
     super(parent, validators, asyncValidators, valueAccessors, changeDetectorRef);
 
     this._parent = parent;
-    this._ngStore = ngStore;
+    this.sync = ngStore;
 
     this._setValidators(validators);
     this._setAsyncValidators(asyncValidators);
@@ -92,10 +93,11 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   }
 
   ngOnInit(): void {
-    this._ngStore?.store.select((state: any) => state).pipe(
+    this.sync?.initialized$.pipe(
+      filter(value => value),
+      switchMap(() => this.sync.store.select(selectFormState(this.sync.path))),
       distinctUntilChanged(),
-      takeUntil(this._destroyed$),
-      map(state => selectFormState(this._ngStore.path)(state)))
+      takeUntil(this._destroyed$))
     .subscribe((model: any) => {
       const value = getValue(model, this.path.join('.'));
       if(value !== this.control.value) {

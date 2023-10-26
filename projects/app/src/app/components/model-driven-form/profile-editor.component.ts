@@ -42,7 +42,7 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
 
   async ngAfterViewInit() {
 
-    const state = await firstValueFrom(this.store.select(selectFormState(this.formCast)));
+    const state = await firstValueFrom(this.store.select(selectFormState(this.formCast, true)));
 
     this.model = state ? deepClone(state) : initialModelPage.form;
     this.collapsed = true;
