@@ -88,7 +88,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   onInit$!: Observable<any>;
   onUpdate$!: Observable<any>;
   onSubmit$!: Observable<any>;
-  onActionQueued$!: Observable<any>;
+  onEnqueue$!: Observable<any>;
 
   private subs = {} as any;
 
@@ -202,7 +202,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed$.value)
     );
 
-    this.onActionQueued$ = of(this.enableQueue).pipe(
+    this.onEnqueue$ = of(this.enableQueue).pipe(
       filter((value) => value),
       mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
       switchMap(() => actionQueues.get(this.path)?.updated$ || of(null)),
@@ -220,7 +220,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.subs.a = this.onUpdate$.subscribe();
     this.subs.b = this.onSubmit$.subscribe();
-    this.subs.c = this.onActionQueued$.subscribe();
+    this.subs.c = this.onEnqueue$.subscribe();
   }
 
   ngAfterContentInit() {
