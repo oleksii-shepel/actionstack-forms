@@ -21,6 +21,7 @@ import {
   asyncScheduler,
   defer,
   filter,
+  firstValueFrom,
   from,
   fromEvent,
   map,
@@ -28,7 +29,6 @@ import {
   observeOn,
   of,
   scan,
-  skip,
   startWith,
   take,
   takeWhile,
@@ -39,6 +39,8 @@ import {
   SYNC_OPTIONS_DEFAULT,
   SYNC_OPTIONS_TOKEN,
   deepClone,
+  deepEqual,
+  getValue,
   sampleTime,
   setValue,
   waitUntil
@@ -91,8 +93,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   private subs = {} as any;
 
   private blurCallback = (control: NgControl) => (value: any) => {
-    waitUntil(() => this.initialized$.value).then(() => {
-      if(this.updateOn === 'blur' && control.path && control.control) {
+    waitUntil(() => this.initialized$.value).then(() => firstValueFrom(this.store.select(selectFormState(this.path)))).then((formState) => {
+      if(this.updateOn === 'blur' && control.path && control.control && getValue(formState, control.path.join('.')) !== control.value) {
         control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
         this.store.dispatch(UpdateField({ path: this.path, property: control.path.join('.'), value: control.value }));
       }
@@ -167,7 +169,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
             }
 
             this.store.dispatch(AutoInit({ path: this.path, value: formState, noclone: true }));
-            this.initialized$.next(true); this.initialized$.complete();
+            this.initialized$.next(true);
           } else {
             this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true })); }
           }),
@@ -177,11 +179,13 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.formDirective.form.valid),
-      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
-      tap(() => {
+      mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
+      mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
+      tap((formState) => {
         if(this.updateOn === 'submit') {
+          const formValue = this.formValue;
           this.formDirective.form.updateOn === 'submit' && this.formDirective.form.updateValueAndValidity();
-          this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true }));
+          !deepEqual(formState, formValue) && this.store.dispatch(UpdateForm({ path: this.path, value: formValue, noclone: true }));
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ path: this.path })))),
@@ -189,8 +193,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     );
 
     this.onUpdate$ = this.actionsSubject.pipe(
-      skip(1),
       filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
+      mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
         this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
@@ -200,6 +204,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onActionQueued$ = of(this.enableQueue).pipe(
       filter((value) => value),
+      mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
       switchMap(() => actionQueues.get(this.path)?.updated$ || of(null)),
       filter((value) => value !== null),
       observeOn(asyncScheduler),
@@ -228,6 +233,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   ngOnDestroy() {
     this.store.dispatch(FormDestroyed({ path: this.path, value: this.formValue }));
+
+    this.initialized$.complete();
 
     this.destroyed$.next(true);
     this.destroyed$.complete();
