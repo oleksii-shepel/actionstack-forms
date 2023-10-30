@@ -33,7 +33,7 @@ export const AutoSubmit = createAction(
 
 export const FormDestroyed = createAction(
   FormActionsInternal.FormDestroyed,
-  props<{ path: string; }>()
+  props<{ path: string; value: any; }>()
 );
 
 export class Deferred implements Action {

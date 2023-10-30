@@ -100,8 +100,8 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
       takeUntil(this._destroyed$))
     .subscribe((model: any) => {
       const value = getValue(model, this.path.join('.'));
+      this.valueAccessor?.writeValue(value);
       if(value !== this.control.value) {
-        this.valueAccessor?.writeValue(value);
         this.control.setValue(value, {emitEvent: false});
       }
     });

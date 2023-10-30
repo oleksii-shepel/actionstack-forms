@@ -14,7 +14,7 @@ import {
   Self
 } from '@angular/core';
 import { FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { Action, ActionsSubject, Store } from '@ngrx/store';
+import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
@@ -34,13 +34,14 @@ import {
   takeWhile,
   tap
 } from 'rxjs';
-import { finalize, first, switchMap } from 'rxjs/operators';
+import { first, switchMap } from 'rxjs/operators';
 import {
   SYNC_OPTIONS_DEFAULT,
   SYNC_OPTIONS_TOKEN,
   deepClone,
   sampleTime,
-  setValue
+  setValue,
+  waitUntil
 } from '.';
 import {
   AutoInit,
@@ -83,22 +84,26 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   destroyed$ = new BehaviorSubject<boolean>(false);
 
   onInit$!: Observable<any>;
-  onActionQueued$!: Observable<any>;
   onUpdate$!: Observable<any>;
   onSubmit$!: Observable<any>;
+  onActionQueued$!: Observable<any>;
 
   private subs = {} as any;
 
   private blurCallback = (control: NgControl) => (value: any) => {
-    if(this.updateOn === 'blur' && control.path && control.control) {
-      control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
-      this.store.dispatch(UpdateField({ path: this.path, property: control.path.join('.'), value: control.value }));
-    }
+    waitUntil(() => this.initialized$.value).then(() => {
+      if(this.updateOn === 'blur' && control.path && control.control) {
+        control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
+        this.store.dispatch(UpdateField({ path: this.path, property: control.path.join('.'), value: control.value }));
+      }
+    });
   }
 
   private func = this.setControlValue.bind(this);
   private inputCallback = (control: NgControl) => (value: any) => {
-    sampleTime(this.func, this.debounceTime)(control, value);
+    waitUntil(() => this.initialized$.value).then(() => {
+      sampleTime(this.func, this.debounceTime)(control, value);
+    });
   }
 
   constructor(
@@ -141,18 +146,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onInit$ = this.store.select(selectFormState(this.path, true)).pipe(
       first(),
-      tap(formState => {
-
-        if(formState) {
-          formState = deepClone(formState);
-          this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
-        } else {
-          formState = deepClone(this.formDirective.form.value);
-        }
-
-        this.store.dispatch(AutoInit({ path: this.path, value: formState, noclone: true }));
-      }),
-      switchMap(() => defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
+      switchMap((formState) => defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
         observeOn(asyncScheduler), // to avoid collisions by callback method registration
         tap((controls) => {
           controls.forEach((control: NgControl) => {
@@ -163,7 +157,20 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           });
         }),
         scan((acc, _) => acc + 1, 0),
-        tap((value) => { if(value === 1) { this.initialized$.next(true); this.initialized$.complete(); } else { this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true })); }}),
+        tap((value) => {
+          if(value === 1) {
+            if(formState) {
+              formState = deepClone(formState);
+              this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
+            } else {
+              formState = deepClone(this.formDirective.form.value);
+            }
+
+            this.store.dispatch(AutoInit({ path: this.path, value: formState, noclone: true }));
+            this.initialized$.next(true); this.initialized$.complete();
+          } else {
+            this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true })); }
+          }),
       )),
       takeWhile(() => !this.destroyed$.value),
     )
@@ -203,17 +210,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
           }
         }
       }),
-      takeWhile(() => document.contains(this.elRef.nativeElement)),
-      finalize(() => {
-        const queue = actionQueues.get(this.path) as Queue<Action>;
-        if(queue.initialized$.value) {
-          while(queue.length > 0) {
-            this.store.dispatch(queue.dequeue() as Action);
-          }
-          this.store.dispatch(FormDestroyed({ path: this.path }));
-        }
-        actionQueues.delete(this.path);
-      }),
+      takeWhile(() => !this.destroyed$.value)
     );
 
     this.subs.a = this.onUpdate$.subscribe();
@@ -230,16 +227,18 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy() {
-    if(!this.enableQueue) {
-      this.store.dispatch(FormDestroyed({ path: this.path }));
-    }
+    this.store.dispatch(FormDestroyed({ path: this.path, value: this.formValue }));
+
+    this.destroyed$.next(true);
+    this.destroyed$.complete();
 
     for (const key of Object.keys(this.subs)) {
       this.subs[key].unsubscribe();
     }
 
-    this.destroyed$.next(true);
-    this.destroyed$.complete();
+    if(this.enableQueue) {
+      actionQueues.delete(this.path);
+    }
   }
 
   setControlValue(control: NgControl, value: any) {

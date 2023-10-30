@@ -48,6 +48,6 @@ describe('reducers', () => {
 
     newState = f((state: any, action: any) => { return state; })(initialState, AutoSubmit({path: "slice.form"}));
 
-    newState = f((state: any, action: any) => { return state; })(initialState, FormDestroyed({path: "slice.form"}));
+    newState = f((state: any, action: any) => { return state; })(initialState, FormDestroyed({path: "slice.form", value: initialState}));
   });
 });
