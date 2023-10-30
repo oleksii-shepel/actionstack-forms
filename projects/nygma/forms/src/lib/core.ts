@@ -184,8 +184,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       tap((formState) => {
         if(this.updateOn === 'submit') {
           const formValue = this.formValue;
-          this.formDirective.form.updateOn === 'submit' && this.formDirective.form.updateValueAndValidity();
-          !deepEqual(formState, formValue) && this.store.dispatch(UpdateForm({ path: this.path, value: formValue, noclone: true }));
+          this.formDirective.form.updateOn === "submit" && this.formDirective.form.updateValueAndValidity(),
+          deepEqual(formState, formValue) || this.store.dispatch(UpdateForm({ path: this.path, value: formValue, noclone: true }));
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ path: this.path })))),
@@ -204,7 +204,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onActionQueued$ = of(this.enableQueue).pipe(
       filter((value) => value),
-      mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
       switchMap(() => actionQueues.get(this.path)?.updated$ || of(null)),
       filter((value) => value !== null),
       observeOn(asyncScheduler),
