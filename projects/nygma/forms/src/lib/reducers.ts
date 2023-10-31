@@ -27,64 +27,61 @@ export const actionQueues = new Map<string, Queue<Action>>();
 export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
 
   const metaReducer = (state: any, action: any) => {
+    state = state ?? deepClone(initialState);
 
-  state = state ?? deepClone(initialState);
-
-  let nextState = state;
-  const slice = action.path;
-  if(slice) {
-    if (!actionQueues.has(slice) && ActionArray.includes(action.type)) {
-      actionQueues.set(slice, new Queue());
-    }
-
-    if(!actionQueues.has(slice) || actionQueues.get(slice)?.initialized$.value || action.type === FormActionsInternal.AutoInit || action.deferred) {
-      nextState = reducer(state, action);
-      let form = getValue(nextState, slice);
-
-      switch(action.type) {
-        case FormActions.UpdateForm:
-          if(!form.__form) {
-            console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
-          }
-          form = !action.noclone ? deepClone(action.value) : {...action.value};
-          form.__form = true;
-          break;
-        case FormActions.UpdateField:
-          if(!form.__form) {
-            console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
-          }
-          form = setValue(form, action.property, action.value);
-          form.__form = true;
-          break;
-        case FormActionsInternal.AutoInit:
-          if(actionQueues.has(slice)) {
-            const queue = actionQueues.get(slice) as Queue<Action>;
-            queue.initialized$.next(true);
-            queue.initialized$.complete();
-          }
-          form = !action.noclone ? deepClone(action.value) : {...action.value};
-          form.__form = true;
-          break;
-        case FormActionsInternal.AutoSubmit:
-          break;
-        case FormActionsInternal.FormDestroyed:
-          actionQueues.delete(slice);
-          break;
+    let nextState = state;
+    const slice = action.path;
+    if(slice && ActionArray.includes(action.type)) {
+      if (!actionQueues.has(slice)) {
+        actionQueues.set(slice, new Queue());
       }
 
-      nextState = setValue(nextState, slice, form);
-      return nextState;
-    } else {
-        const queue = actionQueues.get(slice) as Queue<Action>;
-        queue.enqueue(new Deferred(action));
+      if(actionQueues.get(slice)?.initialized$.value || action.type === FormActionsInternal.AutoInit || action.deferred) {
+        let form = getValue(nextState, slice);
+
+        switch(action.type) {
+          case FormActions.UpdateForm:
+            if(!form.__form) {
+              console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
+            }
+            form = !action.noclone ? deepClone(action.value) : {...action.value};
+            form.__form = true;
+            break;
+          case FormActions.UpdateField:
+            if(!form.__form) {
+              console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
+            }
+            form = setValue(form, action.property, action.value);
+            form.__form = true;
+            break;
+          case FormActionsInternal.AutoInit:
+            if(actionQueues.has(slice)) {
+              const queue = actionQueues.get(slice) as Queue<Action>;
+              queue.initialized$.next(true);
+              queue.initialized$.complete();
+            }
+            form = !action.noclone ? deepClone(action.value) : {...action.value};
+            form.__form = true;
+            break;
+          case FormActionsInternal.AutoSubmit:
+            break;
+          case FormActionsInternal.FormDestroyed:
+            actionQueues.delete(slice);
+            break;
+        }
+
+        nextState = setValue(nextState, slice, form);
         return nextState;
+      } else {
+          const queue = actionQueues.get(slice) as Queue<Action>;
+          queue.enqueue(new Deferred(action));
+          return nextState;
       }
     }
 
     nextState = reducer(state, action);
     return nextState;
   }
-
   return metaReducer;
 }
 
