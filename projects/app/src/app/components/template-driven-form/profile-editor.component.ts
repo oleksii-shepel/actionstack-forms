@@ -66,7 +66,9 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   }
 
   onSubmit() {
-    Function.prototype
+    if(this.form?.valid) {
+      alert("Form submitted successfully");
+    }
   }
 
   ngOnDestroy() {

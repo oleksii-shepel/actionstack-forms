@@ -34,7 +34,7 @@ import {
   takeWhile,
   tap
 } from 'rxjs';
-import { first, switchMap } from 'rxjs/operators';
+import { endWith, first, switchMap } from 'rxjs/operators';
 import {
   SYNC_OPTIONS_DEFAULT,
   SYNC_OPTIONS_TOKEN,
@@ -173,7 +173,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.formDirective.form.valid),
-      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
         if(this.updateOn === 'submit') {
@@ -188,7 +188,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onUpdate$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
-      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
         this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
@@ -198,7 +198,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onEnqueue$ = from(actionQueues.get(this.path)?.updated$ ?? of(null)).pipe(
       filter((value) => value),
-      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
+      mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
       observeOn(asyncScheduler),
       tap((queue) => {
         if(queue.initialized$.value) {
@@ -226,7 +226,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   ngOnDestroy() {
     this.store.dispatch(FormDestroyed({ path: this.path, value: this.formValue }));
 
-    this.initialized$.complete();
     this.destroyed$.next(true);
     this.destroyed$.complete();
 
