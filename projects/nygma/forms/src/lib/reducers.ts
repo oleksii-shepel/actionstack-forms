@@ -1,5 +1,5 @@
 import { Action, ActionReducer, createSelector } from '@ngrx/store';
-import { Deferred, FormActions, FormActionsInternal } from './actions';
+import { ActionArray, Deferred, FormActions, FormActionsInternal } from './actions';
 import { Queue } from './queue';
 import { deepClone, deepEqual, getValue, setValue } from './utils';
 
@@ -33,11 +33,11 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
   let nextState = state;
   const slice = action.path;
   if(slice) {
-    if (!actionQueues.has(slice)) {
+    if (!actionQueues.has(slice) && ActionArray.includes(action.type)) {
       actionQueues.set(slice, new Queue());
     }
 
-    if(actionQueues.get(slice)?.initialized$.value || action.type === FormActionsInternal.AutoInit || action.deferred) {
+    if(!actionQueues.has(slice) || actionQueues.get(slice)?.initialized$.value || action.type === FormActionsInternal.AutoInit || action.deferred) {
       nextState = reducer(state, action);
       let form = getValue(nextState, slice);
 

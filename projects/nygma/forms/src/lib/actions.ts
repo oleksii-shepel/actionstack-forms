@@ -11,6 +11,8 @@ export enum FormActionsInternal {
   FormDestroyed = '@forms/form/destroyed',
 }
 
+export const ActionArray = (Object.values(FormActions) as any[]).concat(Object.values(FormActionsInternal));
+
 export const UpdateForm = createAction(
   FormActions.UpdateForm,
   props<{ path: string; value: any; noclone?: boolean}>()
