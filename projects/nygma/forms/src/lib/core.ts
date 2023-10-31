@@ -34,7 +34,7 @@ import {
   takeWhile,
   tap
 } from 'rxjs';
-import { endWith, first, switchMap } from 'rxjs/operators';
+import { endWith, switchMap } from 'rxjs/operators';
 import {
   SYNC_OPTIONS_DEFAULT,
   SYNC_OPTIONS_TOKEN,
@@ -113,7 +113,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Inject(Store) public store: Store,
     @Inject(ActionsSubject) public actionsSubject: ActionsSubject,
   ) {
-
   }
 
   ngOnInit() {
@@ -141,7 +140,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     }
 
     this.onInit$ = this.store.select(selectFormState(this.path, true)).pipe(
-      first(),
+      take(1),
       switchMap((formState) => defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
         observeOn(asyncScheduler), // to avoid collisions by callback method registration
         tap((controls) => {
@@ -171,6 +170,16 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed$.value),
     )
 
+    this.onUpdate$ = this.actionsSubject.pipe(
+      filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
+      mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
+      mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
+      tap((formState) => {
+        this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
+      }),
+      takeWhile(() => !this.destroyed$.value)
+    );
+
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.formDirective.form.valid),
       mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
@@ -183,16 +192,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         }
       }),
       tap(() => ( this.store.dispatch(AutoSubmit({ path: this.path })))),
-      takeWhile(() => !this.destroyed$.value)
-    );
-
-    this.onUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
-      mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
-      mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
-      tap((formState) => {
-        this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
-      }),
       takeWhile(() => !this.destroyed$.value)
     );
 

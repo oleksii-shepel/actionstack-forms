@@ -91,7 +91,7 @@ export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): 
 export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (reducer: ActionReducer<any>): any => {
   settings = Object.assign({showAll: false, showRegular: false, showDeferred: false, showOnlyModifiers: true}, settings);
 
-  function filter(action: any, difference: any): boolean {
+  function filter(action: any, equal: any): boolean {
     let show = false;
     if(settings.showMatch && action.type.match(settings.showMatch)) {
       show = true;
@@ -102,7 +102,7 @@ export const logger = (settings: {showAll?: boolean, showRegular?: boolean, show
     if(settings.showDeferred && action.deferred) {
       show = true;
     }
-    if(settings.showOnlyModifiers && Object.keys(difference).length > 0) {
+    if(settings.showOnlyModifiers && !equal) {
       show = true;
     }
     if(settings.showAll) {
@@ -126,7 +126,7 @@ export const logger = (settings: {showAll?: boolean, showRegular?: boolean, show
     if(filter(action, equal)) {
       console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
       console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
-      console.log('changed: %o', current);
+      console.log(current);
       console.groupEnd();
     }
     return result;
