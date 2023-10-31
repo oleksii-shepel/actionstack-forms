@@ -53,7 +53,6 @@ import {
   UpdateField,
   UpdateForm
 } from './actions';
-import { Queue } from './queue';
 import { actionQueues, selectFormState } from './reducers';
 
 
@@ -78,7 +77,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   path!: string;
   debounceTime!: number;
   updateOn!: string;
-  enableQueue!: boolean;
 
   formDirective!: NgForm | FormGroupDirective;
 
@@ -115,6 +113,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Inject(Store) public store: Store,
     @Inject(ActionsSubject) public actionsSubject: ActionsSubject,
   ) {
+
   }
 
   ngOnInit() {
@@ -130,7 +129,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       this.path = config.slice;
     }
 
-    this.enableQueue = config.enableQueue;
     this.debounceTime = config.debounceTime;
     this.updateOn = config.updateOn;
 
@@ -140,10 +138,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     if (!this.formDirective) {
       throw new Error('Form group directive not found');
-    }
-
-    if(this.enableQueue) {
-      actionQueues.set(this.path, new Queue());
     }
 
     this.onInit$ = this.store.select(selectFormState(this.path, true)).pipe(
@@ -169,7 +163,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
             }
 
             this.store.dispatch(AutoInit({ path: this.path, value: formState, noclone: true }));
-            this.initialized$.next(true);
+            this.initialized$.next(true); this.initialized$.complete();
           } else {
             this.store.dispatch(UpdateForm({ path: this.path, value: this.formValue, noclone: true })); }
           }),
@@ -179,7 +173,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.formDirective.form.valid),
-      mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
         if(this.updateOn === 'submit') {
@@ -194,7 +188,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onUpdate$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
-      mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
         this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
@@ -202,11 +196,9 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed$.value)
     );
 
-    this.onEnqueue$ = of(this.enableQueue).pipe(
+    this.onEnqueue$ = from(actionQueues.get(this.path)?.updated$ ?? of(null)).pipe(
       filter((value) => value),
-      mergeMap((value) => from(this.initialized$).pipe(filter(init => init), take(1), map(() => value))),
-      switchMap(() => actionQueues.get(this.path)?.updated$ || of(null)),
-      filter((value) => value !== null),
+      mergeMap((value) => from(this.initialized$).pipe(filter(value => value), take(1), map(() => value))),
       observeOn(asyncScheduler),
       tap((queue) => {
         if(queue.initialized$.value) {
@@ -235,16 +227,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     this.store.dispatch(FormDestroyed({ path: this.path, value: this.formValue }));
 
     this.initialized$.complete();
-
     this.destroyed$.next(true);
     this.destroyed$.complete();
 
     for (const key of Object.keys(this.subs)) {
       this.subs[key].unsubscribe();
-    }
-
-    if(this.enableQueue) {
-      actionQueues.delete(this.path);
     }
   }
 

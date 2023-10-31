@@ -5,7 +5,7 @@ import { StoreModule } from '@ngrx/store';
 import { SyncDirective, SyncOptions } from './core';
 
 export const SYNC_OPTIONS_TOKEN = new InjectionToken<string>('SYNC_CONFIG_TOKEN');
-export const SYNC_OPTIONS_DEFAULT: Omit<SyncOptions, 'slice'> = { debounceTime: 200, updateOn: 'change', enableQueue: true };
+export const SYNC_OPTIONS_DEFAULT: Omit<SyncOptions, 'slice'> = { debounceTime: 200, updateOn: 'change' };
 
 @NgModule({
   imports: [FormsModule, StoreModule],
