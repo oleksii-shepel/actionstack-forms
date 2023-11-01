@@ -1,8 +1,11 @@
-import { Action, createAction, props } from '@ngrx/store';
+import { ActionCreatorProps, createAction, props } from '@ngrx/store';
+import { ActionCreator, NotAllowedCheck, TypedAction } from '@ngrx/store/src/models';
+import { Queue } from './queue';
+import { deepClone, setValue } from './utils';
 
 export enum FormActions {
   UpdateForm = '@forms/form/update',
-  UpdateField = '@forms/form/field/update',
+  UpdateControl = '@forms/form/control/update',
 }
 
 export enum FormActionsInternal {
@@ -11,38 +14,51 @@ export enum FormActionsInternal {
   FormDestroyed = '@forms/form/destroyed',
 }
 
-export const ActionArray = (Object.values(FormActions) as string[]).concat(Object.values(FormActionsInternal));
+export const actionArray = (Object.values(FormActions) as string[]).concat(Object.values(FormActionsInternal));
+export const actionMapping = new Map<string, FormAction<string>>();
+export const actionQueues = new Map<string, Queue<FormAction<string>>>();
 
-export const UpdateForm = createAction(
-  FormActions.UpdateForm,
-  props<{ path: string; value: any; noclone?: boolean}>()
-);
-
-export const UpdateField = createAction(
-  FormActions.UpdateField,
-  props<{ path: string; property: string; value: any; }>()
-);
-
-export const AutoInit = createAction(
-  FormActionsInternal.AutoInit,
-  props<{ path: string; value: any; noclone?: boolean}>()
-);
-
-export const AutoSubmit = createAction(
-  FormActionsInternal.AutoSubmit,
-  props<{ path: string; }>()
-);
-
-export const FormDestroyed = createAction(
-  FormActionsInternal.FormDestroyed,
-  props<{ path: string; value: any; }>()
-);
-
-export class Deferred implements Action {
-  type!: string;
-  deferred = true;
-
-  constructor(action: Action) {
-    Object.assign(this, action);
-  }
+export interface FormAction<T extends string> extends ActionCreator<T, () => TypedAction<T>> {
+  type: T;
+  deferred: boolean;
+  execute: (state: any) => any;
 }
+
+function actionFactory<P extends object>(type: string, fn?: (state: any) => any): any {
+  const action = createAction<string, P>(type, props<{ _as: 'props', _p: P }>() as ActionCreatorProps<P> & NotAllowedCheck<P>);
+  const func = fn? fn : (state: any): any => { return state; };
+  const obj = Object.assign(action, { deferred: false, execute: func }) as any;
+  actionMapping.set(type, obj);
+  return obj;
+}
+
+export const updateForm = actionFactory<{ path: string; value: any; noclone?: boolean; }>(FormActions.UpdateForm, function(this: any, state: any) {
+  if(!state.__form) {
+    console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
+  }
+  const newState = !this.noclone ? deepClone(this.value) : {...this.value};
+  newState.__form = true;
+
+  return newState;
+});
+
+export const updateControl = actionFactory<{ path: string; property: string; value: any; }>(FormActions.UpdateControl, function(this: any, state: any) {
+  if(!state.__form) {
+    console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
+  }
+  const newState = setValue(state, this.property, this.value);
+  newState.__form = true;
+
+  return newState;
+});
+
+export const autoInit = actionFactory<{ path: string; value: any; noclone?: boolean; }>(FormActionsInternal.AutoInit, function(this: any, state: any) {
+  const newState = !this.noclone ? deepClone(this.value) : {...this.value};
+  newState.__form = true;
+
+  return newState;
+});
+
+export const autoSubmit = actionFactory<{ path: string; }>(FormActionsInternal.AutoSubmit);
+
+export const formDestroyed = actionFactory<{ path: string; value: any; }>(FormActionsInternal.FormDestroyed);

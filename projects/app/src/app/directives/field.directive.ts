@@ -95,7 +95,7 @@ export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgCont
   ngOnInit(): void {
     this.sync?.initialized$.pipe(
       filter(value => value),
-      switchMap(() => this.sync.store.select(selectFormState(this.sync.path))),
+      switchMap(() => this.sync.store.select(selectFormState(this.sync.path, true))),
       distinctUntilChanged(),
       takeUntil(this._destroyed$))
     .subscribe((model: any) => {

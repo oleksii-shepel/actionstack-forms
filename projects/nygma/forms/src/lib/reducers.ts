@@ -1,91 +1,74 @@
-import { Action, ActionReducer, createSelector } from '@ngrx/store';
-import { ActionArray, Deferred, FormActions, FormActionsInternal } from './actions';
+import { ActionReducer, createSelector } from '@ngrx/store';
+import { FormAction, FormActionsInternal, actionArray, actionMapping, actionQueues } from './actions';
 import { Queue } from './queue';
 import { deepClone, deepEqual, getValue, setValue } from './utils';
 
-
-
-
 export type FormState = any;
-
-
-
 
 export const selectFormState = (path: string, nocheck?: boolean) => createSelector((state: any) => {
   const form = deepClone(getValue(state, path));
-  if(!form.__form) { !nocheck && console.warn(`You are trying to read form state from the store by path '${path}', but it is not marked as such. Is the sync directive at this point in time initialized? Consider putting your code in a ngAfterViewInit hook`); }
-  else { delete form.__form; }
+  if(!form?.__form) { !nocheck && console.warn(`You are trying to read form state from the store by path '${path}', but it is not marked as such. Is the sync directive at this point in time initialized? Consider putting your code in a ngAfterViewInit hook`); }
+  else { delete form?.__form; }
   return form;
 }, state => state);
 
-
-
-export const actionQueues = new Map<string, Queue<Action>>();
-
-
-
-export const forms = (initialState: any = {}) => (reducer: ActionReducer<any>): any => {
+export const forms = (initialState: any = {}, logging: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp} = {}) => (reducer: ActionReducer<any>): any => {
 
   const metaReducer = (state: any, action: any) => {
     state = state ?? deepClone(initialState);
 
     let nextState = state;
     const slice = action.path;
-    if(slice && ActionArray.includes(action.type)) {
+
+    if(slice && actionArray.includes(action.type)) {
+      const formAction = Object.assign({...actionMapping.get(action.type)}, {...action}) as FormAction<string>;
+
       if (!actionQueues.has(slice)) {
         actionQueues.set(slice, new Queue());
       }
 
-      if(actionQueues.get(slice)?.initialized$.value || action.type === FormActionsInternal.AutoInit || action.deferred) {
-        let form = getValue(nextState, slice);
+      if(actionQueues.get(slice)?.initialized$.value || formAction.type === FormActionsInternal.AutoInit) {
+        const form = getValue(state, slice);
+        nextState = setValue(state, slice, formAction.execute(form));
+        logger(logging)(state, nextState, formAction);
 
-        switch(action.type) {
-          case FormActions.UpdateForm:
-            if(!form.__form) {
-              console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
-            }
-            form = !action.noclone ? deepClone(action.value) : {...action.value};
-            form.__form = true;
-            break;
-          case FormActions.UpdateField:
-            if(!form.__form) {
-              console.warn(`Seems like sync directive is not initialized at this point in time, consider putting form update in a ngAfterViewInit hook`);
-            }
-            form = setValue(form, action.property, action.value);
-            form.__form = true;
-            break;
-          case FormActionsInternal.AutoInit:
-            if(actionQueues.has(slice)) {
-              const queue = actionQueues.get(slice) as Queue<Action>;
-              queue.initialized$.next(true);
-              queue.initialized$.complete();
-            }
-            form = !action.noclone ? deepClone(action.value) : {...action.value};
-            form.__form = true;
-            break;
-          case FormActionsInternal.AutoSubmit:
-            break;
-          case FormActionsInternal.FormDestroyed:
+        const queue = actionQueues.get(slice) as Queue<FormAction<string>>;
+        if(queue) {
+          if(formAction.type === FormActionsInternal.AutoInit) {
+            queue.initialized$.next(true);
+            queue.initialized$.complete();
+          } else if(formAction.type === FormActionsInternal.FormDestroyed) {
             actionQueues.delete(slice);
-            break;
+          }
         }
-
-        nextState = setValue(nextState, slice, form);
-        return nextState;
-      } else {
-          const queue = actionQueues.get(slice) as Queue<Action>;
-          queue.enqueue(new Deferred(action));
-          return nextState;
       }
+
+      if (actionQueues.get(slice)?.initialized$.value) {
+        const queue = actionQueues.get(slice) as Queue<FormAction<string>>;
+
+        while(queue.length > 0) {
+          const form = getValue(nextState, slice);
+          const deferred = queue.dequeue();
+          nextState = setValue(nextState, slice, deferred?.execute(form));
+          logger(logging)(state, nextState, deferred);
+        }
+      } else if(actionQueues.has(slice)) {
+        const queue = actionQueues.get(slice) as Queue<FormAction<string>>;
+        formAction.deferred = true;
+        queue.enqueue(formAction);
+      }
+
+      return nextState;
     }
 
     nextState = reducer(state, action);
+    logger(logging)(state, nextState, action);
     return nextState;
   }
   return metaReducer;
 }
 
-export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (reducer: ActionReducer<any>): any => {
+export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (state: any, nextState: any, action: any) => {
   settings = Object.assign({showAll: false, showRegular: false, showDeferred: false, showOnlyModifiers: true}, settings);
 
   function filter(action: any, equal: any): boolean {
@@ -108,24 +91,21 @@ export const logger = (settings: {showAll?: boolean, showRegular?: boolean, show
     return show;
   }
 
-  return (state: any, action: any) => {
-    const result = reducer(state, action);
-    const actionCopy = deepClone(action);
-    delete actionCopy.type;
+  const actionCopy = deepClone(action);
+  delete actionCopy.type;
 
-    const actionPath = actionCopy?.path ?? '';
-    delete actionCopy?.path;
+  const actionPath = actionCopy?.path ?? '';
+  delete actionCopy?.path;
 
-    const previous = actionPath.length > 0 ? getValue(state, actionPath) : state;
-    const current = actionPath.length > 0 ? getValue(result, actionPath) : result;
-    const equal = deepEqual(previous, current);
+  const before = actionPath.length > 0 ? selectFormState(actionPath, true)(state) : state;
+  const after = actionPath.length > 0 ? selectFormState(actionPath, true)(nextState) : nextState;
+  const equal = deepEqual(before, after);
 
-    if(filter(action, equal)) {
-      console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
-      console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
-      console.log(current);
-      console.groupEnd();
-    }
-    return result;
-  };
+  if(filter(action, equal)) {
+    console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
+    console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
+    console.log(after);
+    console.groupEnd();
+  }
+  return nextState;
 }

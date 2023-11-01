@@ -58,7 +58,7 @@ The code snippet of main NgModule shows how the import looks like:
 </p>
 
 ```typescript
-import { NgFormsModule, forms, logger } from 'nygma-forms';
+import { NgFormsModule, forms } from 'nygma-forms';
 
 @NgModule({
   declarations: [
@@ -70,7 +70,7 @@ import { NgFormsModule, forms, logger } from 'nygma-forms';
     FormsModule,
     NgFormsModule,
     StoreModule.forRoot(reducer, {
-      metaReducers: [logger({showOnlyModifiers: true}), forms(initialState)]
+      metaReducers: [forms(initialState, {showOnlyModifiers: true})]
     }),
 
     NgFormsModule
@@ -95,8 +95,8 @@ If you may probably noticed, you do not must to dispatch any actions to the stor
 
 ```typescript
 export enum FormActions {
-  UpdateForm = '[Form] Update Form',
-  UpdateField = '[Form] Update Form Field',
+  UpdateForm    = '@forms/form/update',
+  UpdateControl = '@forms/form/control/update',
 }
 ```
 <p align="justify">

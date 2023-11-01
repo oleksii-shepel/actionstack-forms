@@ -1,10 +1,10 @@
 
-export function waitUntil(condition: any, checkInterval = 100) {
-  if(condition()) return Promise.resolve();
+export function waitUntil(condition: () => boolean, cancelled = () => false, checkInterval = 100) {
+  if(condition() || cancelled()) return Promise.resolve();
 
   return new Promise<void>(resolve => {
     const interval = setInterval(() => {
-      if (!condition()) return;
+      if (!condition() && !cancelled()) return;
       clearInterval(interval);
       resolve();
     }, checkInterval);
@@ -12,28 +12,30 @@ export function waitUntil(condition: any, checkInterval = 100) {
 }
 
 
-export const scheduledFnMap = new Map<object, {frameEnd: number; timestamp: number; delay: number; timeout: any}>();
+const fnMap = new Map<object, {frameEnd: number; timestamp: number; delay: number; timeout: any}>();
 
 
 
-export function sampleTime(fn: any, period: number) {
+export function sampleTime(fn: any, period: number, cancelled = () => false) {
   function scheduledFn(frameEnd: number, timestamp: number, delay: number): ((...args: any[]) => void) {
     return (...args: any[]) => {
-      clearTimeout(scheduledFnMap.get(fn)?.timeout);
+      clearTimeout(fnMap.get(fn)?.timeout);
+      if(cancelled()) return;
       const timeout = setTimeout(() => {
         clearTimeout(timeout);
-        scheduledFnMap.delete(fn);
+        fnMap.delete(fn);
+        if(cancelled()) return;
         return fn(...args);
       }, delay);
 
-      scheduledFnMap.set(fn, {frameEnd: frameEnd, timestamp: timestamp, delay: delay, timeout: timeout});
+      fnMap.set(fn, {frameEnd: frameEnd, timestamp: timestamp, delay: delay, timeout: timeout});
     }
   }
 
   const timestamp = new Date().getTime();
 
-  if(scheduledFnMap.has(fn)) {
-    const { frameEnd } = scheduledFnMap.get(fn) as any;
+  if(fnMap.has(fn)) {
+    const { frameEnd } = fnMap.get(fn) as any;
     const delay = frameEnd - timestamp;
 
     if(delay > 0) {

@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { NgFormsModule, forms, logger } from 'nygma-forms';
+import { NgFormsModule, forms } from 'nygma-forms';
 import { environment } from '../environments/environment';
 import { AppComponent } from './components/app/app.component';
 import { JsonEditorComponent } from './components/json-editor/json-editor.component';
@@ -41,7 +41,7 @@ import { NgModelArrayModule } from './utils';
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     StoreModule.forRoot(reducer, {
-      metaReducers: [logger({showAll: true}), forms(initialState), global()]
+      metaReducers: [forms(initialState, {showAll: true}), global()]
     }),
 
     NgModelArrayModule

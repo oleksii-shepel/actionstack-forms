@@ -1,6 +1,6 @@
 {
   "name": "nygma-forms",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Forms Module for NgRx store",
   "license": "MIT",
   "keywords": [

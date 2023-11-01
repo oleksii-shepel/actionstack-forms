@@ -1,4 +1,4 @@
-import { AutoInit, AutoSubmit, FormDestroyed, UpdateField, UpdateForm } from '../lib/actions';
+import { autoInit, autoSubmit, formDestroyed, updateControl, updateForm } from '../lib/actions';
 import { forms, logger } from '../lib/reducers';
 
 describe('reducers', () => {
@@ -6,9 +6,8 @@ describe('reducers', () => {
     const log = logger({showAll: true});
     const logSpy = jest.spyOn(console, 'log');
     const state = { test: 'test' };
-    log((state: any, action: any) => {
-      return { ...state, test: 'test2' };
-    })(state, UpdateForm({path: 'test.form', value: 'test'}));
+    const nextState = { ...state, test: 'test2' };
+    log(state, nextState, updateForm({path: 'test.form', value: 'test'}));
     expect(logSpy).toHaveBeenCalledTimes(2);
   });
   it('should handle actions', () => {
@@ -34,20 +33,20 @@ describe('reducers', () => {
     const f = forms(initialState);
     let expected = {} as any;
 
-    let newState = f((state: any, action: any) => { return state; })(initialState, AutoInit({path: "slice.form", value: model}));
+    let newState = f((state: any, action: any) => { return state; })(initialState, autoInit({path: "slice.form", value: model}));
     expected = { slice: { form: { ...model, __form: true }} }; initialState = newState;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, UpdateForm({path: "slice.form", value: model}));
+    newState = f((state: any, action: any) => { return state; })(initialState, updateForm({path: "slice.form", value: model}));
     expected = { slice: { form: { ...model, __form: true }} };
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, UpdateField({path: "slice.form", property: "email", value: model.email}));
+    newState = f((state: any, action: any) => { return state; })(initialState, updateControl({path: "slice.form", property: "email", value: model.email}));
     expected = { slice: { form: { ...model, __form: true }} }
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, AutoSubmit({path: "slice.form"}));
+    newState = f((state: any, action: any) => { return state; })(initialState, autoSubmit({path: "slice.form"}));
 
-    newState = f((state: any, action: any) => { return state; })(initialState, FormDestroyed({path: "slice.form", value: initialState}));
+    newState = f((state: any, action: any) => { return state; })(initialState, formDestroyed({path: "slice.form", value: initialState}));
   });
 });

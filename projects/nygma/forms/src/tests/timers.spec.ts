@@ -1,5 +1,4 @@
-import { scheduledFnMap } from '../lib/timers';
-import { sampleTime } from '../public-api';
+import { sampleTime } from '../lib/timers';
 
 describe('timers', () => {
   it('should debounce function calls', () => {
@@ -38,7 +37,6 @@ describe('timers', () => {
     jest.useFakeTimers();
 
     const func = jest.fn();
-    scheduledFnMap.set(func, {frameEnd: new Date().getTime() + 1000, timestamp: new Date().getTime(), delay: 1000, timeout: null});
 
     sampleTime(func, 1000)('a', 'b', 'c');
     sampleTime(func, 1000)('a', 'b', 'c');
