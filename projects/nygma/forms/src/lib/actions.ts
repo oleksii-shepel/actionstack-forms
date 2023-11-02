@@ -14,8 +14,7 @@ export enum FormActionsInternal {
   FormDestroyed = '@forms/form/destroyed',
 }
 
-export const actionArray = (Object.values(FormActions) as string[]).concat(Object.values(FormActionsInternal));
-export const actionMapping = new Map<string, FormAction<string>>();
+export const actionMapping = new Map<string, (props: any) => object & TypedAction<string>>();
 export const actionQueues = new Map<string, Queue<FormAction<string>>>();
 
 export interface FormAction<T extends string> extends ActionCreator<T, () => TypedAction<T>> {
@@ -24,12 +23,13 @@ export interface FormAction<T extends string> extends ActionCreator<T, () => Typ
   execute: (state: any) => any;
 }
 
-function actionFactory<P extends object>(type: string, fn?: (state: any) => any): any {
-  const action = createAction<string, P>(type, props<{ _as: 'props', _p: P }>() as ActionCreatorProps<P> & NotAllowedCheck<P>);
-  const func = fn? fn : (state: any): any => { return state; };
-  const obj = Object.assign(action, { deferred: false, execute: func }) as any;
-  actionMapping.set(type, obj);
-  return obj;
+function actionFactory<P extends object>(type: string, reducer?: (state: any) => any): any {
+  let creator = createAction<string, P>(type, props<{ _as: 'props', _p: P }>() as ActionCreatorProps<P> & NotAllowedCheck<P>);
+  const func = reducer? reducer : (state: any): any => { return state; };
+  creator = Object.assign(creator, { deferred: false, execute: func });
+  const action = (props: any) => creator({...creator, ...props});
+  actionMapping.set(type, action);
+  return action;
 }
 
 export const updateForm = actionFactory<{ path: string; value: any; noclone?: boolean; }>(FormActions.UpdateForm, function(this: any, state: any) {

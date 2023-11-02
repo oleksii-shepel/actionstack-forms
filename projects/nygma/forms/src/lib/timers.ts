@@ -1,12 +1,14 @@
 
 export function waitUntil(condition: () => boolean, cancelled = () => false, checkInterval = 100) {
-  if(condition() || cancelled()) return Promise.resolve();
+  if(condition()) return Promise.resolve(true);
+  if(cancelled()) return Promise.resolve(false);
 
-  return new Promise<void>(resolve => {
+  return new Promise<boolean>(resolve => {
     const interval = setInterval(() => {
-      if (!condition() && !cancelled()) return;
+      if (!condition()) return;
       clearInterval(interval);
-      resolve();
+      if(cancelled()) { resolve(false); }
+      else { resolve(true);}
     }, checkInterval);
   });
 }

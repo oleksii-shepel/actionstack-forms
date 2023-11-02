@@ -1,5 +1,5 @@
 import { ActionReducer, createSelector } from '@ngrx/store';
-import { FormAction, FormActionsInternal, actionArray, actionMapping, actionQueues } from './actions';
+import { FormActionsInternal, actionMapping, actionQueues } from './actions';
 import { Queue } from './queue';
 import { deepClone, deepEqual, getValue, setValue } from './utils';
 
@@ -20,19 +20,15 @@ export const forms = (initialState: any = {}, logging: {showAll?: boolean, showR
     let nextState = state;
     const slice = action.path;
 
-    if(slice && actionArray.includes(action.type)) {
-      const formAction = Object.assign({...actionMapping.get(action.type)}, {...action}) as FormAction<string>;
+    if(slice && actionMapping.has(action.type)) {
+      const formAction = action;
+      const queue = actionQueues.get(slice) ?? actionQueues.set(slice, new Queue()).get(slice);
 
-      if (!actionQueues.has(slice)) {
-        actionQueues.set(slice, new Queue());
-      }
-
-      if(actionQueues.get(slice)?.initialized$.value || formAction.type === FormActionsInternal.AutoInit) {
+      if(queue?.initialized$.value || formAction.type === FormActionsInternal.AutoInit) {
         const form = getValue(state, slice);
         nextState = setValue(state, slice, formAction.execute(form));
         logger(logging)(state, nextState, formAction);
 
-        const queue = actionQueues.get(slice) as Queue<FormAction<string>>;
         if(queue) {
           if(formAction.type === FormActionsInternal.AutoInit) {
             queue.initialized$.next(true);
@@ -43,8 +39,7 @@ export const forms = (initialState: any = {}, logging: {showAll?: boolean, showR
         }
       }
 
-      if (actionQueues.get(slice)?.initialized$.value) {
-        const queue = actionQueues.get(slice) as Queue<FormAction<string>>;
+      if (queue?.initialized$.value) {
 
         while(queue.length > 0) {
           const form = getValue(nextState, slice);
@@ -52,8 +47,7 @@ export const forms = (initialState: any = {}, logging: {showAll?: boolean, showR
           nextState = setValue(nextState, slice, deferred?.execute(form));
           logger(logging)(state, nextState, deferred);
         }
-      } else if(actionQueues.has(slice)) {
-        const queue = actionQueues.get(slice) as Queue<FormAction<string>>;
+      } else if(queue) {
         formAction.deferred = true;
         queue.enqueue(formAction);
       }

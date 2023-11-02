@@ -88,8 +88,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   private subs = {} as any;
 
   private blurCallback = (control: NgControl) => (value: any) => {
-    waitUntil(() => this.initialized$.value, () => this.destroyed$.value).then(() => firstValueFrom(this.store.select(selectFormState(this.path)))).then((formState) => {
-      if(this.updateOn === 'blur' && control.path && control.control && getValue(formState, control.path.join('.')) !== control.value) {
+    waitUntil(() => this.initialized$.value, () => this.destroyed$.value).then((result) => result? firstValueFrom(this.store.select(selectFormState(this.path))) : undefined).then((formState) => {
+      if(formState && this.updateOn === 'blur' && control.path && control.control && getValue(formState, control.path.join('.')) !== control.value) {
         control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
         this.store.dispatch(updateControl({ path: this.path, property: control.path.join('.'), value: control.value }));
       }
@@ -98,8 +98,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
   private func = this.setControlValue.bind(this);
   private inputCallback = (control: NgControl) => (value: any) => {
-    waitUntil(() => this.initialized$.value, () => this.destroyed$.value).then(() => {
-      sampleTime(this.func, this.debounceTime, () => this.destroyed$.value)(control, value);
+    waitUntil(() => this.initialized$.value, () => this.destroyed$.value).then((result) => {
+      result? sampleTime(this.func, this.debounceTime, () => this.destroyed$.value)(control, value) : undefined;
     });
   }
 
@@ -151,14 +151,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         scan((acc, _) => acc + 1, 0),
         tap((value) => {
           if(value === 1) {
-            if(formState) {
-              formState = deepClone(formState);
-              this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
-            } else {
-              formState = deepClone(this.formDirective.form.value);
-            }
-
-            this.store.dispatch(autoInit({ path: this.path, value: formState, noclone: true }));
+            formState = formState? (this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'}), formState) : deepClone(this.formDirective.form.value);
+            this.store.dispatch(autoInit({path: this.path, value: formState, noclone: true}));
             this.initialized$.next(true); this.initialized$.complete();
           } else {
             this.store.dispatch(updateForm({ path: this.path, value: this.formValue, noclone: true })); }
