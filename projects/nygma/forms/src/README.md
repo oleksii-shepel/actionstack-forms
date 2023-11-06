@@ -48,6 +48,7 @@ export interface SyncOptions {
   slice: string;
   debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
+  priority: 'store' | 'model';
 }
 ```
 <p align="justify">

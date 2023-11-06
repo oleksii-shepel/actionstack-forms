@@ -60,6 +60,7 @@ export interface SyncOptions {
   slice: string;
   debounceTime?: number;
   updateOn?: 'change' | 'blur' | 'submit';
+  priority: 'store' | 'model';
 }
 
 
@@ -75,6 +76,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   path!: string;
   debounceTime!: number;
   updateOn!: string;
+  priority!: string;
 
   formDirective!: NgForm | FormGroupDirective;
 
@@ -127,6 +129,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.debounceTime = config.debounceTime;
     this.updateOn = config.updateOn;
+    this.priority = config.priority;
 
     if (!this.path) {
       throw new Error('The path property is not provided for the directive');
@@ -138,6 +141,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onInit$ = this.store.select(selectFormState(this.path, true)).pipe(
       take(1),
+      tap((formState) => { this.priority === 'store' && this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'}); }),
       switchMap((formState) => defer(() => this.controls.changes.pipe(startWith(this.controls))).pipe(
         observeOn(asyncScheduler), // to avoid collisions by callback method registration
         tap((controls) => {
@@ -151,7 +155,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
         scan((acc, _) => acc + 1, 0),
         tap((value) => {
           if(value === 1) {
-            formState = formState? (this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'}), formState) : deepClone(this.formDirective.form.value);
+            formState = this.priority === 'model' ? deepClone(this.formDirective.form.value) : formState;
             this.store.dispatch(autoInit({path: this.path, value: formState, noclone: true}));
             this.initialized$.next(true); this.initialized$.complete();
           } else {

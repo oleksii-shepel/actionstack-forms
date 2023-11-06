@@ -58,8 +58,8 @@ export const initialProfilePage: ProfilePage = {
 
 export const profileOptions: FormOptions<ProfileForm> = {
   bookmark: {},
-  firstName: {updateOn: 'blur'},
-  lastName: {updateOn: 'change'},
+  firstName: {},
+  lastName: {},
   address: {
     street: {},
     city: {},
@@ -69,7 +69,7 @@ export const profileOptions: FormOptions<ProfileForm> = {
   selected: {},
   quotes: {},
   aliases: {},
-  __group: {updateOn: 'change'}
+  __group: {}
 
 }
 
