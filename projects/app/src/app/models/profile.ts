@@ -1,4 +1,5 @@
 import { FormOptions } from "../utils/types";
+
 export interface ProfileForm {
   bookmark: boolean;
   firstName: string;
@@ -13,6 +14,7 @@ export interface ProfileForm {
   quotes: string;
   aliases: string[];
 }
+
 export interface ProfilePage {
   form: ProfileForm;
   books: string[];
@@ -128,6 +130,7 @@ export interface ModelForm {
   };
   aliases: string[];
 }
+
 export interface ModelPage {
   form: ModelForm;
   collapsed: boolean;
