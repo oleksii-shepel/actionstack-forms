@@ -17,7 +17,7 @@ import { TemplateProfileEditorComponent } from './components/template-driven-for
 import { FieldArrayDirective } from './directives/array.directive';
 import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
-import { global, initialState, reducer } from './reducers';
+import { global, rootReducer } from './reducers';
 import { NgModelArrayModule } from './utils';
 @NgModule({
   declarations: [
@@ -40,8 +40,8 @@ import { NgModelArrayModule } from './utils';
     NgFormsModule,
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
-    StoreModule.forRoot({root: reducer}, {
-      metaReducers: [forms(initialState, {showAll: true}), global()]
+    StoreModule.forRoot({ root: rootReducer }, {
+      metaReducers: [forms({showAll: true}), global()]
     }),
 
     NgModelArrayModule

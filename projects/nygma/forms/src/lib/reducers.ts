@@ -12,10 +12,9 @@ export const selectFormState = (path: string, nocheck?: boolean) => createSelect
   return form;
 }, state => state);
 
-export const forms = (initialState: any = {}, logging: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp} = {}) => (reducer: ActionReducer<any>): any => {
+export const forms = (logging: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp} = {}) => (reducer: ActionReducer<any>): ActionReducer<any> => {
 
   const metaReducer = (state: any, action: any) => {
-    state = state ?? deepClone(initialState);
 
     let nextState = state;
     const slice = action.path;

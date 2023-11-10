@@ -86,7 +86,7 @@ export const global = () => (reducer: ActionReducer<any>): any => {
   }
 }
 
-export function reducer(state = initialState, action: any) {
+export function rootReducer(state = initialState, action: any) {
 
   if (environment.production) {
     // suppress console output

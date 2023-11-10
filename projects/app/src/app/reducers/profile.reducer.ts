@@ -1,9 +1,9 @@
 import { Action } from '@ngrx/store';
-import { ProfilePage, initialProfilePage } from '../models/profile';
+import { ProfilePage } from '../models/profile';
 
 
 
-export function profileReducer(state = initialProfilePage, action: Action): ProfilePage {
+export function profileReducer(state: any, action: Action): ProfilePage {
   switch (action.type) {
     default: {
       return state;
