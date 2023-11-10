@@ -70,7 +70,7 @@ import { NgFormsModule, forms } from 'nygma-forms';
     ReactiveFormsModule,
     FormsModule,
     NgFormsModule,
-    StoreModule.forRoot({ root: reducer }, {
+    StoreModule.forRoot({ root: rootReducer }, {
       metaReducers: [forms(initialState, {showOnlyModifiers: true})]
     }),
 
