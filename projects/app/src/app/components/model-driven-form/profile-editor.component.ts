@@ -21,8 +21,8 @@ export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Output() messenger = new EventEmitter<boolean>();
 
   profile$!: Observable<any>;
-  slice = "model";
-  formCast = "model.form";
+  slice = "root.model";
+  formCast = "root.model.form";
   model = initialModelPage.form;
 
   a: any; b: any;

@@ -19,8 +19,8 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Input() caption = '';
 
   profile$!: Observable<any>;
-  slice = "profile";
-  formCast = "profile.form";
+  slice = "root.profile";
+  formCast = "root.profile.form";
   profileForm = buildForm(initialProfilePage.form, profileOptions) as FormGroup;
   form = this.profileForm;
 

@@ -20,8 +20,8 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   @Input() caption = '';
 
   profile$!: Observable<any>;
-  slice = "hero";
-  formCast = "hero.form";
+  slice = "root.hero";
+  formCast = "root.hero.form";
   model = initialHeroPage.form;
   a: any; b: any;
 

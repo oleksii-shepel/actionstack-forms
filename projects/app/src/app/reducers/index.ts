@@ -47,15 +47,19 @@ import * as fromStandard from './standard.reducer';
  * our top level state interface is just a map of keys to inner state types.
  */
 export interface ApplicationState {
-  profile: ProfilePage;
-  hero: HeroPage;
-  model: ModelPage;
+  root: {
+    profile: ProfilePage;
+    hero: HeroPage;
+    model: ModelPage;
+  }
 }
 
 export const initialState: ApplicationState = {
-  profile: initialProfilePage,
-  hero: initialHeroPage,
-  model: initialModelPage,
+  root: {
+    profile: initialProfilePage,
+    hero: initialHeroPage,
+    model: initialModelPage,
+  }
 }
 
 /**
@@ -65,10 +69,12 @@ export const initialState: ApplicationState = {
  * wrapping that in storeLogger. Remember that compose applies
  * the result from right to left.
  */
-const reducers = {
-  profile: fromProfile.profileReducer,
-  hero: fromHero.profileReducer,
-  model: fromStandard.profileReducer
+const reducers: any = {
+  root: {
+    profile: fromProfile.profileReducer,
+    hero: fromHero.profileReducer,
+    model: fromStandard.profileReducer
+  }
 };
 
 const developmentReducer: ActionReducer<ApplicationState> = compose(storeFreeze, combineReducers)(reducers);
