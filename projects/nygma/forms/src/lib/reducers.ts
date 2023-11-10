@@ -1,6 +1,5 @@
 import { ActionReducer, createSelector } from '@ngrx/store';
-import { asapScheduler } from 'rxjs';
-import { FormActionsInternal, actionMapping, actionQueues } from './actions';
+import { FormActionsInternal, actionMapping, actionQueues, deferred } from './actions';
 import { Queue } from './queue';
 import { deepClone, deepEqual, getValue, setValue } from './utils';
 
@@ -43,16 +42,13 @@ export const forms = (initialState: any = {}, logging: {showAll?: boolean, showR
       if (queue?.initialized$.value) {
 
         while(queue.length > 0) {
-          asapScheduler.schedule(() => {
-            const form = getValue(nextState, slice);
-            const deferred = queue.dequeue();
-            nextState = setValue(nextState, slice, deferred?.execute(form));
-            logger(logging)(state, nextState, deferred);
-          });
+          const form = getValue(nextState, slice);
+          const deferred = queue.dequeue();
+          nextState = setValue(nextState, slice, deferred?.execute(form));
+          logger(logging)(state, nextState, deferred);
         }
       } else if(queue) {
-        formAction.deferred = true;
-        queue.enqueue(formAction);
+        queue.enqueue(deferred(formAction));
       }
 
       return nextState;

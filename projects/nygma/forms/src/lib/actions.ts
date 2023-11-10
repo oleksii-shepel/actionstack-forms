@@ -62,3 +62,7 @@ export const autoInit = actionFactory<{ path: string; value: any; noclone?: bool
 export const autoSubmit = actionFactory<{ path: string; }>(FormActionsInternal.AutoSubmit);
 
 export const formDestroyed = actionFactory<{ path: string; value: any; }>(FormActionsInternal.FormDestroyed);
+
+export const deferred = (action: TypedAction<string>): any => {
+  return Object.assign({...action}, {deferred: true});
+};

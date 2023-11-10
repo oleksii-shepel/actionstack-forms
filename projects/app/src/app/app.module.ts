@@ -40,7 +40,7 @@ import { NgModelArrayModule } from './utils';
     NgFormsModule,
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
-    StoreModule.forRoot(reducer, {
+    StoreModule.forRoot({root: reducer}, {
       metaReducers: [forms(initialState, {showAll: true}), global()]
     }),
 

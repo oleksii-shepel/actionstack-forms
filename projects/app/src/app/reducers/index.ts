@@ -102,4 +102,4 @@ export function reducer(state = initialState, action: any) {
 
 export const selectSlice = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
 export const selectProperty = (slice: string, property: string) => createSelector((state: any) => getValue(state, `${slice}.${property}`), state => state);
-export const UpdateProperty = createAction('@ngrx/store/slice/property/update', props<{ path: string; property: string; value: any; }>());
+export const updateProperty = createAction('@ngrx/store/slice/property/update', props<{ path: string; property: string; value: any; }>());

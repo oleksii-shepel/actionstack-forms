@@ -21,8 +21,6 @@ import {
   asyncScheduler,
   defer,
   filter,
-  firstValueFrom,
-  from,
   fromEvent,
   map,
   mergeMap,
@@ -33,16 +31,14 @@ import {
   takeWhile,
   tap
 } from 'rxjs';
-import { endWith, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import {
   SYNC_OPTIONS_DEFAULT,
   SYNC_OPTIONS_TOKEN,
   deepClone,
   deepEqual,
-  getValue,
   sampleTime,
-  setValue,
-  waitUntil
+  setValue
 } from '.';
 import {
   FormActions,
@@ -90,19 +86,15 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   private subs = {} as any;
 
   private blurCallback = (control: NgControl) => (value: any) => {
-    waitUntil(() => this.initialized$.value, () => this.destroyed$.value).then((result) => result? firstValueFrom(this.store.select(selectFormState(this.path))) : undefined).then((formState) => {
-      if(formState && this.updateOn === 'blur' && control.path && control.control && getValue(formState, control.path.join('.')) !== control.value) {
-        control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
-        this.store.dispatch(updateControl({ path: this.path, property: control.path.join('.'), value: control.value }));
-      }
-    });
+    if(this.updateOn === 'blur' && control.path && control.control) {
+      control.control.setValue(control.value, {emitEvent: control.control.updateOn === 'blur'});
+      this.store.dispatch(updateControl({ path: this.path, property: control.path.join('.'), value: control.value }));
+    }
   }
 
   private func = this.setControlValue.bind(this);
   private inputCallback = (control: NgControl) => (value: any) => {
-    waitUntil(() => this.initialized$.value, () => this.destroyed$.value).then((result) => {
-      result? sampleTime(this.func, this.debounceTime, () => this.destroyed$.value)(control, value) : undefined;
-    });
+    sampleTime(this.func, this.debounceTime, () => this.destroyed$.value)(control, value);
   }
 
   constructor(
@@ -167,7 +159,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onUpdate$ = this.actionsSubject.pipe(
       filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
-      mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
         this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
@@ -177,7 +168,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.formDirective.form.valid),
-      mergeMap((value) => from(this.initialized$).pipe(endWith(true), filter(value => value), take(1), map(() => value))),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
       tap((formState) => {
         if(this.updateOn === 'submit') {

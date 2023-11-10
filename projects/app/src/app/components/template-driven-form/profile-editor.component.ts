@@ -5,7 +5,7 @@ import { deepClone, selectFormState, updateForm } from 'nygma-forms';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialHeroPage } from '../../models/profile';
-import { ApplicationState, UpdateProperty, selectSlice } from '../../reducers';
+import { ApplicationState, selectSlice, updateProperty } from '../../reducers';
 
 @Component({
   selector: 'template-profile-editor',
@@ -28,7 +28,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateProperty({value: value, path: this.slice, property: 'collapsed'}));
+    this.store.dispatch(updateProperty({value: value, path: this.slice, property: 'collapsed'}));
   }
 
   get collapsed() {

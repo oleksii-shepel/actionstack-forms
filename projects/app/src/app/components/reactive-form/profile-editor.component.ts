@@ -5,7 +5,7 @@ import { buildForm } from 'nygma-forms';
 import { Observable, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialProfilePage, profileOptions } from '../../models/profile';
-import { UpdateProperty, selectSlice } from '../../reducers';
+import { selectSlice, updateProperty } from '../../reducers';
 
 
 @Component({
@@ -37,7 +37,7 @@ export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy 
   _collapsed = true;
   @HostBinding('class.collapsed') set collapsed(value: boolean) {
     this._collapsed = value;
-    this.store.dispatch(UpdateProperty({value: value, path: this.slice, property: 'collapsed'}));
+    this.store.dispatch(updateProperty({value: value, path: this.slice, property: 'collapsed'}));
   }
 
   get collapsed() {
