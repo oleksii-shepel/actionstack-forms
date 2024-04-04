@@ -1,11 +1,11 @@
+import { Store } from '@actioncrew/actionstack';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import { deepClone, selectFormState, updateForm } from 'nygma-forms';
 import { Observable, firstValueFrom, fromEvent, merge, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialHeroPage } from '../../models/profile';
-import { ApplicationState, selectSlice, updateProperty } from '../../reducers';
+import { selectSlice, updateProperty } from '../../reducers';
 
 @Component({
   selector: 'template-profile-editor',
@@ -35,7 +35,7 @@ export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy 
     return this._collapsed;
   }
 
-  constructor(private store: Store<ApplicationState>, private elementRef: ElementRef) {
+  constructor(private store: Store, private elementRef: ElementRef) {
   }
 
   async ngAfterViewInit() {

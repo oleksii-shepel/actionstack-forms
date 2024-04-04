@@ -1,5 +1,5 @@
 <header>
-  <div [innerHTML]="changesWithDelay$ | async"></div>
+  <div [innerHTML]="changesWithDelay$ | async | sanitizedHtml"></div>
   <button *ngIf="collapsed" (click)="toggle(collapsed)">Expand</button>
   <button *ngIf="!collapsed" (click)="toggle(collapsed)">Collapse</button>
 </header>

@@ -1,3 +1,4 @@
+import { Action, Store, effect } from '@actioncrew/actionstack';
 import {
   AfterContentInit,
   ChangeDetectorRef,
@@ -14,7 +15,6 @@ import {
   Self
 } from '@angular/core';
 import { FormGroupDirective, NgControl, NgForm } from '@angular/forms';
-import { ActionsSubject, Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
@@ -80,7 +80,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   destroyed$ = new BehaviorSubject<boolean>(false);
 
   onInit$!: Observable<any>;
-  onUpdate$!: Observable<any>;
   onSubmit$!: Observable<any>;
 
   private subs = {} as any;
@@ -101,8 +100,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
     @Optional() @Self() @Inject(ChangeDetectorRef) public cdr: ChangeDetectorRef,
     @Optional() @Self() @Inject(ElementRef) public elRef: ElementRef,
     @Inject(Injector) public injector: Injector,
-    @Inject(Store) public store: Store,
-    @Inject(ActionsSubject) public actionsSubject: ActionsSubject,
+    @Inject(Store) public store: Store
   ) {
   }
 
@@ -157,15 +155,6 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed$.value),
     )
 
-    this.onUpdate$ = this.actionsSubject.pipe(
-      filter((action: any) => action && action.path === this.path && action.type === FormActions.UpdateForm),
-      mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
-      tap((formState) => {
-        this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
-      }),
-      takeWhile(() => !this.destroyed$.value)
-    );
-
     this.onSubmit$ = fromEvent(this.elRef.nativeElement, 'submit').pipe(
       filter(() => this.formDirective.form.valid),
       mergeMap(() => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState))),
@@ -180,15 +169,24 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed$.value)
     );
 
-    this.subs.a = this.onUpdate$.subscribe();
+    const updateEffect$ = effect(FormActions.UpdateForm, (action: Action<any>, state: any, dependencies: any) => {
+      return this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState), tap((formState) => {
+        this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
+      }),
+      takeWhile(() => !this.destroyed$.value))
+    });
+
+    this.subs.a = this.onInit$.subscribe();
     this.subs.b = this.onSubmit$.subscribe();
+    this.subs.c = this.store.extend(updateEffect$());
+
   }
 
   ngAfterContentInit() {
     // the subscription has to be made after the ngAfterContentInit method completion
     // to avoid collisions by callback method registration
     asyncScheduler.schedule(() => {
-      this.subs.c = this.onInit$.subscribe();
+      this.subs.d = this.onInit$.subscribe();
     });
   }
 

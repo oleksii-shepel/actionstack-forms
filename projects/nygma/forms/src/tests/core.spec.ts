@@ -1,8 +1,8 @@
+import { StoreModule } from "@actioncrew/actionstack";
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormGroup, FormGroupDirective, FormsModule, NgForm, ReactiveFormsModule } from "@angular/forms";
-import { StoreModule } from "@ngrx/store";
 import { firstValueFrom } from 'rxjs';
 import { selectFormState } from "../lib";
 import { NgFormsModule, SYNC_OPTIONS_DEFAULT } from "../lib/module";

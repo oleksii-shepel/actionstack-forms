@@ -1,14 +1,15 @@
+import { StoreModule, StoreSettings } from '@actioncrew/actionstack';
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { NgFormsModule, forms } from 'nygma-forms';
+import { logger } from 'redux-logger';
 import { environment } from '../environments/environment';
 import { AppComponent } from './components/app/app.component';
-import { JsonEditorComponent } from './components/json-editor/json-editor.component';
+import { JsonEditorComponent, SanitizedHtmlPipe } from './components/json-editor/json-editor.component';
 import { MessengerComponent } from './components/messenger/messenger.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
 import { ReactiveProfileEditorComponent } from './components/reactive-form/profile-editor.component';
@@ -17,10 +18,19 @@ import { TemplateProfileEditorComponent } from './components/template-driven-for
 import { FieldArrayDirective } from './directives/array.directive';
 import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
-import { global, initialState, rootReducer } from './reducers';
+import { global, initialState, reducers } from './reducers';
 import { NgModelArrayModule } from './utils';
 @NgModule({
+  providers: [
+    {provide: StoreSettings, useValue: {
+      dispatchSystemActions: true,
+      awaitStatePropagation: true,
+      enableMetaReducers: true,
+      enableAsyncReducers: false
+    }}
+  ],
   declarations: [
+    SanitizedHtmlPipe,
     AppComponent,
     ReactiveProfileEditorComponent,
     TemplateProfileEditorComponent,
@@ -40,8 +50,11 @@ import { NgModelArrayModule } from './utils';
     NgFormsModule,
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
-    StoreModule.forRoot({ root: rootReducer }, {
-      metaReducers: [forms(initialState, {showAll: true}), global()]
+    StoreModule.forRoot({
+      slice: "root",
+      middleware: [logger],
+      reducer: reducers,
+      metaReducers: [forms(initialState), global()]
     }),
 
     NgModelArrayModule

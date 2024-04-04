@@ -1,5 +1,3 @@
-import { ActionReducer, createAction, createSelector, props } from '@ngrx/store';
-import { environment } from '../../environments/environment';
 import { HeroPage, ModelPage, ProfilePage, initialHeroPage, initialModelPage, initialProfilePage } from './../models/profile';
 
 /**
@@ -10,14 +8,12 @@ import { HeroPage, ModelPage, ProfilePage, initialHeroPage, initialModelPage, in
  *
  * More: https://drboolean.gitbooks.io/mostly-adequate-guide/content/ch5.html
  */
-import { compose } from '@ngrx/store';
 
 /**
  * storeFreeze prevents state from being mutated. When mutation occurs, an
  * exception will be thrown. This is useful during development mode to
  * ensure that none of the reducers accidentally mutates the state.
  */
-import { storeFreeze } from 'ngrx-store-freeze';
 
 /**
  * combineReducers is another useful metareducer that takes a map of reducer
@@ -27,8 +23,6 @@ import { storeFreeze } from 'ngrx-store-freeze';
  *
  * More: https://egghead.io/lessons/javascript-redux-implementing-combinereducers-from-scratch
  */
-import { combineReducers } from '@ngrx/store';
-
 
 /**
  * Every reducer module's default export is the reducer function itself. In
@@ -36,6 +30,7 @@ import { combineReducers } from '@ngrx/store';
  * the state of the reducer plus any selector functions. The `* as`
  * notation packages up all of the exports into a single object.
  */
+import { Reducer, action, featureSelector, selector } from '@actioncrew/actionstack';
 import { getValue, setValue } from 'nygma-forms';
 import * as fromHero from './hero.reducer';
 import * as fromProfile from './profile.reducer';
@@ -65,20 +60,17 @@ export const initialState: ApplicationState = {
  * wrapping that in storeLogger. Remember that compose applies
  * the result from right to left.
  */
-const reducers = {
+export const reducers = {
   profile: fromProfile.profileReducer,
   hero: fromHero.profileReducer,
   model: fromStandard.profileReducer
 };
 
-const developmentReducer: ActionReducer<ApplicationState> = compose(storeFreeze, combineReducers)(reducers);
-const productionReducer: ActionReducer<ApplicationState> = combineReducers(reducers);
+export const global = () => (reducer: Reducer): any => {
+  return async (state: any, action: any) => {
+    let newState = await reducer(state, action);
 
-export const global = () => (reducer: ActionReducer<any>): any => {
-  return (state: any, action: any) => {
-    let newState = reducer(state, action);
-
-    if(action.type === '@ngrx/store/slice/property/update') {
+    if(action.type === '@forms/slice/property/update') {
       newState = setValue(newState, `${action.path}.${action.property}`, action.value);
     }
 
@@ -86,20 +78,6 @@ export const global = () => (reducer: ActionReducer<any>): any => {
   }
 }
 
-export function rootReducer(state = initialState, action: any) {
-
-  if (environment.production) {
-    // suppress console output
-    console.log = function () { Function.prototype };
-
-    return productionReducer(state, action);
-
-  } else {
-    return developmentReducer(state, action);
-  }
-
-}
-
-export const selectSlice = (slice: string) => createSelector((state: any) => getValue(state, slice), state => state);
-export const selectProperty = (slice: string, property: string) => createSelector((state: any) => getValue(state, `${slice}.${property}`), state => state);
-export const updateProperty = createAction('@ngrx/store/slice/property/update', props<{ path: string; property: string; value: any; }>());
+export const selectSlice = (slice: string) => selector(featureSelector(slice.split('.')), state => state)();
+export const selectProperty = (slice: string, property: string) => selector(featureSelector(slice.split('.')), state => getValue(state, property))();
+export const updateProperty = action('@forms/slice/property/update', ({path, property, value}: any) => ({path, property, value}));

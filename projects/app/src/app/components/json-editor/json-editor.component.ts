@@ -1,9 +1,21 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { deepEqual, findProps, getValue } from 'nygma-forms';
 import { BehaviorSubject, sampleTime } from 'rxjs';
 import { difference } from '../../utils/utils';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
+
+import { Pipe, PipeTransform } from '@angular/core';
+@Pipe({
+  name: 'sanitizedHtml'
+})
+export class SanitizedHtmlPipe implements PipeTransform {
+  constructor(private sanitized: DomSanitizer) {}
+  transform(value: any): any {
+    return this.sanitized.bypassSecurityTrustHtml(value);
+  }
+}
 
 @Component({
   selector: 'json-editor',
