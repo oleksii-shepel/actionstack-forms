@@ -9,24 +9,29 @@ export const getValue = (obj: any, prop?: string) => {
 
 
 export const setValue = (obj: any, prop: string, val: any): any => {
-  if(!prop) { return val; }
-
-  const isArray = (path: string[]) => path.length >= 2 && !isNaN(+path[1]);
+  if (!prop) { return val; }
 
   const path = prop.split('.');
-  const root = Array.isArray(obj)? [...obj] : {...obj};
-  if(path.length === 1) { root[prop] = val; return root; }
+  const root = Array.isArray(obj) ? [...obj] : { ...obj };
 
-  let item = root; let key = path[0];
-  while(path.length > 1) {
-    item[key] = isArray(path) ? [...(item[key] || [])] : {...item[key]};
-    item = item[key];
-    path.shift(); key = path[0];
+  if (path.length === 1) {
+    root[prop] = val;
+    return root;
   }
+
+  let item = root;
+  let key = path[0];
+
+  while (path.length > 1) {
+    item[key] = Array.isArray(item[key]) ? [...item[key]] : { ...item[key] };
+    item = item[key];
+    path.shift();
+    key = path[0];
+  }
+
   item[key] = val;
   return root;
-}
-
+};
 
 
 export function findProps(obj: any): string[] {
