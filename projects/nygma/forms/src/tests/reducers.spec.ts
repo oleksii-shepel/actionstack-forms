@@ -1,15 +1,7 @@
 import { autoInit, autoSubmit, formDestroyed, updateControl, updateForm } from '../lib/actions';
-import { forms, logger } from '../lib/reducers';
+import { forms } from '../lib/reducers';
 
 describe('reducers', () => {
-  it('should log', () => {
-    const log = logger({showAll: true});
-    const logSpy = jest.spyOn(console, 'log');
-    const state = { test: 'test' };
-    const nextState = { ...state, test: 'test2' };
-    log(state, nextState, updateForm({path: 'test.form', value: 'test'}));
-    expect(logSpy).toHaveBeenCalledTimes(2);
-  });
   it('should handle actions', async() => {
     const model = {
       firstName: 'John',

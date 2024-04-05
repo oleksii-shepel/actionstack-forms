@@ -16,7 +16,7 @@ export const selectFormState = (path: string, nocheck?: boolean) => (state: Obse
   }));
 };
 
-export const forms = (initialState: any = {}, logging: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp} = {}) => async (reducer: Reducer) => {
+export const forms = (initialState: any = {}) => async (reducer: Reducer) => {
 
   const metaReducer = async (state: any, action: any) => {
     action = {...action.payload, type: action.type};
@@ -32,7 +32,6 @@ export const forms = (initialState: any = {}, logging: {showAll?: boolean, showR
       if(queue?.initialized$.value || formAction.type === FormActionsInternal.AutoInit) {
         const form = getValue(state, slice);
         nextState = setValue(state, slice, formAction.execute(form));
-        //logger(logging)(state, nextState, formAction);
 
         if(queue) {
           if(formAction.type === FormActionsInternal.AutoInit) {
@@ -50,7 +49,6 @@ export const forms = (initialState: any = {}, logging: {showAll?: boolean, showR
           const form = getValue(nextState, slice);
           const deferred = queue.dequeue();
           nextState = setValue(nextState, slice, deferred?.execute(form));
-          //logger(logging)(state, nextState, deferred);
         }
       } else if(queue) {
         queue.enqueue(deferred(formAction));
@@ -60,50 +58,7 @@ export const forms = (initialState: any = {}, logging: {showAll?: boolean, showR
     }
 
     nextState = await reducer(state, action);
-    //logger(logging)(state, nextState, action);
     return nextState;
   }
   return metaReducer;
 }
-
-// export const logger = (settings: {showAll?: boolean, showRegular?: boolean, showDeferred?: boolean, showOnlyModifiers?: boolean, showMatch?: RegExp}) => (state: any, nextState: any, action: any) => {
-//   settings = Object.assign({showAll: false, showRegular: false, showDeferred: false, showOnlyModifiers: false}, settings);
-
-//   function filter(action: any, equal: any): boolean {
-//     let show = false;
-//     if(settings.showMatch && action.type.match(settings.showMatch)) {
-//       show = true;
-//     }
-//     if(settings.showRegular && !action.deferred) {
-//       show = true;
-//     }
-//     if(settings.showDeferred && action.deferred) {
-//       show = true;
-//     }
-//     if(settings.showOnlyModifiers && !equal) {
-//       show = true;
-//     }
-//     if(settings.showAll) {
-//       show = true;
-//     }
-//     return show;
-//   }
-
-//   const actionCopy = deepClone(action);
-//   delete actionCopy.type;
-
-//   const actionPath = actionCopy?.path ?? '';
-//   delete actionCopy?.path;
-
-//   const before = actionPath.length > 0 ? selectFormState(actionPath, true)(state) : state;
-//   const after = actionPath.length > 0 ? selectFormState(actionPath, true)(nextState) : nextState;
-//   const equal = deepEqual(before, after);
-
-//   if(filter(action, equal)) {
-//     console.groupCollapsed("%c%s%c", action.deferred ? "color: blue;" : "color: black;", action.type, "color: black;");
-//     console.log("path: '%c%s%c', payload: %o", "color: red;", actionPath, "color: black;", actionCopy);
-//     console.log(after);
-//     console.groupEnd();
-//   }
-//   return nextState;
-// }
