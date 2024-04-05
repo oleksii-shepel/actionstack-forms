@@ -10,7 +10,7 @@ describe('reducers', () => {
     log(state, nextState, updateForm({path: 'test.form', value: 'test'}));
     expect(logSpy).toHaveBeenCalledTimes(2);
   });
-  it('should handle actions', () => {
+  it('should handle actions', async() => {
     const model = {
       firstName: 'John',
       lastName: 'Doe',
@@ -30,23 +30,23 @@ describe('reducers', () => {
       }
     };
 
-    const f = forms(initialState);
+    const f = await forms(initialState)((state: any, action: any) => { return state; });
     let expected = {} as any;
 
-    let newState = f((state: any, action: any) => { return state; })(initialState, autoInit({path: "slice.form", value: model}));
+    let newState = await f(initialState, autoInit({path: "slice.form", value: model}));
     expected = { slice: { form: { ...model, __form: true }} }; initialState = newState;
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, updateForm({path: "slice.form", value: model}));
+    newState = await f(initialState, updateForm({path: "slice.form", value: model}));
     expected = { slice: { form: { ...model, __form: true }} };
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, updateControl({path: "slice.form", property: "email", value: model.email}));
+    newState = await f(initialState, updateControl({path: "slice.form", property: "email", value: model.email}));
     expected = { slice: { form: { ...model, __form: true }} }
     expect(newState).toEqual(expected);
 
-    newState = f((state: any, action: any) => { return state; })(initialState, autoSubmit({path: "slice.form"}));
+    newState = await f(initialState, autoSubmit({path: "slice.form"}));
 
-    newState = f((state: any, action: any) => { return state; })(initialState, formDestroyed({path: "slice.form", value: initialState}));
+    newState = await f(initialState, formDestroyed({path: "slice.form", value: initialState}));
   });
 });
