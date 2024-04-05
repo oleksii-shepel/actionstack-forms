@@ -30,7 +30,7 @@ import { HeroPage, ModelPage, ProfilePage, initialHeroPage, initialModelPage, in
  * the state of the reducer plus any selector functions. The `* as`
  * notation packages up all of the exports into a single object.
  */
-import { Reducer, action, featureSelector, selector } from '@actioncrew/actionstack';
+import { Reducer, action, selector } from '@actioncrew/actionstack';
 import { getValue, setValue } from 'nygma-forms';
 import * as fromHero from './hero.reducer';
 import * as fromProfile from './profile.reducer';
@@ -78,6 +78,6 @@ export const global = () => (reducer: Reducer): any => {
   }
 }
 
-export const selectSlice = (slice: string) => selector(featureSelector(slice.split('.')), state => state)();
-export const selectProperty = (slice: string, property: string) => selector(featureSelector(slice.split('.')), state => getValue(state, property))();
+export const selectSlice = selector("@global", (state, slice) => getValue(state, slice));
+export const selectProperty = selector("@global", (state, slice) => getValue(state, slice), (slice, property) => slice[property]);
 export const updateProperty = action('@forms/slice/property/update', ({path, property, value}: any) => ({path, property, value}));
