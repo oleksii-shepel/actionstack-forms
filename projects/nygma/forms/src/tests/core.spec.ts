@@ -27,7 +27,8 @@ describe('core', () => {
     beforeEach(async () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
-        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
+          reducer: (state: any, action: any): any => state,
           metaReducers: [forms({slice: {form: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
@@ -272,7 +273,8 @@ describe('core', () => {
     beforeEach(async () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
-        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
+          reducer: (state: any, action: any): any => state,
           metaReducers: [forms({slice: {form: {firstName: 'John'}}})]
         }), NgFormsModule]
       });
@@ -520,7 +522,8 @@ describe('core', () => {
 
       TestBed.configureTestingModule({
         declarations: [TestComponent],
-        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
+          reducer: (state: any, action: any): any => state,
           metaReducers: [forms({slice: {form: {}}})]
         }), NgFormsModule]
       });
@@ -565,7 +568,8 @@ describe('core', () => {
 
       TestBed.configureTestingModule({
         declarations: [TestComponent],
-        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
+          reducer: (state: any, action: any): any => state,
           metaReducers: [forms({slice: {form: {}}})]
         }), NgFormsModule]
       });
@@ -611,7 +615,8 @@ describe('core', () => {
 
       TestBed.configureTestingModule({
         declarations: [TestComponent],
-        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
+          reducer: (state: any, action: any): any => state,
           metaReducers: [forms({slice: {form: {}}})]
         }), NgFormsModule]
       });
@@ -650,7 +655,8 @@ describe('core', () => {
 
       TestBed.configureTestingModule({
         declarations: [TestComponent],
-        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot((state: any, action: any): any => state, {
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
+          reducer: (state: any, action: any): any => state,
           metaReducers: [forms({slice: {form: {}}})]
         }), NgFormsModule]
       });

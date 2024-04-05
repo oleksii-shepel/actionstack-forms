@@ -80,6 +80,7 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
   destroyed$ = new BehaviorSubject<boolean>(false);
 
   onInit$!: Observable<any>;
+  onUpdate$!: Observable<any>;
   onSubmit$!: Observable<any>;
 
   private subs = {} as any;
@@ -176,9 +177,11 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
       takeWhile(() => !this.destroyed$.value))
     });
 
+    this.onUpdate$ = this.store.extend(updateEffect$());
+
     this.subs.a = this.onInit$.subscribe();
     this.subs.b = this.onSubmit$.subscribe();
-    this.subs.c = this.store.extend(updateEffect$());
+    this.subs.c = this.onUpdate$.subscribe();
 
   }
 
