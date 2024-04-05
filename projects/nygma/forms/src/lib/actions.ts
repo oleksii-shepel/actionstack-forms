@@ -22,12 +22,10 @@ export interface FormAction {
 }
 
 function actionFactory<P extends object>(type: string, reducer?: (state: any) => any): any {
-  let creator = action(type);
-  const func = reducer? reducer : (state: any): any => { return state; };
-  creator = Object.assign(creator, { deferred: false, execute: func });
-  const higherOrderAction = (props: P) => creator({...creator, ...props});
-  actionMapping.set(type, higherOrderAction);
-  return higherOrderAction;
+  const func = reducer? reducer : (state: any = {}): any => { return state; };
+  const creator = (props: any) => action(type, (params: P) => ({...params, deferred: false, execute: func}))(props);
+  actionMapping.set(type, creator);
+  return creator;
 }
 
 export const updateForm = actionFactory<{ path: string; value: any; noclone?: boolean; }>(FormActions.UpdateForm, function(this: any, state: any) {

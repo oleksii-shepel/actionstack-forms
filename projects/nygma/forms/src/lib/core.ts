@@ -105,6 +105,7 @@ export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
   ) {
   }
 
+
   ngOnInit() {
     this.formDirective = this.injector.get(FormGroupDirective, null) ?? (this.injector.get(NgForm, null) as any);
 
