@@ -65,7 +65,7 @@ export interface SyncOptions {
     `form:not([ngNoForm]):not([formGroup])[sync],ng-form[sync],[ngForm][sync],[formGroup][sync]`,
   exportAs: 'sync',
 })
-export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
+export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
   @Input('sync') config!: string | SyncOptions;
   @ContentChildren(NgControl, {descendants: true}) controls!: QueryList<NgControl>;
 
@@ -179,9 +179,8 @@ export class SyncDirective implements OnInit, OnDestroy, AfterContentInit {
 
     this.onUpdate$ = this.store.extend(updateEffect$());
 
-    this.subs.a = this.onInit$.subscribe();
-    this.subs.b = this.onSubmit$.subscribe();
-    this.subs.c = this.onUpdate$.subscribe();
+    this.subs.a = this.onSubmit$.subscribe();
+    this.subs.b = this.onUpdate$.subscribe();
 
   }
 
