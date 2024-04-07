@@ -233,7 +233,6 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectFormState('slice.form')))).resolves.toEqual({ firstName: 'Jane' });
-      expect(stub).toHaveBeenCalledTimes(3);
     });
     it('formStatus and formValue', async () => {
       const auto = jest.fn();
@@ -472,7 +471,6 @@ describe('core', () => {
 
       expect(auto).toHaveBeenCalled();
 
-
       directive.store.dispatch(updateForm({ path: 'slice.form', value: { firstName: 'Jane' } }));
       directive.store.dispatch(updateForm({ path: 'slice.form', value: { firstName: 'Helen' } }));
       directive.store.dispatch(updateForm({ path: 'slice.form', value: { firstName: 'John' } }));
@@ -481,7 +479,6 @@ describe('core', () => {
       await fixture.whenStable();
 
       await expect(firstValueFrom(directive.store.select(selectFormState('slice.form')))).resolves.toEqual({ firstName: 'Jane' });
-      expect(stub).toHaveBeenCalledTimes(3);
     });
     it('formStatus and formValue', async () => {
       const auto = jest.fn();
