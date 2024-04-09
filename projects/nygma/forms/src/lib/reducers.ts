@@ -18,7 +18,7 @@ export const selectFormState = (path: string, nocheck?: boolean) => (state: Obse
 
 export const forms = (initialState: any = {}) => (reducer: Reducer) => {
 
-  const metaReducer = (state: any, action: any) => {
+  const metaReducer = async (state: any, action: any) => {
     action = {...action.payload, type: action.type};
     state = state ?? deepClone(initialState);
 
@@ -57,7 +57,7 @@ export const forms = (initialState: any = {}) => (reducer: Reducer) => {
       return nextState;
     }
 
-    nextState = reducer(state, action);
+    nextState = await reducer(state, action);
     return nextState;
   }
   return metaReducer;
