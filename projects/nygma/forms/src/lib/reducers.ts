@@ -19,11 +19,10 @@ export const selectFormState = (path: string, nocheck?: boolean) => (state: Obse
 export const forms = (initialState: any = {}) => (reducer: Reducer) => {
 
   const metaReducer = async (state: any, action: any) => {
-    action = {...action.payload, type: action.type};
     state = state ?? deepClone(initialState);
 
     let nextState = state;
-    const slice = action.path;
+    const slice = action?.payload?.path;
 
     if(slice && actionMapping.has(action.type)) {
       const formAction = action;
@@ -31,7 +30,7 @@ export const forms = (initialState: any = {}) => (reducer: Reducer) => {
 
       if(queue?.initialized$.value || formAction.type === FormActionsInternal.AutoInit) {
         const form = getValue(state, slice);
-        nextState = setValue(state, slice, formAction.execute(form));
+        nextState = setValue(state, slice, formAction.payload.execute(form));
 
         if(queue) {
           if(formAction.type === FormActionsInternal.AutoInit) {

@@ -71,7 +71,7 @@ export const global = () => (reducer: Reducer): any => {
     let newState = await reducer(state, action);
 
     if(action.type === '@forms/slice/property/update') {
-      newState = setValue(newState, `${action.path}.${action.property}`, action.value);
+      newState = setValue(newState, `${action.payload.path}.${action.payload.property}`, action.payload.value);
     }
 
     return newState;
