@@ -1,4 +1,4 @@
-import { Reducer, featureSelector } from '@actioncrew/actionstack';
+import { AsyncReducer, featureSelector } from '@actioncrew/actionstack';
 import { Observable, map } from 'rxjs';
 import { FormActionsInternal, actionMapping, actionQueues, deferred } from './actions';
 import { Queue } from './queue';
@@ -16,7 +16,7 @@ export const selectFormState = (path: string, nocheck?: boolean) => (state: Obse
   }));
 };
 
-export const forms = (initialState: any = {}) => (reducer: Reducer) => {
+export const forms = (initialState: any = {}) => async (reducer: AsyncReducer) => {
 
   const metaReducer = async (state: any, action: any) => {
     state = state ?? deepClone(initialState);
