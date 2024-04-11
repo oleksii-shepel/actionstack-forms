@@ -47,7 +47,7 @@ export const forms = (initialState: any = {}) => async (reducer: AsyncReducer) =
         while(queue.length > 0) {
           const form = getValue(nextState, slice);
           const deferred = queue.dequeue();
-          nextState = setValue(nextState, slice, deferred?.execute(form));
+          nextState = setValue(nextState, slice, (deferred as any)?.payload?.execute(form));
         }
       } else if(queue) {
         queue.enqueue(deferred(formAction));

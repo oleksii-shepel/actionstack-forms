@@ -1,4 +1,4 @@
-import { StoreModule } from "@actioncrew/actionstack";
+import { Store, StoreModule, StoreSettings, store } from "@actioncrew/actionstack";
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
@@ -27,11 +27,14 @@ describe('core', () => {
     beforeEach(async () => {
       TestBed.configureTestingModule({
         declarations: [TestComponent],
-        imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
+        imports: [CommonModule, ReactiveFormsModule, FormsModule, NgFormsModule],
+        providers: [
+          { provide: StoreSettings, useValue: new StoreSettings() },
+          { provide: Store, useFactory: () => store({
           slice: "slice",
-          reducer: (state: any = {}, action: any): any => state,
-          metaReducers: [forms({slice: {form: {firstName: 'John'}}})]
-        }), NgFormsModule]
+          reducer: (state: any = {form: {firstName: 'John'}}, action: any): any => state,
+          metaReducers: [forms()]
+        })}]
       });
 
       fixture = TestBed.overrideComponent(TestComponent, {
@@ -56,7 +59,7 @@ describe('core', () => {
       directive.ngOnDestroy();
       jest.advanceTimersByTime(3000);
 
-      TestBed.resetTestingModule();
+      //TestBed.resetTestingModule();
       jest.clearAllTimers();
 
       for (const sub in subs) {
@@ -106,7 +109,9 @@ describe('core', () => {
 
     it('should call subscription when InitForm action dispatched', async() => {
       const stub = jest.fn();
+      const auto = jest.fn();
 
+      subs.a = directive.initialized$.subscribe(auto);
       subs.a = directive.onUpdate$.subscribe(stub);
 
       jest.advanceTimersByTime(3000);
@@ -273,8 +278,8 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
           slice: "slice",
-          reducer: (state: any = {}, action: any): any => state,
-          metaReducers: [forms({slice: {form: {firstName: 'John'}}})]
+          reducer: (state: any = {form: {firstName: 'John'}}, action: any): any => state,
+          metaReducers: [forms()]
         }), NgFormsModule]
       });
 
@@ -520,8 +525,8 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
           slice: "slice",
-          reducer: (state: any = {}, action: any): any => state,
-          metaReducers: [forms({slice: {form: {}}})]
+          reducer: (state: any = {form: {}}, action: any): any => state,
+          metaReducers: [forms()]
         }), NgFormsModule]
       });
 
@@ -567,8 +572,8 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
           slice: "slice",
-          reducer: (state: any = {}, action: any): any => state,
-          metaReducers: [forms({slice: {form: {}}})]
+          reducer: (state: any = {form: {}}, action: any): any => state,
+          metaReducers: [forms()]
         }), NgFormsModule]
       });
 
@@ -615,8 +620,8 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
           slice: "slice",
-          reducer: (state: any = {}, action: any): any => state,
-          metaReducers: [forms({slice: {form: {}}})]
+          reducer: (state: any = {form: {}}, action: any): any => state,
+          metaReducers: [forms()]
         }), NgFormsModule]
       });
 
@@ -656,8 +661,8 @@ describe('core', () => {
         declarations: [TestComponent],
         imports: [CommonModule, ReactiveFormsModule, FormsModule, StoreModule.forRoot({
           slice: "slice",
-          reducer: (state: any = {}, action: any): any => state,
-          metaReducers: [forms({slice: {form: {}}})]
+          reducer: (state: any = {form: {}}, action: any): any => state,
+          metaReducers: [forms()]
         }), NgFormsModule]
       });
 

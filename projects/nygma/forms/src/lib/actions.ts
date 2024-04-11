@@ -63,9 +63,9 @@ export const autoSubmit = actionFactory<{ path: string; }>(FormActionsInternal.A
 export const formDestroyed = actionFactory<{ path: string; value: any; }>(FormActionsInternal.FormDestroyed);
 
 export const deferred = (action: Action<any>): any => {
-  return Object.assign({...action}, {deferred: true});
+  return Object.assign({...action}, { payload: {deferred: true}});
 };
 
 export const dequeued = (action: Action<any>): any => {
-  return Object.assign({...action}, {dequeued: true});
+  return Object.assign({...action}, { payload: {dequeued: true}});
 };
