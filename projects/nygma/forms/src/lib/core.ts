@@ -46,7 +46,8 @@ import {
   autoSubmit,
   formDestroyed,
   updateControl,
-  updateForm
+  updateForm,
+  updateFormSuccess
 } from './actions';
 import { selectFormState } from './reducers';
 
@@ -175,6 +176,7 @@ export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
       return this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState), tap((formState) => {
         this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
       }),
+      map(() => updateFormSuccess(this.path, this.formDirective.form.value)),
       takeWhile(() => !this.destroyed$.value))
     });
 

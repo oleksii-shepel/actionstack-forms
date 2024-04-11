@@ -4,6 +4,7 @@ import { deepClone, setValue } from './utils';
 
 export enum FormActions {
   UpdateForm = '@forms/form/update',
+  UpdateFormSuccess = '@forms/form/update/success',
   UpdateControl = '@forms/form/control/update',
 }
 
@@ -23,7 +24,7 @@ export interface FormAction {
 
 function actionFactory<P extends object>(type: string, reducer?: (state: any) => any): any {
   const func = reducer? reducer : (state: any = {}): any => { return state; };
-  const creator = (props: any) => action(type, (params: P) => ({...params, deferred: false, execute: func}))(props);
+  const creator = action(type, (params: P) => ({...params, deferred: false, execute: func}));
   actionMapping.set(type, creator);
   return creator;
 }
@@ -37,6 +38,8 @@ export const updateForm = actionFactory<{ path: string; value: any; noclone?: bo
 
   return newState;
 });
+
+export const updateFormSuccess = actionFactory<{ path: string; value: any; }>(FormActions.UpdateFormSuccess);
 
 export const updateControl = actionFactory<{ path: string; property: string; value: any; }>(FormActions.UpdateControl, function(this: any, state: any) {
   if(!state.__form) {
