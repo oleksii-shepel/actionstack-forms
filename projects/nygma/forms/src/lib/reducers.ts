@@ -1,4 +1,4 @@
-import { AsyncReducer, featureSelector } from '@actioncrew/actionstack';
+import { Action, AsyncReducer, featureSelector } from '@actioncrew/actionstack';
 import { Observable, map } from 'rxjs';
 import { FormActionsInternal, actionMapping, actionQueues, deferred } from './actions';
 import { Queue } from './queue';
@@ -46,8 +46,8 @@ export const forms = (initialState: any = {}) => async (reducer: AsyncReducer) =
 
         while(queue.length > 0) {
           const form = getValue(nextState, slice);
-          const deferred = queue.dequeue();
-          nextState = setValue(nextState, slice, (deferred as any)?.payload?.execute(form));
+          const deferred = queue.dequeue() as Action<any>;
+          nextState = setValue(nextState, slice, deferred.payload?.execute(form));
         }
       } else if(queue) {
         queue.enqueue(deferred(formAction));

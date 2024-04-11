@@ -31,9 +31,9 @@ describe('core', () => {
         providers: [
           { provide: StoreSettings, useValue: new StoreSettings() },
           { provide: Store, useFactory: () => store({
-          slice: "slice",
-          reducer: (state: any = {form: {firstName: 'John'}}, action: any): any => state,
-          metaReducers: [forms()]
+            slice: "slice",
+            reducer: (state: any = {form: {firstName: 'John'}}, action: any): any => state,
+            metaReducers: [forms()]
         })}]
       });
 
@@ -59,7 +59,7 @@ describe('core', () => {
       directive.ngOnDestroy();
       jest.advanceTimersByTime(3000);
 
-      //TestBed.resetTestingModule();
+      TestBed.resetTestingModule();
       jest.clearAllTimers();
 
       for (const sub in subs) {

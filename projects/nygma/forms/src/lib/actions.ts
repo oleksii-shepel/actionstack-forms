@@ -22,9 +22,8 @@ export interface FormAction {
   execute: (state: any) => any;
 }
 
-function actionFactory<P extends object>(type: string, reducer?: (state: any) => any): any {
-  const func = reducer? reducer : (state: any = {}): any => { return state; };
-  const creator = action(type, (params: P) => ({...params, deferred: false, execute: func}));
+function actionFactory<P extends object>(type: string, reducer = (state: any = {}): any => { return state; }): any {
+  const creator = action(type, (params: P) => ({...params, deferred: false, execute: reducer}));
   actionMapping.set(type, creator);
   return creator;
 }
@@ -63,9 +62,9 @@ export const autoSubmit = actionFactory<{ path: string; }>(FormActionsInternal.A
 export const formDestroyed = actionFactory<{ path: string; value: any; }>(FormActionsInternal.FormDestroyed);
 
 export const deferred = (action: Action<any>): any => {
-  return Object.assign({...action}, { payload: {deferred: true}});
+  return Object.assign({...action, payload: {deferred: true}});
 };
 
 export const dequeued = (action: Action<any>): any => {
-  return Object.assign({...action}, { payload: {dequeued: true}});
+  return Object.assign({...action, payload: {dequeued: true}});
 };
