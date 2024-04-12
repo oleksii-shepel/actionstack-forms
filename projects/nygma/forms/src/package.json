@@ -1,6 +1,6 @@
 {
   "name": "nygma-forms",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "Forms Module for NgRx store",
   "license": "MIT",
   "keywords": [
@@ -16,7 +16,7 @@
   "peerDependencies": {
     "@angular/core": ">=14.0.0",
     "@angular/forms": ">=14.0.0",
-    "@ngrx/store": ">=14.0.0",
+    "@actioncrew/actionstack": ">=1.0.5",
     "rxjs": ">=7.5.0"
   },
   "devDependencies": {

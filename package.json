@@ -1,6 +1,6 @@
 {
   "name": "nygma-app",
-  "version": "1.3.21",
+  "version": "1.0.25",
   "description": "Forms Module for Actionstack store",
   "license": "MIT",
   "keywords": [
@@ -26,7 +26,7 @@
     "eslint": "eslint ./projects/nygma/forms/src/lib --ext .ts"
   },
   "dependencies": {
-    "@actioncrew/actionstack": "file:actioncrew-actionstack-1.0.5.tgz",
+    "@actioncrew/actionstack": "~1.0.5",
     "@angular/animations": "~14.0.0",
     "@angular/common": "~14.0.0",
     "@angular/compiler": "~14.0.0",
