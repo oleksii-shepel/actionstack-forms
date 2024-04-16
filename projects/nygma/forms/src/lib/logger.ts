@@ -252,11 +252,21 @@ interface LogEntry {
   nextState: any;
 }
 
+/**
+ * Options for creating a logger.
+ * @interface CreateLoggerOptions
+ * @extends LoggerOptions
+ */
 interface CreateLoggerOptions extends LoggerOptions {
   getState?: Function;
   dispatch?: Function;
 }
 
+/**
+ * Default logger options.
+ * @const {LoggerOptions}
+ * @default
+ */
 const defaults: LoggerOptions = {
   level: 'log',
   logger: console,
@@ -280,6 +290,11 @@ const defaults: LoggerOptions = {
   transformer: undefined,
 };
 
+/**
+ * Creates a logger with the provided options.
+ * @param {CreateLoggerOptions} [options={}] - Options for creating the logger.
+ * @returns {Function} A function that acts as a logger middleware.
+ */
 const createLogger = (options: CreateLoggerOptions = {}) => {
   const loggerOptions = Object.assign({}, defaults, options);
   let loggerCreator: any = () => (next: any)  => (action: any) => next(action);
