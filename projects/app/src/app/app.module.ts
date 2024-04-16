@@ -1,11 +1,12 @@
 import { StoreModule, StoreSettings } from '@actioncrew/actionstack';
+import { logger } from '@actioncrew/actionstack/tools';
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgFormsModule, forms, logger } from 'nygma-forms';
+import { NgFormsModule, forms } from 'nygma-forms';
 import { environment } from '../environments/environment';
 import { AppComponent } from './components/app/app.component';
 import { JsonEditorComponent, SanitizedHtmlPipe } from './components/json-editor/json-editor.component';
