@@ -252,22 +252,6 @@ interface LogEntry {
   nextState: any;
 }
 
-interface BufferOptions {
-  logger: any;
-  actionTransformer: Function;
-  titleFormatter?: Function;
-  collapsed: any;
-  colors: {
-    title?: Function;
-    prevState?: Function;
-    action?: Function;
-    nextState?: Function;
-    error?: Function;
-  };
-  level: string | Function | object;
-  diff: boolean;
-}
-
 interface CreateLoggerOptions extends LoggerOptions {
   getState?: Function;
   dispatch?: Function;
