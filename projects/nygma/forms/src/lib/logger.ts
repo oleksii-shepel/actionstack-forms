@@ -298,6 +298,7 @@ const defaults: LoggerOptions = {
 
 const createLogger = (options: CreateLoggerOptions = {}) => {
   const loggerOptions = Object.assign({}, defaults, options);
+  let loggerCreator: any = () => (next: any)  => (action: any) => next(action);
 
   const {
     logger,
@@ -308,52 +309,52 @@ const createLogger = (options: CreateLoggerOptions = {}) => {
     diffPredicate,
   } = loggerOptions;
 
-  // Return if 'console' object is not defined
-  if (typeof logger === 'undefined') {
-    return () => (next: any)  => (action: any) => next(action);
+  if (logger !== 'undefined') {
+    const logBuffer: LogEntry[] = [];
+
+    loggerCreator = ({ getState }: any) => (next: any) => (action: any) => {
+      // Exit early if predicate function returns 'false'
+      if (typeof predicate === 'function' && !predicate(getState, action)) {
+        return next(action);
+      }
+
+      const logEntry: LogEntry = {} as any;
+
+      logBuffer.push(logEntry);
+
+      logEntry.started = timer.now();
+      logEntry.startedTime = new Date();
+      logEntry.prevState = stateTransformer!(getState());
+      logEntry.action = action;
+
+      let returnedValue;
+      if (logErrors) {
+        try {
+          returnedValue = next(action);
+        } catch (e) {
+          logEntry.error = errorTransformer!(e);
+        }
+      } else {
+        returnedValue = next(action);
+      }
+
+      logEntry.took = timer.now() - logEntry.started;
+      logEntry.nextState = stateTransformer!(getState());
+
+      const diff = loggerOptions.diff && typeof diffPredicate === 'function'
+        ? diffPredicate(getState, action)
+        : loggerOptions.diff;
+
+      printBuffer(logBuffer, Object.assign({}, loggerOptions, { diff }));
+      logBuffer.length = 0;
+
+      if (logEntry.error) throw logEntry.error;
+      return returnedValue;
+    };
   }
 
-  const logBuffer: LogEntry[] = [];
-
-  return ({ getState }: any) => (next: any) => (action: any) => {
-    // Exit early if predicate function returns 'false'
-    if (typeof predicate === 'function' && !predicate(getState, action)) {
-      return next(action);
-    }
-
-    const logEntry: LogEntry = {} as any;
-
-    logBuffer.push(logEntry);
-
-    logEntry.started = timer.now();
-    logEntry.startedTime = new Date();
-    logEntry.prevState = stateTransformer!(getState());
-    logEntry.action = action;
-
-    let returnedValue;
-    if (logErrors) {
-      try {
-        returnedValue = next(action);
-      } catch (e) {
-        logEntry.error = errorTransformer!(e);
-      }
-    } else {
-      returnedValue = next(action);
-    }
-
-    logEntry.took = timer.now() - logEntry.started;
-    logEntry.nextState = stateTransformer!(getState());
-
-    const diff = loggerOptions.diff && typeof diffPredicate === 'function'
-      ? diffPredicate(getState, action)
-      : loggerOptions.diff;
-
-    printBuffer(logBuffer, Object.assign({}, loggerOptions, { diff }));
-    logBuffer.length = 0;
-
-    if (logEntry.error) throw logEntry.error;
-    return returnedValue;
-  };
+  loggerCreator.signature = '6.q.w.c.i.m.9.n.j.y';
+  return loggerCreator;
 }
 
 const defaultLogger = createLogger();
