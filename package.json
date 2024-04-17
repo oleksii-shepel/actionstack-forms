@@ -26,7 +26,7 @@
     "eslint": "eslint ./projects/nygma/forms/src/lib --ext .ts"
   },
   "dependencies": {
-    "@actioncrew/actionstack": "^1.0.9",
+    "@actioncrew/actionstack": "^1.0.10",
     "@angular/animations": "~14.0.0",
     "@angular/common": "~14.0.0",
     "@angular/compiler": "~14.0.0",
