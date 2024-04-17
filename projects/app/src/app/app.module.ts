@@ -1,5 +1,5 @@
 import { StoreModule, StoreSettings } from '@actioncrew/actionstack';
-import { logger } from '@actioncrew/actionstack/tools';
+import { perfmon } from '@actioncrew/actionstack/tools';
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
@@ -52,7 +52,7 @@ import { NgModelArrayModule } from './utils';
     provideFirestore(() => getFirestore()),
     StoreModule.forRoot({
       slice: "root",
-      middleware: [logger],
+      middleware: [perfmon],
       reducer: reducers,
       metaReducers: [forms(initialState), global()]
     }),
