@@ -16,7 +16,7 @@
   "peerDependencies": {
     "@angular/core": ">=14.0.0",
     "@angular/forms": ">=14.0.0",
-    "@actioncrew/actionstack": ">=1.0.10",
+    "@actioncrew/actionstack": ">=1.0.12",
     "rxjs": ">=7.5.0"
   },
   "devDependencies": {
