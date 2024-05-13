@@ -172,7 +172,7 @@ export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
       takeWhile(() => !this.destroyed$.value)
     );
 
-    const updateEffect$ = effect(FormActions.UpdateForm, (action: Action<any>, state: any, dependencies: any) => {
+    const updateEffect$ = effect(FormActions.UpdateForm, (...args: any[]) => (actionType: any) => (action$: Observable<Action<any>>, state$: Observable<any>, dependencies: any) => {
       return this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState), tap((formState) => {
         this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
       }),

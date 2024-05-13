@@ -26,7 +26,7 @@
     "eslint": "eslint ./projects/nygma/forms/src/lib --ext .ts"
   },
   "dependencies": {
-    "@actioncrew/actionstack": "^1.0.12",
+    "@actioncrew/actionstack": "file:actioncrew-actionstack-1.0.19.tgz",
     "@angular/animations": "~14.0.0",
     "@angular/common": "~14.0.0",
     "@angular/compiler": "~14.0.0",
@@ -43,9 +43,9 @@
     "zone.js": "~0.11.8"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~14.0.0",
+    "@angular-devkit/build-angular": "^14.2.13",
     "@angular-devkit/schematics": "~14.0.0",
-    "@angular/cli": "~14.0.0",
+    "@angular/cli": "^14.2.13",
     "@angular/compiler-cli": "~14.0.0",
     "@schematics/angular": "~14.0.0",
     "@types/deep-diff": "^1.0.5",
