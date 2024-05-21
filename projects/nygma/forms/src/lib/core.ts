@@ -1,4 +1,5 @@
-import { Action, Store, effect } from '@actioncrew/actionstack';
+import { Action, ofType, Store } from '@actioncrew/actionstack';
+import { addEpics, removeEpics } from '@actioncrew/actionstack/epics';
 import {
   AfterContentInit,
   ChangeDetectorRef,
@@ -12,43 +13,29 @@ import {
   OnInit,
   Optional,
   QueryList,
-  Self
+  Self,
 } from '@angular/core';
 import { FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import {
-  BehaviorSubject,
-  Observable,
   asyncScheduler,
+  BehaviorSubject,
   defer,
   filter,
   fromEvent,
   map,
   mergeMap,
+  Observable,
   observeOn,
   scan,
   startWith,
   take,
   takeWhile,
-  tap
+  tap,
 } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import {
-  SYNC_OPTIONS_DEFAULT,
-  SYNC_OPTIONS_TOKEN,
-  deepClone,
-  deepEqual,
-  sampleTime,
-  setValue
-} from '.';
-import {
-  FormActions,
-  autoInit,
-  autoSubmit,
-  formDestroyed,
-  updateControl,
-  updateForm,
-  updateFormSuccess
-} from './actions';
+import { concatMap, switchMap, withLatestFrom } from 'rxjs/operators';
+
+import { deepClone, deepEqual, sampleTime, setValue, SYNC_OPTIONS_DEFAULT, SYNC_OPTIONS_TOKEN } from '.';
+import { autoInit, autoSubmit, FormActions, formDestroyed, updateControl, updateForm, updateFormSuccess } from './actions';
 import { selectFormState } from './reducers';
 
 
@@ -81,8 +68,8 @@ export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
   destroyed$ = new BehaviorSubject<boolean>(false);
 
   onInit$!: Observable<any>;
-  onUpdate$!: Observable<any>;
   onSubmit$!: Observable<any>;
+  onUpdate$!: (action$: Observable<Action<any>>, state$: Observable<any>, dependencies: any) => Observable<any>;
 
   private subs = {} as any;
 
@@ -172,19 +159,20 @@ export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
       takeWhile(() => !this.destroyed$.value)
     );
 
-    const updateEffect$ = effect(FormActions.UpdateForm, (...args: any[]) => (actionType: any) => (action$: Observable<Action<any>>, state$: Observable<any>, dependencies: any) => {
-      return this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState), tap((formState) => {
-        this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
-      }),
-      map(() => updateFormSuccess({path: this.path, value: this.formDirective.form.value})),
-      takeWhile(() => !this.destroyed$.value))
-    });
+    this.onUpdate$ = (action$: Observable<Action<any>>, state$: Observable<any>, dependencies: any) => {
+      return action$.pipe(
+        ofType(FormActions.UpdateForm),
+        withLatestFrom(state$),
+        concatMap(([action, state]) => this.store.select(selectFormState(this.path)).pipe(take(1), map((formState) => formState), tap((formState) => {
+          this.formDirective.form.patchValue(formState, {emitEvent: this.formDirective.form.updateOn === 'change'});
+        }))),
+        map(() => updateFormSuccess({path: this.path, value: this.formDirective.form.value})),
+        takeWhile(() => !this.destroyed$.value))
+    };
 
-    this.onUpdate$ = this.store.extend(updateEffect$());
+    this.store.dispatch(addEpics(this.onUpdate$));
 
     this.subs.a = this.onSubmit$.subscribe();
-    this.subs.b = this.onUpdate$.subscribe();
-
   }
 
   ngAfterContentInit() {
@@ -197,6 +185,7 @@ export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
 
   ngOnDestroy() {
     this.store.dispatch(formDestroyed({ path: this.path, value: this.formValue }));
+    this.store.dispatch(removeEpics(this.onUpdate$));
 
     this.destroyed$.next(true);
     this.destroyed$.complete();
