@@ -1,5 +1,5 @@
-import { Action, ofType, Store } from '@actioncrew/actionstack';
-import { addEpics, removeEpics } from '@actioncrew/actionstack/epics';
+import { Action, Store } from '@actioncrew/actionstack';
+import { addEpics, ofType, removeEpics } from '@actioncrew/actionstack/epics';
 import {
   AfterContentInit,
   ChangeDetectorRef,
