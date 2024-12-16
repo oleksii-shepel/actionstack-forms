@@ -6,7 +6,7 @@
       "nygma-forms": [
         "dist/nygma/forms",
         "projects/nygma/forms/src/lib"
-      ],
+      ]
     },
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
@@ -23,8 +23,8 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "useDefineForClassFields": false,
-    "esModuleInterop":true,
-    "target": "es2020"
+    "esModuleInterop": true,
+    "target": "ES2022"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
