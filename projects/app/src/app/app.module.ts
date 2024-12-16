@@ -1,12 +1,12 @@
-import { StoreModule, StoreSettings } from '@actioncrew/actionstack';
-import { perfmon } from '@actioncrew/actionstack/tools';
+import { applyMiddleware, STORE_ENHANCER, StoreModule, StoreSettings } from '@actionstack/angular';
+import { perfmon } from '@actionstack/tools';
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgFormsModule, forms } from 'nygma-forms';
+import { forms, NgFormsModule } from 'nygma-forms';
 import { environment } from '../environments/environment';
 import { AppComponent } from './components/app/app.component';
 import { JsonEditorComponent, SanitizedHtmlPipe } from './components/json-editor/json-editor.component';
@@ -21,14 +21,6 @@ import { FieldGroupDirective } from './directives/group.directive';
 import { global, initialState, reducers } from './reducers';
 import { NgModelArrayModule } from './utils';
 @NgModule({
-  providers: [
-    {provide: StoreSettings, useValue: {
-      dispatchSystemActions: true,
-      awaitStatePropagation: true,
-      enableMetaReducers: true,
-      enableAsyncReducers: false
-    }}
-  ],
   declarations: [
     SanitizedHtmlPipe,
     AppComponent,
@@ -51,14 +43,21 @@ import { NgModelArrayModule } from './utils';
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     StoreModule.forRoot({
-      slice: "root",
-      middleware: [perfmon],
+      slice: "main",
       reducer: reducers,
       metaReducers: [forms(initialState), global()]
     }),
-
     NgModelArrayModule
   ],
+  providers: [
+    { provide: StoreSettings, useValue: {
+                              dispatchSystemActions: true,
+                              awaitStatePropagation: true,
+                              enableMetaReducers: true,
+                              enableAsyncReducers: false
+                            }
+    },
+    { provide: STORE_ENHANCER, useValue: applyMiddleware(perfmon) }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

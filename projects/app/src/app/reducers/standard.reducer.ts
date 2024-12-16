@@ -1,4 +1,4 @@
-import { Action } from '@actioncrew/actionstack';
+import { Action } from '@actionstack/angular';
 import { ModelPage, initialModelPage } from '../models/profile';
 
 

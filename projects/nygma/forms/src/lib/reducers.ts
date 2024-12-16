@@ -1,4 +1,4 @@
-import { Action, AsyncReducer, featureSelector } from '@actioncrew/actionstack';
+import { Action, AsyncReducer, featureSelector } from '@actionstack/angular';
 import { Observable, map } from 'rxjs';
 import { FormActionsInternal, actionMapping, actionQueues, deferred } from './actions';
 import { Queue } from './queue';

@@ -30,7 +30,7 @@ import { HeroPage, ModelPage, ProfilePage, initialHeroPage, initialModelPage, in
  * the state of the reducer plus any selector functions. The `* as`
  * notation packages up all of the exports into a single object.
  */
-import { Reducer, action, selector } from '@actioncrew/actionstack';
+import { Reducer, action, selector } from '@actionstack/angular';
 import { getValue, setValue } from 'nygma-forms';
 import * as fromHero from './hero.reducer';
 import * as fromProfile from './profile.reducer';

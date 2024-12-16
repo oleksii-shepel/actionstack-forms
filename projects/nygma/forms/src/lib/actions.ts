@@ -1,4 +1,4 @@
-import { Action, action } from '@actioncrew/actionstack';
+import { Action, action } from '@actionstack/angular';
 import { Queue } from './queue';
 import { deepClone, setValue } from './utils';
 

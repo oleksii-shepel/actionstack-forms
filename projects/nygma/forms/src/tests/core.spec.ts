@@ -1,4 +1,4 @@
-import { Store, StoreModule, StoreSettings, store } from "@actioncrew/actionstack";
+import { Store, StoreModule, StoreSettings, store } from "@actionstack/angular";
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";

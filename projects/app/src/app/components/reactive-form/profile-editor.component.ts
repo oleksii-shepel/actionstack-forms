@@ -1,4 +1,4 @@
-import { Store } from '@actioncrew/actionstack';
+import { Store } from '@actionstack/angular';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, NgZone, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { buildForm } from 'nygma-forms';
