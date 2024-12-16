@@ -18,9 +18,7 @@ export const selectFormState = (path: string, nocheck?: boolean) => (state: Obse
 
 export const forms = (initialState: any = {}) => async (reducer: AsyncReducer) => {
 
-  const metaReducer = async (state: any, action: any) => {
-    state = state ?? deepClone(initialState);
-
+  const metaReducer = async (state: any = initialState, action: any) => {
     let nextState = state;
     const slice = action?.payload?.path;
 

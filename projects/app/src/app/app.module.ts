@@ -1,4 +1,5 @@
-import { applyMiddleware, STORE_ENHANCER, StoreModule, StoreSettings } from '@actionstack/angular';
+import { applyMiddleware, combineReducers, STORE_ENHANCER, StoreModule, StoreSettings } from '@actionstack/angular';
+import { epics } from '@actionstack/angular/epics';
 import { perfmon } from '@actionstack/tools';
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -18,7 +19,7 @@ import { TemplateProfileEditorComponent } from './components/template-driven-for
 import { FieldArrayDirective } from './directives/array.directive';
 import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
-import { global, initialState, reducers } from './reducers';
+import { global, reducers } from './reducers';
 import { NgModelArrayModule } from './utils';
 @NgModule({
   declarations: [
@@ -44,8 +45,8 @@ import { NgModelArrayModule } from './utils';
     provideFirestore(() => getFirestore()),
     StoreModule.forRoot({
       slice: "main",
-      reducer: reducers,
-      metaReducers: [forms(initialState), global()]
+      reducer: combineReducers(reducers),
+      metaReducers: [forms(), global()]
     }),
     NgModelArrayModule
   ],
@@ -57,7 +58,7 @@ import { NgModelArrayModule } from './utils';
                               enableAsyncReducers: false
                             }
     },
-    { provide: STORE_ENHANCER, useValue: applyMiddleware(perfmon) }],
+    { provide: STORE_ENHANCER, useValue: applyMiddleware(perfmon, epics) }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
