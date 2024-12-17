@@ -9,11 +9,12 @@ import { selectSlice, updateProperty } from '../../reducers';
 
 
 @Component({
-  selector: 'reactive-profile-editor',
-  templateUrl: './profile-editor.component.html',
-  styleUrls: ['./profile-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [occurence]
+    selector: 'reactive-profile-editor',
+    templateUrl: './profile-editor.component.html',
+    styleUrls: ['./profile-editor.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [occurence],
+    standalone: false
 })
 export class ReactiveProfileEditorComponent implements AfterViewInit, OnDestroy {
   @Input() caption = '';

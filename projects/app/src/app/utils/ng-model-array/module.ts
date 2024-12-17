@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { NgModule, provideAppInitializer } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgModelArray, moduleFactory } from './ngmodelarray';
 
@@ -6,10 +6,9 @@ import { NgModelArray, moduleFactory } from './ngmodelarray';
   imports: [FormsModule],
   declarations: [NgModelArray],
   exports: [NgModelArray],
-  providers: [{
-    provide: APP_INITIALIZER,
-    useFactory: () => moduleFactory,
-    multi: true
-  }]
+  providers: [provideAppInitializer(() => {
+        const initializerFn = (() => moduleFactory)();
+        return initializerFn();
+      })]
 })
 export class NgModelArrayModule {}

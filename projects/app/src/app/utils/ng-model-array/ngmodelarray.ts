@@ -24,7 +24,10 @@ export const moduleFactory = () => {
 
 
 
-@Directive({selector: '[ngModelArray]', providers: [formArrayNameProvider]})
+@Directive({
+    selector: '[ngModelArray]', providers: [formArrayNameProvider],
+    standalone: false
+})
 export class NgModelArray extends ControlContainer implements OnInit, OnDestroy {
 
   _parent: ControlContainer;

@@ -7,7 +7,10 @@ export const modelGroupProvider: any = {
   useExisting: forwardRef(() => FieldGroupDirective)
 };
 
-@Directive({selector: '[ngFieldGroup]', providers: [modelGroupProvider], exportAs: 'ngFieldGroup'})
+@Directive({
+    selector: '[ngFieldGroup]', providers: [modelGroupProvider], exportAs: 'ngFieldGroup',
+    standalone: false
+})
 export class FieldGroupDirective extends AbstractFormGroupDirective implements OnInit, OnDestroy {
 
   @Input('ngFieldGroup') override name = '';

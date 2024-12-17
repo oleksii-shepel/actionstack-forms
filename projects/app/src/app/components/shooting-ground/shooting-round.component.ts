@@ -3,10 +3,11 @@ import { Firestore, doc, getDoc, increment, updateDoc } from '@angular/fire/fire
 import { walter } from '../../animations/animations';
 
 @Component({
-  selector: 'shooting-ground',
-  templateUrl: './shooting-ground.component.html',
-  styleUrls: ['./shooting-ground.component.scss'],
-  animations: [walter]
+    selector: 'shooting-ground',
+    templateUrl: './shooting-ground.component.html',
+    styleUrls: ['./shooting-ground.component.scss'],
+    animations: [walter],
+    standalone: false
 })
 export class ShootingGroundComponent implements OnInit {
   @ViewChild("walter") walter!: ElementRef<HTMLElement>;

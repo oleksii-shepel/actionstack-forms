@@ -11,11 +11,12 @@ import { messenger } from '../../animations/animations';
 import { ModalService } from '../../services/modal.service';
 
 @Component({
-  selector: 'messenger',
-  templateUrl: './messenger.component.html',
-  styleUrls: ['./messenger.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  animations: [messenger]
+    selector: 'messenger',
+    templateUrl: './messenger.component.html',
+    styleUrls: ['./messenger.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    animations: [messenger],
+    standalone: false
 })
 export class MessengerComponent implements OnInit, OnDestroy {
   @Input() id = 'default-modal';

@@ -9,7 +9,8 @@ import { AbstractControlDirective, ControlValueAccessor, DefaultValueAccessor } 
  * applications code.
  */
 @Directive({
-  selector: 'base-control-value-accessor'
+    selector: 'base-control-value-accessor',
+    standalone: false
 })
 export class BaseControlValueAccessor {
   /**
@@ -71,7 +72,8 @@ export class BaseControlValueAccessor {
  * applications code.
  */
 @Directive({
-  selector: 'built-in-control-value-accessor',
+    selector: 'built-in-control-value-accessor',
+    standalone: false
 })
 export class BuiltInControlValueAccessor extends BaseControlValueAccessor {
 }

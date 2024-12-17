@@ -8,11 +8,12 @@ import { initialHeroPage } from '../../models/profile';
 import { selectSlice, updateProperty } from '../../reducers';
 
 @Component({
-  selector: 'template-profile-editor',
-  templateUrl: './profile-editor.component.html',
-  styleUrls: ['./profile-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [occurence]
+    selector: 'template-profile-editor',
+    templateUrl: './profile-editor.component.html',
+    styleUrls: ['./profile-editor.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [occurence],
+    standalone: false
 })
 export class TemplateProfileEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('heroForm') form: NgForm | null = null;

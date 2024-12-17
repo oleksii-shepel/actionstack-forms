@@ -8,11 +8,12 @@ import { initialModelPage } from '../../models/profile';
 import { selectSlice, updateProperty } from '../../reducers';
 
 @Component({
-  selector: 'standard-profile-editor',
-  templateUrl: './profile-editor.component.html',
-  styleUrls: ['./profile-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [occurence]
+    selector: 'standard-profile-editor',
+    templateUrl: './profile-editor.component.html',
+    styleUrls: ['./profile-editor.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [occurence],
+    standalone: false
 })
 export class StandardProfileEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('modelForm') form: NgForm | null = null;

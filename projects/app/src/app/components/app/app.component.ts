@@ -8,12 +8,11 @@ import { ModalService } from '../../services/modal.service';
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  animations: [occurence],
-  imports: [AppModule, CommonModule],
-  standalone: true
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    animations: [occurence],
+    imports: [AppModule, CommonModule]
 })
 export class AppComponent implements OnDestroy {
   @HostBinding('class') class ='author';

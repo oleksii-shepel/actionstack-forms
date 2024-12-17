@@ -8,7 +8,8 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
 
 import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
-  name: 'sanitizedHtml'
+    name: 'sanitizedHtml',
+    standalone: false
 })
 export class SanitizedHtmlPipe implements PipeTransform {
   constructor(private sanitized: DomSanitizer) {}
@@ -18,9 +19,10 @@ export class SanitizedHtmlPipe implements PipeTransform {
 }
 
 @Component({
-  selector: 'json-editor',
-  templateUrl: './json-editor.component.html',
-  styleUrls: ['./json-editor.component.scss'],
+    selector: 'json-editor',
+    templateUrl: './json-editor.component.html',
+    styleUrls: ['./json-editor.component.scss'],
+    standalone: false
 })
 export class JsonEditorComponent implements OnChanges {
   JSON = JSON;

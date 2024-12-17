@@ -49,9 +49,9 @@ export interface SyncOptions {
 
 
 @Directive({
-  selector:
-    `form:not([ngNoForm]):not([formGroup])[sync],ng-form[sync],[ngForm][sync],[formGroup][sync]`,
-  exportAs: 'sync',
+    selector: `form:not([ngNoForm]):not([formGroup])[sync],ng-form[sync],[ngForm][sync],[formGroup][sync]`,
+    exportAs: 'sync',
+    standalone: false
 })
 export class SyncDirective implements OnDestroy, AfterContentInit, OnInit {
   @Input('sync') config!: string | SyncOptions;

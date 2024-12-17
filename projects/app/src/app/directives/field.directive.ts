@@ -12,16 +12,19 @@ const formControlBinding: Provider = {
   useExisting: forwardRef(() => FieldDirective)
 };
 
-@Directive({selector: '[ngField]:not([formControlName]):not([formControl])',
-  host: {
-    '(input)': 'onChange($event.target.value)',
-    '(blur)': 'onTouched()',
-    '(keydown.enter)': 'onEnter()'
-  },
- providers: [
-  formControlBinding,
-  [{provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true}]
-], exportAs: 'ngField'})
+@Directive({
+    selector: '[ngField]:not([formControlName]):not([formControl])',
+    host: {
+        '(input)': 'onChange($event.target.value)',
+        '(blur)': 'onTouched()',
+        '(keydown.enter)': 'onEnter()'
+    },
+    providers: [
+        formControlBinding,
+        [{ provide: NG_VALUE_ACCESSOR, useClass: DefaultValueAccessor, multi: true }]
+    ], exportAs: 'ngField',
+    standalone: false
+})
 export class FieldDirective extends NgModel implements OnInit, OnDestroy, NgControl {
   @Input("ngField") override name = '';
   @Output('ngFieldChange') override update = new EventEmitter();
