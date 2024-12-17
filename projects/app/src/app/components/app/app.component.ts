@@ -1,6 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostBinding, OnDestroy, ViewChild, ViewContainerRef } from '@angular/core';
 import { BehaviorSubject, concatMap, filter, from, map, mergeMap, take, tap } from 'rxjs';
 import { occurence } from '../../animations/animations';
+import { AppModule } from '../../app.module';
 import { ModalService } from '../../services/modal.service';
 
 export type EditorType = 'reactive' | 'template-driven' | 'standard';
@@ -10,6 +12,8 @@ export type EditorType = 'reactive' | 'template-driven' | 'standard';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   animations: [occurence],
+  imports: [AppModule, CommonModule],
+  standalone: true
 })
 export class AppComponent implements OnDestroy {
   @HostBinding('class') class ='author';

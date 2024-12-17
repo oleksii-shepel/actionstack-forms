@@ -1,15 +1,10 @@
-import { applyMiddleware, combineReducers, STORE_ENHANCER, StoreModule, StoreSettings } from '@actionstack/angular';
+import { applyMiddleware, combineReducers, provideStore, STORE_ENHANCER, StoreSettings } from '@actionstack/angular';
 import { epics } from '@actionstack/angular/epics';
 import { perfmon } from '@actionstack/tools';
-import { NgModule } from '@angular/core';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { ApplicationConfig, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { forms, NgFormsModule } from 'nygma-forms';
 import { environment } from '../environments/environment';
-import { AppComponent } from './components/app/app.component';
 import { JsonEditorComponent, SanitizedHtmlPipe } from './components/json-editor/json-editor.component';
 import { MessengerComponent } from './components/messenger/messenger.component';
 import { StandardProfileEditorComponent } from './components/model-driven-form/profile-editor.component';
@@ -21,10 +16,26 @@ import { FieldDirective } from './directives/field.directive';
 import { FieldGroupDirective } from './directives/group.directive';
 import { global, reducers } from './reducers';
 import { NgModelArrayModule } from './utils';
+
+import { CommonModule } from '@angular/common';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideStore({
+      slice: "main",
+      reducer: combineReducers(reducers),
+      metaReducers: [forms(), global()]
+    }),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideFirestore(() => getFirestore()),
+  ]
+};
+
 @NgModule({
   declarations: [
     SanitizedHtmlPipe,
-    AppComponent,
     ReactiveProfileEditorComponent,
     TemplateProfileEditorComponent,
     StandardProfileEditorComponent,
@@ -36,19 +47,16 @@ import { NgModelArrayModule } from './utils';
     ShootingGroundComponent
   ],
   imports: [
-    BrowserModule,
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    BrowserAnimationsModule,
     NgFormsModule,
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideFirestore(() => getFirestore()),
-    StoreModule.forRoot({
-      slice: "main",
-      reducer: combineReducers(reducers),
-      metaReducers: [forms(), global()]
-    }),
     NgModelArrayModule
+  ],
+  exports: [
+    ReactiveProfileEditorComponent,
+    TemplateProfileEditorComponent,
+    StandardProfileEditorComponent
   ],
   providers: [
     { provide: StoreSettings, useValue: {
@@ -58,7 +66,7 @@ import { NgModelArrayModule } from './utils';
                               enableAsyncReducers: false
                             }
     },
-    { provide: STORE_ENHANCER, useValue: applyMiddleware(perfmon, epics) }],
-  bootstrap: [AppComponent]
+    { provide: STORE_ENHANCER, useValue: applyMiddleware(perfmon, epics) }
+  ]
 })
 export class AppModule { }

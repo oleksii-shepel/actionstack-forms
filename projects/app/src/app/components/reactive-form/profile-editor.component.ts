@@ -2,7 +2,7 @@ import { Store } from '@actionstack/angular';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, NgZone, OnDestroy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { buildForm } from 'nygma-forms';
-import { Observable, fromEvent, merge, shareReplay } from 'rxjs';
+import { fromEvent, merge, Observable, shareReplay } from 'rxjs';
 import { occurence } from '../../animations/animations';
 import { initialProfilePage, profileOptions } from '../../models/profile';
 import { selectSlice, updateProperty } from '../../reducers';
